@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نقضيها عليك - التحديث المتكامل</title>
+    <title>نقضيها عليك - رابط الإيداع الآمن</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -70,31 +70,25 @@
         .service-option { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--card-border); padding: 14px; border-radius: 16px; text-align: center; cursor: pointer; }
         .service-option.selected { border-color: var(--accent); background: rgba(0, 242, 254, 0.1); }
 
-        .radar-card-container { background: rgba(11, 15, 30, 0.85); border: 1px solid rgba(0, 242, 254, 0.2); border-radius: 22px; padding: 18px; margin-bottom: 18px; text-align: center; }
-        .radar-screen { width: 220px; height: 220px; margin: 0 auto 14px auto; border-radius: 50%; border: 2px solid rgba(0, 242, 254, 0.5); background: radial-gradient(circle, rgba(15, 23, 42, 0.8) 0%, rgba(3, 4, 8, 0.95) 100%); position: relative; overflow: hidden; }
-        .radar-sweep { position: absolute; top: 0; left: 0; right: 0; bottom: 0; border-radius: 50%; background: conic-gradient(from 0deg, rgba(0, 242, 254, 0.4) 0deg, rgba(0, 242, 254, 0) 55deg); animation: radar-spin 2.5s linear infinite; transform-origin: center center; }
-        @keyframes radar-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .radar-center-driver { position: absolute; top: 50%; left: 50%; width: 14px; height: 14px; background: var(--primary); border: 2px solid #ffffff; border-radius: 50%; transform: translate(-50%, -50%); z-index: 10; }
-        .radar-blip { position: absolute; width: 10px; height: 10px; background: var(--indrive-green); border-radius: 50%; box-shadow: 0 0 8px var(--indrive-green); }
-
         .driver-wallet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
         .wallet-stat-box { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--card-border); padding: 12px; border-radius: 14px; text-align: center; }
         .wallet-stat-val { font-size: 16px; font-weight: 900; color: var(--accent); margin-top: 4px; }
 
         .cash-badge { display: inline-block; background: rgba(16, 185, 129, 0.2); border: 1px solid var(--indrive-green); color: var(--indrive-green); font-size: 11px; padding: 4px 8px; border-radius: 8px; font-weight: bold; margin-bottom: 8px; }
 
-        .rib-box { background: rgba(0, 242, 254, 0.05); border: 1px dashed var(--accent); padding: 14px; border-radius: 12px; font-size: 12px; color: var(--text-main); margin-bottom: 12px; line-height: 1.8; }
-        .rib-code { font-family: monospace; font-size: 13px; font-weight: bold; color: #00f2fe; background: rgba(0,0,0,0.4); padding: 6px 10px; border-radius: 8px; display: block; margin: 6px 0; word-break: break-all; direction: ltr; text-align: center; }
+        /* الرابط المشفر المحمي */
+        .secure-link-box { background: rgba(0, 242, 254, 0.05); border: 1px dashed var(--accent); padding: 12px; border-radius: 12px; text-align: center; margin-top: 10px; }
+        .secure-link { color: var(--accent); text-decoration: underline; font-size: 12px; font-weight: bold; cursor: pointer; word-break: break-all; }
 
-        .rating-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 999999; padding: 20px; }
-        .rating-modal-overlay.show { display: flex; }
-        .rating-modal { background: #0e1326; border: 1px solid var(--accent); border-radius: 20px; padding: 24px; width: 100%; max-width: 400px; text-align: center; }
-        .star-rating { font-size: 28px; color: #ffd700; cursor: pointer; margin: 14px 0; }
-        .star-rating span { transition: transform 0.2s; display: inline-block; padding: 0 4px; }
-
-        .admin-item-card { background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); padding: 14px; border-radius: 14px; margin-bottom: 12px; }
-        .admin-item-card h4 { font-size: 13px; color: var(--accent); margin-bottom: 6px; }
-        .admin-item-card p { font-size: 11px; color: var(--text-muted); line-height: 1.6; }
+        /* نافذة الإيداع السرية (Modal) */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 999999; padding: 20px; }
+        .modal-overlay.show { display: flex; }
+        .modal-content { background: #0e1326; border: 1px solid var(--accent); border-radius: 20px; padding: 20px; width: 100%; max-width: 420px; text-align: right; position: relative; }
+        
+        .rib-box { background: rgba(0, 0, 0, 0.4); border: 1px dashed var(--accent); padding: 14px; border-radius: 12px; font-size: 12px; color: var(--text-main); margin: 12px 0; line-height: 1.8; }
+        .rib-code-wrapper { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 8px; margin: 8px 0; }
+        .rib-code { font-family: monospace; font-size: 12px; font-weight: bold; color: #00f2fe; direction: ltr; word-break: break-all; }
+        .btn-copy { background: rgba(0, 242, 254, 0.2); border: 1px solid var(--accent); color: white; padding: 4px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; }
 
         .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 520px; background: rgba(7, 9, 19, 0.98); display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid var(--card-border); z-index: 9999; }
         .nav-item { color: var(--text-muted); font-size: 11px; text-align: center; cursor: pointer; border: none; background: transparent; flex: 1; outline: none; }
@@ -109,25 +103,38 @@
         <span id="toastText">مرحباً بك في المنصة</span>
     </div>
 
-    <!-- نافذة تقييم المنفذ -->
-    <div id="ratingModal" class="rating-modal-overlay">
-        <div class="rating-modal">
-            <h3 style="color:white; font-size:17px; margin-bottom:6px;">🌟 تقييم خدمة التوصيل</h3>
-            <p style="font-size:12px; color:var(--text-muted);">الدفع تم نقداً (Cash) 💵. كيف كانت تجربتك مع السائق؟</p>
-            
-            <div class="star-rating" id="starContainer">
-                <span onclick="setRating(1)">★</span>
-                <span onclick="setRating(2)">★</span>
-                <span onclick="setRating(3)">★</span>
-                <span onclick="setRating(4)">★</span>
-                <span onclick="setRating(5)">★</span>
+    <!-- النافذة المنبثقة لرابط الإيداع المشفر -->
+    <div id="depositModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 style="color:white; font-size:16px; margin-bottom:4px; display:flex; align-items:center; gap:8px;">
+                <span>🔒</span> رابط الشحن البنكي المشفر
+            </h3>
+            <p style="font-size:11px; color:var(--text-muted);">هذه البيانات سرية وخاصة بعمليات شحن المحفظة عبر CIH Bank</p>
+
+            <div class="rib-box">
+                <strong>🏛️ الحساب البنكي الرسمي (CIH Bank):</strong>
+                <div class="rib-code-wrapper">
+                    <span class="rib-code" id="cihRib">MA64 2307 8024 7119 7211 0035 0065</span>
+                    <button class="btn-copy" onclick="copyRIB()">نسخ 📋</button>
+                </div>
+                • اسم الحساب: <strong>نقضيها عليك (Naqdiha Alayk)</strong><br>
+                • الحد الأدنى للإيداع: <strong>30 درهم</strong>
             </div>
 
-            <div class="field-group" style="margin-bottom:14px;">
-                <input type="text" id="ratingComment" placeholder="ملاحظة إضافية (اختياري)...">
-            </div>
-
-            <button onclick="submitRating()" class="btn btn-primary">تأكيد التقييم وإغلاق الطلب 👍</button>
+            <form onsubmit="handleDepositSubmit(event)">
+                <div class="field-group">
+                    <label>المبلغ المحول (بالدرهم) *</label>
+                    <input type="number" id="depositAmount" required min="30" placeholder="مثال: 50">
+                </div>
+                <div class="field-group">
+                    <label>إرفاق صورة وصل التحويل (Reçu) *</label>
+                    <input type="file" required accept="image/*">
+                </div>
+                <div style="display:flex; gap:8px;">
+                    <button type="submit" class="btn btn-success" style="flex:2;">إرسال الوصل للتحقق 📤</button>
+                    <button type="button" onclick="closeDepositModal()" class="btn btn-danger" style="flex:1;">إغلاق ✖</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -165,70 +172,13 @@
                         <span style="font-size:26px; display:block;">📄</span>
                         <p style="font-size:12px; font-weight:bold;">وثائق وأوراق</p>
                     </div>
-                    <div class="service-option" onclick="selectService('📦 توصيل طرد', this)">
-                        <span style="font-size:26px; display:block;">📦</span>
-                        <p style="font-size:12px; font-weight:bold;">طرود وأمانات</p>
-                    </div>
-                    <div class="service-option" onclick="selectService('💊 صيدلية', this)">
-                        <span style="font-size:26px; display:block;">💊</span>
-                        <p style="font-size:12px; font-weight:bold;">أدوية وصيدلية</p>
-                    </div>
                 </div>
-
                 <div id="map"></div>
-
-                <form onsubmit="event.preventDefault(); showToast('✅ تم إرسال طلبك! سيتسالم المنفذ المبلغ كاش.');">
-                    <div class="field-group">
-                        <label>الخدمة المختارة</label>
-                        <input type="text" id="selectedServiceInput" value="🛒 تسخير وسويقة" readonly>
-                    </div>
-                    <div class="field-group">
-                        <label>الاسم الكامل</label>
-                        <input type="text" required placeholder="ادخل اسمك الكريم">
-                    </div>
-                    <div class="field-group">
-                        <label>رقم الهاتف</label>
-                        <input type="tel" required placeholder="06XXXXXXXX">
-                    </div>
-                    <button type="submit" class="btn btn-primary">إرسال الطلب (تسليم كاش) 🚀</button>
-                </form>
-
-                <button onclick="openRatingModal()" class="btn btn-success" style="margin-top:10px; background: linear-gradient(135deg, #8e44ad, #3498db);">⭐ إنهاء المهمة وتقييم المنفذ (تجربة)</button>
             </div>
         </div>
 
-        <!-- 2. واجهة الطلبيات النشطة -->
-        <div id="orders-tab" class="tab-content">
-            <div class="radar-card-container">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 11px;">
-                    <span style="color:var(--accent); font-weight:800;">⚡ رادار الطلبيات المباشر</span>
-                    <span style="color:var(--indrive-green); font-weight:bold;">جاري رصد الطلبات...</span>
-                </div>
-                <div class="radar-screen">
-                    <div class="radar-sweep"></div>
-                    <div class="radar-center-driver"></div>
-                    <div class="radar-blip" style="top: 35%; left: 40%;"></div>
-                    <div class="radar-blip" style="top: 65%; left: 70%;"></div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h2 class="card-title">الطلبات المتاحة حالياً بالمنطقة</h2>
-                <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 12px; border: 1px solid var(--card-border); margin-bottom: 10px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-size:12px; font-weight:bold; color:var(--accent);">🛒 تسخير وسويقة</span>
-                        <span style="color:var(--indrive-green); font-weight:900;">35 درهم (كاش)</span>
-                    </div>
-                    <p style="font-size:11px; color:var(--text-muted); margin-top:6px;">من: المعاريف 👈 إلى: عين الذئاب</p>
-                    <p style="font-size:10px; color:#ffd700; margin-top:4px;">* سيتم اقتطاع 3.5 درهم (10%) من محفظتك تلقائياً.</p>
-                    <button onclick="showToast('تم قبول الطلب! استلم 35 درهم كاش من الزبون عند التسليم.')" class="btn btn-success" style="margin-top:10px; padding:8px; font-size:12px;">قبول الطلب 🛵</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- 3. واجهة السائق والمنفذ -->
+        <!-- 2. واجهة السائق والمنفذ -->
         <div id="driver-tab" class="tab-content">
-            <!-- محفظة المنفذ -->
             <div class="card" style="border-color: var(--accent);">
                 <h2 class="card-title" style="border-color: var(--indrive-green);">💼 محفظتي اليومية</h2>
                 <div class="driver-wallet-grid">
@@ -245,109 +195,22 @@
                         <div class="wallet-stat-val" style="color:#ffd700;">140 د.م</div>
                     </div>
                 </div>
-                <div class="cash-badge" style="width:100%; text-align:center;">💡 تحصل على مستحقاتك نقداً من الزبون، والمنصة تقتطع فقط 10% من رصيد المحفظة.</div>
-            </div>
 
-            <!-- شحن المحفظة عبر تحويل بنكي -->
-            <div class="card">
-                <h2 class="card-title">💳 شحن المحفظة (تحويل بنكي / CIH Bank)</h2>
-                <div class="rib-box">
-                    <strong>📌 الحساب البنكي الرسمي للشحن (CIH Bank):</strong>
-                    <span class="rib-code">MA64 2307 8024 7119 7211 0035 0065</span>
-                    • البنك: <strong>CIH Bank</strong><br>
-                    • اسم الحساب: <strong>نقضيها عليك (Naqdiha Alayk)</strong><br>
-                    • يُرجى إرسال التحويل ثم إرفاق وصيل التحويل (Reçu) أسفله للتحقق.
+                <!-- رابط الإيداع المشفر والآمن -->
+                <div class="secure-link-box">
+                    <span style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px;">🔒 لشحن حسابك بأمان وسرية:</span>
+                    <a class="secure-link" onclick="openDepositModal()">https://secure.pay.link/cih-deposit</a>
                 </div>
-                <form onsubmit="handleDepositSubmit(event)">
-                    <div class="field-group">
-                        <label>المبلغ المحول (بالدرهم) *</label>
-                        <input type="number" id="depositAmount" required min="30" placeholder="أقل مبلغ هو 30 درهم">
-                    </div>
-                    <div class="field-group">
-                        <label>إرفاق صورة وصيل التحويل (Reçu CIH) *</label>
-                        <input type="file" required accept="image/*">
-                    </div>
-                    <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #00f2fe, #4facfe); color:#000;">إرسال الوصل للأدمن للتأكيد 📤</button>
-                </form>
-            </div>
-
-            <!-- استمارة الانخراط الإجبارية -->
-            <div class="card">
-                <h2 class="card-title">📝 تسجيل منخرط جديد (جميع الخانات إجبارية)</h2>
-                <form onsubmit="handleDriverRegister(event)">
-                    <div class="field-group">
-                        <label>الاسم الكامل (كما في البطاقة الوطنية) *</label>
-                        <input type="text" id="regName" required placeholder="الاسم الشخصي والعائلي">
-                    </div>
-                    <div class="field-group">
-                        <label>رقم الهاتف (واتساب) *</label>
-                        <input type="tel" id="regPhone" required placeholder="06XXXXXXXX">
-                    </div>
-                    <div class="field-group">
-                        <label>صورة البطاقة الوطنية (CIN) *</label>
-                        <input type="file" required accept="image/*">
-                    </div>
-                    <div class="field-group">
-                        <label>صورة شخصية (Selfie) *</label>
-                        <input type="file" required accept="image/*">
-                    </div>
-                    <div class="field-group">
-                        <label>شهادة ملكية الدراجة النارية *</label>
-                        <input type="file" required accept="image/*">
-                    </div>
-                    <div style="margin-bottom:14px; display:flex; gap:8px;">
-                        <input type="checkbox" required id="legCheck">
-                        <label for="legCheck" style="font-size:11px;">أقر بالتزام القانون وتحويل بياناتي للشرطة عند أي خلاف أو سرقة. *</label>
-                    </div>
-                    <button type="submit" class="btn btn-primary">إرسال طلب الانخراط للأدمن 📤</button>
-                </form>
             </div>
         </div>
 
-        <!-- 4. واجهة الأدمن -->
+        <!-- 3. واجهة الأدمن -->
         <div id="admin-tab" class="tab-content">
             <div class="card">
-                <h2 class="card-title" style="color: #a78bfa;">🔑 طلبات المنفذين الجدد (قبول / رفض)</h2>
-                <div id="adminDriverRequests">
-                    <div class="admin-item-card" id="driverReq1">
-                        <h4>🛵 المنفذ: أسامة العلمي</h4>
-                        <p>
-                            • الهاتف: 0661234567<br>
-                            • الوثائق: CIN (مرفقة) | السيلفي (مرفق) | الدراجة (مرفقة)<br>
-                            • الإقرار القانوني: موافق عليه ✅
-                        </p>
-                        <div class="btn-action-group">
-                            <button onclick="approveDriver('driverReq1', 'أسامة العلمي')" class="btn btn-success" style="padding:8px; font-size:12px;">قبول المنفذ ✅</button>
-                            <button onclick="rejectDriver('driverReq1')" class="btn btn-danger" style="padding:8px; font-size:12px;">رفض ❌</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h2 class="card-title" style="color: #a78bfa;">💳 طلبات شحن المحافظ (تأكيد تحويل CIH)</h2>
+                <h2 class="card-title" style="color: #a78bfa;">💳 طلبات شحن المحافظ (CIH)</h2>
                 <div id="adminDepositRequests">
-                    <div class="admin-item-card" id="depReq1">
-                        <h4>💰 السائق: يوسف التازي</h4>
-                        <p>
-                            • المبلغ المطلوب: 100 درهم<br>
-                            • البنك: CIH Bank<br>
-                            • وصل التحويل: <span style="color:var(--accent); text-decoration:underline; cursor:pointer;" onclick="alert('عرض وصل CIH Bank للتحقق')">معاينة الوصل 📄</span>
-                        </p>
-                        <div class="btn-action-group">
-                            <button onclick="approveDeposit('depReq1', 100)" class="btn btn-success" style="padding:8px; font-size:12px;">تأكيد إضافة 100 درهم ✅</button>
-                            <button onclick="rejectDriver('depReq1')" class="btn btn-danger" style="padding:8px; font-size:12px;">رفض ❌</button>
-                        </div>
-                    </div>
+                    <p style="font-size:12px; color:var(--text-muted);">لا توجد طلبات معلقة حالياً.</p>
                 </div>
-            </div>
-        </div>
-
-        <!-- 5. الدعم والخصوصية -->
-        <div id="support-tab" class="tab-content">
-            <div class="card">
-                <h2 class="card-title">📞 الدعم الفني</h2>
-                <button onclick="window.open('https://wa.me/', '_blank')" class="btn btn-success" style="margin-bottom: 10px;">💬 تواصل عبر واتساب</button>
             </div>
         </div>
 
@@ -355,21 +218,14 @@
             <button class="nav-item active" data-tab="customer-tab" onclick="switchTab('customer-tab')">
                 <span>🏠</span> الرئيسية
             </button>
-            <button class="nav-item" data-tab="orders-tab" onclick="switchTab('orders-tab')">
-                <span>⚡</span> الطلبيات
-            </button>
             <button class="nav-item" data-tab="driver-tab" onclick="switchTab('driver-tab')">
                 <span>🛵</span> السائق
-            </button>
-            <button class="nav-item" data-tab="support-tab" onclick="switchTab('support-tab')">
-                <span>🛡️</span> الدعم
             </button>
         </nav>
     </div>
 
     <script>
         let map;
-        let selectedStars = 5;
 
         window.onload = function() {
             try {
@@ -382,19 +238,21 @@
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             const selectedTab = document.getElementById(tabId);
             if (selectedTab) selectedTab.classList.add('active');
-
-            document.querySelectorAll('.role-btn, .nav-item').forEach(btn => {
-                if (btn.getAttribute('data-tab') === tabId) btn.classList.add('active');
-                else btn.classList.remove('active');
-            });
-
-            if (tabId === 'customer-tab' && map) setTimeout(() => { map.invalidateSize(); }, 200);
         }
 
-        function selectService(name, element) {
-            document.querySelectorAll('.service-option').forEach(el => el.classList.remove('selected'));
-            element.classList.add('selected');
-            document.getElementById('selectedServiceInput').value = name;
+        function openDepositModal() {
+            document.getElementById('depositModal').classList.add('show');
+        }
+
+        function closeDepositModal() {
+            document.getElementById('depositModal').classList.remove('show');
+        }
+
+        function copyRIB() {
+            const ribText = document.getElementById('cihRib').innerText.replace(/\s+/g, '');
+            navigator.clipboard.writeText(ribText).then(() => {
+                showToast('📋 تم نسخ رقم الـ RIB بنجاح!');
+            });
         }
 
         function showToast(message) {
@@ -407,29 +265,6 @@
         function toggleAdminBtn() {
             let btn = document.getElementById('btnAdminTab');
             btn.style.display = (btn.style.display === 'block') ? 'none' : 'block';
-            showToast('تم إظهار / إخفاء زر لوحة الأدمن');
-        }
-
-        function handleDriverRegister(e) {
-            e.preventDefault();
-            const name = document.getElementById('regName').value;
-            const phone = document.getElementById('regPhone').value;
-
-            const adminContainer = document.getElementById('adminDriverRequests');
-            const newId = 'req_' + Date.now();
-            adminContainer.innerHTML += `
-                <div class="admin-item-card" id="${newId}">
-                    <h4>🛵 المنفذ: ${name}</h4>
-                    <p>• الهاتف: ${phone}<br>• الوثائق: جميعها مرفقة وإجبارية<br>• التعهد: تم القبول ✅</p>
-                    <div class="btn-action-group">
-                        <button onclick="approveDriver('${newId}', '${name}')" class="btn btn-success" style="padding:8px; font-size:12px;">قبول المنفذ ✅</button>
-                        <button onclick="rejectDriver('${newId}')" class="btn btn-danger" style="padding:8px; font-size:12px;">رفض ❌</button>
-                    </div>
-                </div>
-            `;
-
-            showToast('✅ تم إرسال طلب انخراطك بنجاح! وهو الآن بقائمة مراجعة الأدمن.');
-            e.target.reset();
         }
 
         function handleDepositSubmit(e) {
@@ -439,28 +274,15 @@
             const adminDepContainer = document.getElementById('adminDepositRequests');
             const newId = 'dep_' + Date.now();
             adminDepContainer.innerHTML += `
-                <div class="admin-item-card" id="${newId}">
-                    <h4>💰 طلب شحن جديد (CIH)</h4>
-                    <p>• المبلغ: ${amount} درهم<br>• الوصل: مرفق بنجاح 📄</p>
-                    <div class="btn-action-group">
-                        <button onclick="approveDeposit('${newId}', ${amount})" class="btn btn-success" style="padding:8px; font-size:12px;">تأكيد إضافة ${amount} درهم ✅</button>
-                        <button onclick="rejectDriver('${newId}')" class="btn btn-danger" style="padding:8px; font-size:12px;">رفض ❌</button>
-                    </div>
+                <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:10px; margin-bottom:8px;" id="${newId}">
+                    <h4 style="font-size:12px; color:var(--accent);">💰 طلب شحن جديد (${amount} درهم)</h4>
+                    <button onclick="approveDeposit('${newId}', ${amount})" class="btn btn-success" style="padding:6px; font-size:11px; margin-top:6px;">تأكيد ✅</button>
                 </div>
             `;
 
-            showToast('📩 تم إرسال وصل تحويل CIH! سيتم شحن حسابك فور مراجعة الأدمن.');
+            showToast('📩 تم إرسال طلبك عبر الرابط الآمن!');
+            closeDepositModal();
             e.target.reset();
-        }
-
-        function approveDriver(elementId, name) {
-            document.getElementById(elementId).remove();
-            showToast(`✅ تم قبول السائق (${name}) وتفعيل حسابه بنجاح!`);
-        }
-
-        function rejectDriver(elementId) {
-            document.getElementById(elementId).remove();
-            showToast('❌ تم رفض الطلب وإلغاؤه.');
         }
 
         function approveDeposit(elementId, amount) {
@@ -468,19 +290,7 @@
             let balanceEl = document.getElementById('driverBalance');
             let currentBalance = parseInt(balanceEl.innerText) || 0;
             balanceEl.innerText = (currentBalance + parseInt(amount)) + ' د.م';
-            showToast(`💰 تم تأكيد التحويل وإضافة ${amount} درهم لمحفظة السائق!`);
-        }
-
-        function openRatingModal() { document.getElementById('ratingModal').classList.add('show'); }
-        function setRating(stars) {
-            selectedStars = stars;
-            document.querySelectorAll('#starContainer span').forEach((span, i) => {
-                span.style.color = (i < stars) ? '#ffd700' : '#4a5568';
-            });
-        }
-        function submitRating() {
-            document.getElementById('ratingModal').classList.remove('show');
-            showToast(`⭐ شكراً! تم تسجيل تقييمك (${selectedStars}/5) للطلب الكاش.`);
+            showToast(`💰 تم تفعيل الرصيد!`);
         }
     </script>
 </body>
