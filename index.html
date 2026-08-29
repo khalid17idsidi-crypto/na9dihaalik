@@ -58,17 +58,16 @@
         .field-group { margin-bottom: 14px; }
         .field-group label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 6px; color: var(--text-muted); }
         .field-group input, .field-group select { width: 100%; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 12px; background: rgba(7, 9, 19, 0.7); color: white; font-size: 13px; outline: none; }
+        .field-group input[type="file"] { padding: 8px; font-size: 11px; background: rgba(255,255,255,0.03); }
 
         .btn { width: 100%; padding: 13px; border: none; border-radius: 12px; font-size: 14px; font-weight: 800; cursor: pointer; transition: 0.3s; }
         .btn-primary { background: linear-gradient(135deg, var(--primary), #ff793f); color: white; }
         .btn-success { background: linear-gradient(135deg, var(--indrive-green), #059669); color: #fff; }
 
-        /* الأقسام الأربعة للمنتجات والخدمات */
         .services-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
         .service-option { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--card-border); padding: 14px; border-radius: 16px; text-align: center; cursor: pointer; }
         .service-option.selected { border-color: var(--accent); background: rgba(0, 242, 254, 0.1); }
 
-        /* الرادار الاحترافي */
         .radar-card-container { background: rgba(11, 15, 30, 0.85); border: 1px solid rgba(0, 242, 254, 0.2); border-radius: 22px; padding: 18px; margin-bottom: 18px; text-align: center; }
         .radar-screen { width: 220px; height: 220px; margin: 0 auto 14px auto; border-radius: 50%; border: 2px solid rgba(0, 242, 254, 0.5); background: radial-gradient(circle, rgba(15, 23, 42, 0.8) 0%, rgba(3, 4, 8, 0.95) 100%); position: relative; overflow: hidden; }
         .radar-sweep { position: absolute; top: 0; left: 0; right: 0; bottom: 0; border-radius: 50%; background: conic-gradient(from 0deg, rgba(0, 242, 254, 0.4) 0deg, rgba(0, 242, 254, 0) 55deg); animation: radar-spin 2.5s linear infinite; transform-origin: center center; }
@@ -76,11 +75,18 @@
         .radar-center-driver { position: absolute; top: 50%; left: 50%; width: 14px; height: 14px; background: var(--primary); border: 2px solid #ffffff; border-radius: 50%; transform: translate(-50%, -50%); z-index: 10; }
         .radar-blip { position: absolute; width: 10px; height: 10px; background: var(--indrive-green); border-radius: 50%; box-shadow: 0 0 8px var(--indrive-green); }
 
-        /* طرق الاشتراك والشروط */
         .plan-card { background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
         .plan-card.highlight { border-color: var(--accent); background: rgba(0, 242, 254, 0.05); }
         .conditions-list { list-style: none; padding-right: 0; font-size: 12px; color: var(--text-muted); line-height: 2; }
         .conditions-list li { display: flex; align-items: center; gap: 8px; }
+
+        .legal-notice-box { background: rgba(255, 71, 87, 0.1); border: 1px solid var(--danger); border-radius: 12px; padding: 12px; margin-bottom: 14px; }
+        .legal-notice-box h4 { color: var(--danger); font-size: 13px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+        .legal-notice-box p { font-size: 11px; color: #f8fafc; line-height: 1.6; }
+
+        .checkbox-group { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 14px; }
+        .checkbox-group input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--primary); cursor: pointer; }
+        .checkbox-group label { font-size: 11px; color: var(--text-main); font-weight: bold; cursor: pointer; line-height: 1.5; }
 
         .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 520px; background: rgba(7, 9, 19, 0.98); display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid var(--card-border); z-index: 9999; }
         .nav-item { color: var(--text-muted); font-size: 11px; text-align: center; cursor: pointer; border: none; background: transparent; flex: 1; outline: none; }
@@ -171,7 +177,6 @@
                 <div class="radar-screen">
                     <div class="radar-sweep"></div>
                     <div class="radar-center-driver"></div>
-                    <!-- نقاط ملونة تحاكي الطلبات المتوفرة حول السائق -->
                     <div class="radar-blip" style="top: 35%; left: 40%;"></div>
                     <div class="radar-blip" style="top: 65%; left: 70%;"></div>
                 </div>
@@ -190,44 +195,48 @@
             </div>
         </div>
 
-        <!-- 3. واجهة السائق والمنفذ (شروط الانخراط وطرق الاشتراك) -->
+        <!-- 3. واجهة السائق والمنفذ (نظام المحفظة الشحني، الشروط الصارمة، والالتزام القانوني) -->
         <div id="driver-tab" class="tab-content">
-            <!-- قسم طرق الاشتراك -->
+            <!-- نظام شحن الرصيد والعمولة -->
             <div class="card">
-                <h2 class="card-title">💳 طرق وباقات الاشتراك</h2>
+                <h2 class="card-title">💳 نظام المحفظة واقتطاع العمولة</h2>
                 <div class="plan-card highlight">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <h4 style="font-size:14px; color:white;">الباقة الشهرية المباشرة</h4>
-                        <span style="color:var(--indrive-green); font-weight:800;">150 درهم / شهر</span>
+                        <h4 style="font-size:14px; color:white;">نظام الإيداع المسبق</h4>
+                        <span style="color:var(--indrive-green); font-weight:800;">أقل مبلغ للشحن: 30 درهم</span>
                     </div>
-                    <p style="font-size:11px; color:var(--text-muted); margin-top:4px;">استقبال عدد لا محدود من الطلبات بدون عمولة اقتطاعية.</p>
-                </div>
-                <div class="plan-card">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <h4 style="font-size:14px; color:white;">نظام النسبة بالطلب</h4>
-                        <span style="color:var(--accent); font-weight:800;">10% لكل طلب</span>
-                    </div>
-                    <p style="font-size:11px; color:var(--text-muted); margin-top:4px;">شحن المحفظة الإلكترونية مسبقاً والاقتطاع التلقائي.</p>
+                    <p style="font-size:11px; color:var(--text-muted); margin-top:8px; line-height:1.6;">
+                        • يتم اقتطاع عمولة التطبيق قدرها **10%** تلقائياً عن كل طلب يتم تنفيذه.<br>
+                        • بعد نفاذ الرصيد من محفظتك، يجب إعادة الشحن لاستكمال استقبال الطلبيات.
+                    </p>
                 </div>
             </div>
 
-            <!-- قسم شروط الانخراط -->
+            <!-- الشروط والوثائق المطلوبة -->
             <div class="card">
-                <h2 class="card-title">📋 شروط الانخراط والعمل</h2>
+                <h2 class="card-title">📋 الشروط والوثائق المطلوبة للتفعيل</h2>
                 <ul class="conditions-list">
-                    <li>✔️ ألا يقل عمر المتقدم عن 18 سنة.</li>
-                    <li>✔️ توفر دراجة نارية أو وسيلة نقل بمفهوم قانوني.</li>
-                    <li>✔️ البطاقة الوطنية للتعريف (CIN) سارية المفعول.</li>
-                    <li>✔️ الالتزام بحسن المعاملة والأمانة مع الزبناء.</li>
+                    <li>📌 الاسم الكامل المطابق للهوية.</li>
+                    <li>📌 صورة واضحـة للبطاقة الوطنية للتعريف (CIN).</li>
+                    <li>📌 صورة شخصية حديثة وواضحة (Selfie).</li>
+                    <li>📌 شهادة ملكية الدراجة النارية (الرمادية / الورقة الصوتية).</li>
                 </ul>
             </div>
 
-            <!-- استمارة التسجيل -->
+            <!-- استمارة التسجيل مع الموافقة القانونية الإجبارية -->
             <div class="card">
-                <h2 class="card-title">📝 تسجيل الانخراط</h2>
-                <form onsubmit="event.preventDefault(); showToast('✅ تم تقديم طلبك وسيتم تفعيله بعد المراجعة!');">
+                <h2 class="card-title">📝 تسجيل منخرط جديد</h2>
+                
+                <div class="legal-notice-box">
+                    <h4>⚖️ تنبيه قانوني وإخلاء مسؤولية:</h4>
+                    <p>
+                        بقبولك لهذا الشرط والتسجيل بالمنصة، فإنك توافق رسمياً وبنداً صريحاً على أن جميع بياناتك الشخصية ووثائقك المُرفقة ستُسلم مباشرة للسلطات والأجهزة الأمنية (الشرطة / الدرك الملكي) في حال ثبوت أي بلاغ أو شكاية ضدك تتعلق بالسرقة أو النصب أو الإضرار بالزبون.
+                    </p>
+                </div>
+
+                <form onsubmit="handleDriverSubmit(event)">
                     <div class="field-group">
-                        <label>الاسم الكامل</label>
+                        <label>الاسم الكامل (كما في البطاقة الوطنية)</label>
                         <input type="text" required placeholder="الاسم الشخصي والعائلي">
                     </div>
                     <div class="field-group">
@@ -235,13 +244,24 @@
                         <input type="tel" required placeholder="06XXXXXXXX">
                     </div>
                     <div class="field-group">
-                        <label>اختر باقة الاشتراك</label>
-                        <select>
-                            <option>الباقة الشهرية (150 درهم)</option>
-                            <option>نظام الاقتطاع بالعمولة (10%)</option>
-                        </select>
+                        <label>صورة البطاقة الوطنية (CIN)</label>
+                        <input type="file" required accept="image/*">
                     </div>
-                    <button type="submit" class="btn btn-primary">إرسال وثائق الانخراط 📤</button>
+                    <div class="field-group">
+                        <label>صورة شخصية (Selfie)</label>
+                        <input type="file" required accept="image/*">
+                    </div>
+                    <div class="field-group">
+                        <label>شهادة ملكية الدراجة النارية</label>
+                        <input type="file" required accept="image/*">
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="legalAgreement" required>
+                        <label for="legalAgreement">أوافق على الشروط وأقرّ بتحويل بياناتي للشرف والأجهزة الأمنية والشرطة في حال أي بلاغ أو شكاية ضدّي.</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">إرسال الطلب للمراجعة 📤</button>
                 </form>
             </div>
         </div>
@@ -262,7 +282,7 @@
                     <p>نجمع البيانات الأساسية كالاسم ورقم الهاتف والموقع لغرض توصيل الطلبات بنجاح فقط.</p>
                     
                     <h3>2. السرية والتحقق</h3>
-                    <p>معلومات المستخدمين ووثائق السائقين يتم حمايتها وعدم مشاركتها مع أي طرف ثالث.</p>
+                    <p>معلومات المستخدمين ووثائق السائقين يتم حمايتها وعدم مشاركتها مع أي طرف ثالث باستثناء الحالات القانونية والأمنية عند الاقتضاء.</p>
                 </div>
             </div>
         </div>
@@ -341,6 +361,16 @@
         function toggleAdminBtn() {
             let btn = document.getElementById('btnAdminTab');
             btn.style.display = (btn.style.display === 'block') ? 'none' : 'block';
+        }
+
+        function handleDriverSubmit(e) {
+            e.preventDefault();
+            const checkbox = document.getElementById('legalAgreement');
+            if (!checkbox.checked) {
+                alert('يجب الموافقة على شرط تسليم البيانات للشرطة في حالة الشكاية لتأكيد التسجيل!');
+                return;
+            }
+            showToast('✅ تم تقديم طلبك مع الوثائق والموافقة القانونية بنجاح!');
         }
     </script>
 </body>
