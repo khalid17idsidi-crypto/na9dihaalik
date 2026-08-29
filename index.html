@@ -3,508 +3,258 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نقضيها عليك - التسخير والتوصيل</title>
+    <title>تطبيق التسخير والتوصيل - التفاوض المباشر</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <!-- خط Tajawal وتنسيقات الخريطة -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
         :root {
-            --primary: #10b981;
-            --accent: #00f2fe;
-            --orange: #ff5722;
-            --danger: #ef4444;
-            --bg: #070913;
-            --card-bg: rgba(21, 26, 48, 0.85);
-            --card-border: rgba(255, 255, 255, 0.1);
+            --primary: #10b981; /* أخضر inDrive/توصيل */
+            --primary-dark: #059669;
+            --accent: #ff5722;
+            --bg-dark: #0f172a;
+            --card-bg: #1e293b;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: #030408; color: var(--text-main); display: flex; justify-content: center; min-height: 100vh; }
-        
-        .app-container { width: 100%; max-width: 520px; background: var(--bg); min-height: 100vh; padding-bottom: 120px; position: relative; border-left: 1px solid var(--card-border); border-right: 1px solid var(--card-border); }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
+        body { background: #020617; color: var(--text-main); display: flex; justify-content: center; }
 
-        #notificationToast {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
-            background: linear-gradient(135deg, var(--primary), #059669); color: white;
-            padding: 12px 20px; border-radius: 14px; box-shadow: 0 10px 30px rgba(16, 185, 129, 0.5);
-            font-size: 13px; font-weight: 800; z-index: 99999; transition: transform 0.4s ease;
-            display: flex; align-items: center; gap: 10px; max-width: 90%; text-align: center;
+        .app-container {
+            width: 100%; max-width: 480px; height: 100vh; background: var(--bg-dark);
+            position: relative; overflow: hidden; display: flex; flex-direction: column;
         }
-        #notificationToast.show { transform: translateX(-50%) translateY(0); }
 
-        .brand-header { 
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(6, 182, 212, 0.95)); 
-            color: white; padding: 14px 18px; margin: 10px 14px; border-radius: 18px; 
-            display: flex; align-items: center; justify-content: space-between;
-            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.25);
+        /* 1. طبقة الخريطة تغطي الخلفية */
+        #map { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; }
+
+        /* 2. شريط سفلي قابل للتغيير (Bottom Sheet) */
+        .bottom-sheet {
+            position: absolute; bottom: 0; left: 0; right: 0; z-index: 10;
+            background: var(--card-bg); border-top-left-radius: 24px; border-top-right-radius: 24px;
+            padding: 20px; box-shadow: 0 -10px 30px rgba(0,0,0,0.5); border-top: 1px solid var(--border);
+            max-height: 85vh; overflow-y: auto; transition: all 0.4s ease;
         }
-        .brand-logo-title { display: flex; align-items: center; gap: 10px; }
-        .brand-logo { font-size: 24px; background: rgba(255, 255, 255, 0.2); padding: 6px 10px; border-radius: 12px; }
 
-        .role-switcher { display: flex; background: #0b0e1b; padding: 6px; gap: 4px; margin: 0 14px 14px 14px; border-radius: 14px; border: 1px solid var(--card-border); overflow-x: auto; }
-        .role-btn { flex: 1; min-width: 75px; padding: 10px 4px; border: none; background: transparent; color: var(--text-muted); font-weight: 700; font-size: 11px; border-radius: 10px; cursor: pointer; transition: all 0.3s; text-align: center; white-space: nowrap; }
-        .role-btn.active { background: linear-gradient(135deg, var(--primary), #059669); color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
+        .sheet-handle { width: 40px; height: 5px; background: var(--text-muted); border-radius: 10px; margin: 0 auto 15px auto; opacity: 0.5; }
 
-        .tab-content { display: none; padding: 0 14px 16px 14px; }
-        .tab-content.active { display: block !important; }
+        /* تبويب نوع الخدمة */
+        .service-tabs { display: flex; gap: 8px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 4px; }
+        .tab-btn {
+            flex: 1; min-width: 110px; padding: 10px; border: 1px solid var(--border); border-radius: 12px;
+            background: rgba(255,255,255,0.05); color: var(--text-muted); font-size: 12px; font-weight: 700;
+            cursor: pointer; transition: 0.3s; text-align: center; white-space: nowrap;
+        }
+        .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        .card { background: var(--card-bg); padding: 18px; border-radius: 20px; border: 1px solid var(--card-border); margin-bottom: 16px; backdrop-filter: blur(10px); }
-        .card-title { font-size: 15px; font-weight: 800; margin-bottom: 14px; border-right: 4px solid var(--accent); padding-right: 10px; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; }
+        /* الحقول والنصوص */
+        .field-group { margin-bottom: 12px; }
+        .field-group label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+        .field-group input, .field-group textarea, .field-group select {
+            width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border);
+            background: rgba(15, 23, 42, 0.6); color: white; font-size: 13px; outline: none;
+        }
+        .field-group textarea { resize: none; height: 60px; }
 
-        .map-wrapper-large { position: relative; border-radius: 20px; overflow: hidden; border: 2px solid var(--accent); margin-bottom: 16px; box-shadow: 0 10px 25px rgba(0,242,254,0.15); height: 40vh; min-height: 250px; }
-        #map { width: 100%; height: 100%; z-index: 1; }
+        /* تحديد الأجرة */
+        .fare-box { background: rgba(16, 185, 129, 0.1); border: 1px solid var(--primary); padding: 12px; border-radius: 14px; margin-bottom: 15px; }
+        .fare-input-wrapper { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+        .fare-input-wrapper input { font-size: 18px; font-weight: 800; text-align: center; color: var(--primary); }
+        .quick-btn { background: rgba(255,255,255,0.1); border: none; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; }
 
-        .field-group { margin-bottom: 14px; }
-        .field-group label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 6px; color: var(--text-muted); }
-        .field-group input, .field-group select, .field-group textarea { width: 100%; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 12px; background: rgba(7, 9, 19, 0.7); color: white; font-size: 13px; outline: none; transition: 0.3s; }
-        .field-group input:focus, .field-group select:focus, .field-group textarea:focus { border-color: var(--accent); box-shadow: 0 0 10px rgba(0, 242, 254, 0.2); }
-        .field-group textarea { resize: none; height: 70px; }
+        .btn-submit {
+            width: 100%; padding: 14px; background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white; border: none; border-radius: 14px; font-size: 15px; font-weight: 800; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+        }
 
-        .pricing-info-box { background: rgba(16, 185, 129, 0.1); border: 1px solid var(--primary); padding: 12px; border-radius: 12px; margin-bottom: 14px; font-size: 11px; color: #a7f3d0; line-height: 1.5; }
+        /* 3. شاشة العروض والتفاوض */
+        .radar-box { text-align: center; padding: 20px 0; display: none; }
+        .radar-spinner {
+            width: 60px; height: 60px; border: 4px solid rgba(16, 185, 129, 0.2);
+            border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px auto;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        .security-notice { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.4); padding: 12px 14px; border-radius: 12px; margin-bottom: 14px; font-size: 11px; line-height: 1.6; color: #fca5a5; }
-        .bank-notice { background: rgba(0, 242, 254, 0.08); border: 1px dashed var(--accent); padding: 12px 14px; border-radius: 12px; margin-bottom: 14px; font-size: 11px; line-height: 1.6; color: #a5f3fc; }
+        /* بطاقة الموصل */
+        .driver-card {
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 14px;
+            border-radius: 16px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 10px;
+        }
+        .driver-info { display: flex; align-items: center; justify-content: space-between; }
+        .driver-profile { display: flex; align-items: center; gap: 10px; }
+        .driver-avatar { width: 42px; height: 42px; border-radius: 50%; background: #334155; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .driver-actions { display: flex; gap: 8px; }
+        .btn-accept { flex: 2; padding: 10px; background: var(--primary); border: none; border-radius: 10px; color: white; font-weight: 700; cursor: pointer; }
+        .btn-counter { flex: 1; padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid var(--border); border-radius: 10px; color: white; font-size: 11px; cursor: pointer; }
 
-        .checkbox-group { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 14px; font-size: 11px; color: var(--text-main); line-height: 1.5; }
-        .checkbox-group input { margin-top: 3px; accent-color: var(--primary); }
-
-        .btn { width: 100%; padding: 13px; border: none; border-radius: 12px; font-size: 14px; font-weight: 800; cursor: pointer; transition: 0.3s; }
-        .btn-primary { background: linear-gradient(135deg, var(--primary), #059669); color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
-
-        /* الرادار الاحترافي */
-        .radar-box-large { position: relative; background: radial-gradient(circle, rgba(0, 242, 254, 0.12) 0%, rgba(7, 9, 19, 0.98) 75%); border: 2px solid var(--accent); border-radius: 24px; height: 220px; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; margin-bottom: 20px; box-shadow: 0 0 25px rgba(0, 242, 254, 0.2); }
-        .radar-sweep-large { position: absolute; width: 360px; height: 360px; background: conic-gradient(from 0deg, rgba(0, 242, 254, 0.45), transparent 70deg); border-radius: 50%; animation: radarSpin 2.5s linear infinite; }
-        .radar-circle-1 { position: absolute; width: 90px; height: 90px; border: 1px dashed rgba(0, 242, 254, 0.5); border-radius: 50%; }
-        .radar-circle-2 { position: absolute; width: 170px; height: 170px; border: 1px solid rgba(0, 242, 254, 0.3); border-radius: 50%; }
-        .radar-dot { position: absolute; width: 10px; height: 10px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent); animation: pulseDot 1.2s infinite alternate; }
-        .radar-status { z-index: 2; font-size: 13px; font-weight: 900; color: var(--accent); margin-top: 10px; text-shadow: 0 0 10px rgba(0,242,254,0.8); }
-
-        @keyframes radarSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes pulseDot { 0% { transform: scale(0.8); opacity: 0.5; } 100% { transform: scale(1.5); opacity: 1; } }
-
-        .driver-wallet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
-        .wallet-stat-box { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--card-border); padding: 12px; border-radius: 14px; text-align: center; }
-        .wallet-stat-val { font-size: 14px; font-weight: 900; color: var(--accent); margin-top: 4px; }
-
-        .order-card { background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); padding: 14px; border-radius: 14px; margin-bottom: 12px; }
-        .parcel-img-preview { width: 100%; height: 130px; object-fit: cover; border-radius: 12px; margin: 8px 0; border: 1px solid var(--card-border); }
-
-        .footer-legal-bar { font-size: 10px; text-align: center; color: var(--text-muted); padding: 10px; margin-bottom: 60px; border-top: 1px solid var(--card-border); display: flex; justify-content: center; gap: 15px; }
-        .footer-legal-bar a { color: var(--accent); text-decoration: none; cursor: pointer; }
-
-        .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 520px; background: rgba(7, 9, 19, 0.98); display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid var(--card-border); z-index: 9999; backdrop-filter: blur(10px); }
-        .nav-item { color: var(--text-muted); font-size: 10px; text-align: center; cursor: pointer; border: none; background: transparent; flex: 1; outline: none; }
-        .nav-item.active { color: var(--accent); font-weight: bold; }
-        .nav-item span { font-size: 16px; display: block; margin-bottom: 2px; }
+        /* شاشة التتبع */
+        .tracking-box { display: none; text-align: center; }
+        .otp-badge { background: #334155; padding: 8px 16px; border-radius: 20px; font-weight: 800; color: #f59e0b; display: inline-block; margin: 10px 0; }
+        .file-upload-btn { display: inline-block; padding: 8px 12px; background: rgba(255,255,255,0.08); border: 1px dashed var(--border); border-radius: 8px; font-size: 11px; color: var(--text-muted); cursor: pointer; text-align: center; width: 100%; margin-top: 5px; }
     </style>
 </head>
 <body>
 
-    <div id="notificationToast">
-        <span>🔔</span>
-        <span id="toastText">مرحباً بك في المنصة</span>
-    </div>
-
     <div class="app-container">
-        <header class="brand-header">
-            <div class="brand-logo-title">
-                <span class="brand-logo">🛵</span>
-                <div>
-                    <h1 style="font-size: 18px; font-weight: 900;">نقضيها عليك</h1>
-                    <span style="font-size: 10px; opacity: 0.9;">التسخير والتوصيل بالغرب</span>
-                </div>
-            </div>
-        </header>
+        <!-- الخريطة -->
+        <div id="map"></div>
 
-        <div class="role-switcher">
-            <button class="role-btn active" data-tab="customer-tab" onclick="switchTab('customer-tab')">👤 الزبون</button>
-            <button class="role-btn" data-tab="driver-tab" onclick="switchTab('driver-tab')">📡 رادار الطلبيات</button>
-            <button class="role-btn" data-tab="driver-register-tab" onclick="switchTab('driver-register-tab')">📝 طلب الانضمام</button>
-        </div>
+        <!-- اللوحة السفلية -->
+        <div class="bottom-sheet" id="bottomSheet">
+            <div class="sheet-handle"></div>
 
-        <!-- 1. واجهة الزبون -->
-        <div id="customer-tab" class="tab-content active">
-            <div class="card">
-                <h2 class="card-title">🛒 طلب تسخيرة / توصيل جديد</h2>
-
-                <div class="map-wrapper-large">
-                    <div id="map"></div>
+            <!-- المرحلة 1: إدخال طلب التسخيرة -->
+            <div id="stepOrderForm">
+                <div class="service-tabs">
+                    <button class="tab-btn active" onclick="setTab(this)">🛒 شراء مستلزمات</button>
+                    <button class="tab-btn" onclick="setTab(this)">📦 نقل طرد / وثيقة</button>
+                    <button class="tab-btn" onclick="setTab(this)">💊 صيدلية / أدوات</button>
                 </div>
 
-                <div class="pricing-info-box">
-                    <b>📐 نظام التسعير الأوتوماتيكي:</b> يتم حساب المسافة تلقائياً بالخريطة بناءً على <b>30 درهم لكل 10 كيلو</b> (3 دراهم/كم).
+                <div class="field-group">
+                    <label>🟢 مكان الأخذ / المتجر</label>
+                    <input type="text" id="pickupPos" value="مرجان - شارع الجيش الملكي">
                 </div>
 
-                <form onsubmit="handleCustomerOrder(event)">
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                        <div class="field-group">
-                            <label>🟢 نقطة الانطلاق / الجلب *</label>
-                            <input type="text" id="pickupAddress" required placeholder="انقر الخريطة أو اكتب..." onchange="recalculatePrice()">
-                        </div>
-                        <div class="field-group">
-                            <label>🔴 نقطة التسليم *</label>
-                            <input type="text" id="deliveryAddress" required placeholder="انقر الخريطة أو اكتب..." onchange="recalculatePrice()">
-                        </div>
-                    </div>
+                <div class="field-group">
+                    <label>🔴 عنوان التسليم</label>
+                    <input type="text" id="deliveryPos" placeholder="حدد عنوانك المستهدف...">
+                </div>
 
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                        <div class="field-group">
-                            <label>⚖️ الوزن التقديري *</label>
-                            <select id="packageWeight" onchange="recalculatePrice()">
-                                <option value="1">أقل من 10 كيلو (عادي)</option>
-                                <option value="2">من 10 إلى 20 كيلو (x2)</option>
-                                <option value="3">من 20 إلى 30 كيلو (x3)</option>
-                            </select>
-                        </div>
-                        <div class="field-group">
-                            <label>📏 المسافة المقطوعة</label>
-                            <input type="text" id="calculatedDistance" value="10 كم" readonly style="color:var(--accent); font-weight:bold;">
-                        </div>
-                    </div>
+                <div class="field-group">
+                    <label>📝 قائمة المشتريات / تفاصيل الإرسالية</label>
+                    <textarea placeholder="اكتب التفاصيل هنا (مثال: حليب، خبز، زبدة...)"></textarea>
+                    <label class="file-upload-btn">
+                        📎 إرفاق صورة اللائحة أو الوثيقة (اختياري)
+                        <input type="file" accept="image/*" style="display: none;">
+                    </label>
+                </div>
 
-                    <div class="field-group">
-                        <label>📝 تفاصيل التسخيرة أو الطرد *</label>
-                        <textarea id="orderDescription" required placeholder="اكتب قائمة المشتريات أو وصف الطرد..."></textarea>
-                    </div>
-
-                    <!-- شرط صورة الطرد الإلزامية -->
-                    <div class="field-group">
-                        <label>📸 صورة الطرد / المشتريات (إلزامية) *</label>
-                        <input type="file" id="parcelImage" required accept="image/*" onchange="previewParcelImage(event)">
-                        <img id="parcelPreviewImg" class="parcel-img-preview" style="display:none;" alt="صورة الطرد">
-                    </div>
-
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                        <div class="field-group">
-                            <label>📞 رقم الهاتف *</label>
-                            <input type="tel" id="customerPhone" required placeholder="06XXXXXXXX">
-                        </div>
-                        <div class="field-group">
-                            <label>💵 الأجرة المحسوبة تلقائياً (كاش) *</label>
-                            <input type="number" id="offeredPrice" value="30" required style="color:var(--primary); font-size:16px; font-weight:bold;">
-                        </div>
-                    </div>
-
-                    <!-- التنبيهات الأمنية والشرط القانوني -->
-                    <div class="security-notice">
-                        <b>🚨 تنبيه أمني وقانوني صارم:</b><br>
-                        • يمنع منعاً باتاً طلب نقل أي مواد مخالفة للقانون، ممنوعات، أو أوراق مشبوهة.<br>
-                        • يتحمل الزبون كامل المسؤولية القانونية والجنائية عن محتوى الطرد.
-                    </div>
-
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="customerSecurityConsent" required>
-                        <label for="customerSecurityConsent">أتعهد بأن الطرد لا يحتوي على أي ممنوعات أو مخالفات قانونية، والدفع كاش عند الاستلام. *</label>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">إرسال الطلب للرادار 🚀</button>
-                </form>
-            </div>
-        </div>
-
-        <!-- 2. رادار الطلبيات ومحفظة المنفذ -->
-        <div id="driver-tab" class="tab-content">
-            <div class="card" style="border-color: var(--accent);">
-                <h2 class="card-title" style="border-color: var(--primary);">💼 محفظة المنفذ والعمولة</h2>
-                <div class="driver-wallet-grid">
-                    <div class="wallet-stat-box">
-                        <span style="font-size:10px; color:var(--text-muted); display:block;">رصيد الاشتراك</span>
-                        <div class="wallet-stat-val" id="driverBalance" style="color:var(--primary);">30 د.م</div>
-                    </div>
-                    <div class="wallet-stat-box">
-                        <span style="font-size:10px; color:var(--text-muted); display:block;">نسبة العمولة</span>
-                        <div class="wallet-stat-val" style="color:var(--orange);">10%</div>
-                    </div>
-                    <div class="wallet-stat-box">
-                        <span style="font-size:10px; color:var(--text-muted); display:block;">أرباحك (كاش)</span>
-                        <div class="wallet-stat-val" id="driverEarnings" style="color:#ffd700;">0 د.م</div>
+                <div class="fare-box">
+                    <label style="font-size: 11px; color: var(--text-muted);">💰 الأجرة المقترحة للتوصيل (درهم)</label>
+                    <div class="fare-input-wrapper">
+                        <input type="number" id="offeredFare" value="20">
+                        <button class="quick-btn" onclick="addFare(5)">+5</button>
+                        <button class="quick-btn" onclick="addFare(10)">+10</button>
                     </div>
                 </div>
-                <p style="font-size:11px; color:var(--text-muted); text-align:center;">💡 عند انتهاء رصيد المحفظة، يلزم إيداع الأموال عبر التحويل البنكي للاستمرار في تلقي الطلبيات.</p>
+
+                <button class="btn-submit" onclick="startBargaining()">اطلب الآن و أرسل للموصلين 🚀</button>
             </div>
 
-            <div class="card">
-                <h2 class="card-title">📡 رادار الطلبيات المباشر</h2>
+            <!-- المرحلة 2: الرادار وعروض التفاوض -->
+            <div id="stepBargaining" class="radar-box">
+                <div class="radar-spinner"></div>
+                <h3 style="font-size: 15px; margin-bottom: 5px;">جارٍ البحث عن موصل قريب...</h3>
+                <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 15px;">تم إرسال طلبك لعشرات الموصلين بالمنطقة</p>
+
+                <!-- العروض المتلقاة -->
+                <div id="offersList"></div>
+            </div>
+
+            <!-- المرحلة 3: التتبع المباشر -->
+            <div id="stepTracking" class="tracking-box">
+                <h3 style="font-size: 16px; color: var(--primary);">🛵 الموصل في الطريق إليك!</h3>
+                <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">يقوم بجمع الطلبات الآن</p>
                 
-                <div class="radar-box-large">
-                    <div class="radar-sweep-large"></div>
-                    <div class="radar-circle-1"></div>
-                    <div class="radar-circle-2"></div>
-                    <div class="radar-dot" style="top: 35%; left: 45%;"></div>
-                    <div class="radar-dot" style="top: 60%; left: 70%;"></div>
-                    <div class="radar-status" id="radarStatusText">🔍 الرادار نشط يرصد الطلبيات القريبة...</div>
-                </div>
-
-                <h3 style="font-size:13px; margin-bottom:12px; color:var(--text-main);">📢 الطلبيات المتاحة حالياً:</h3>
-                <div id="availableOrdersList">
-                    <p style="font-size:12px; color:var(--text-muted); text-align:center; padding:15px;">لا توجد طلبيات جارية على الرادار حالياً.</p>
-                </div>
+                <div class="otp-badge">رمز تأكيد الاستلام (OTP): 4821</div>
+                
+                <p style="font-size: 11px; color: var(--text-muted);">مزّد الموصل بهذا الرمز فور استلام تسخيرتك لتأكيد العملية.</p>
+                <button class="btn-submit" style="margin-top: 15px; background: #334155;" onclick="resetApp()">إلغاء أو إنهاء الطلب</button>
             </div>
         </div>
-
-        <!-- 3. طلب الانضمام وشروط القبول والتحويل البنكي -->
-        <div id="driver-register-tab" class="tab-content">
-            <div class="card">
-                <h2 class="card-title">📝 طلب انضمام منفذ جديد</h2>
-
-                <form onsubmit="handleDriverRegistration(event)">
-                    <div class="field-group">
-                        <label>الاسم الكامل *</label>
-                        <input type="text" required placeholder="الاسم الشخصي والعائلي">
-                    </div>
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                        <div class="field-group">
-                            <label>رقم الهاتف *</label>
-                            <input type="tel" required placeholder="06XXXXXXXX">
-                        </div>
-                        <div class="field-group">
-                            <label>رقم البطاقة الوطنية (CNI) *</label>
-                            <input type="text" required placeholder="AB123456">
-                        </div>
-                    </div>
-
-                    <div class="field-group">
-                        <label>وسيلة النقل *</label>
-                        <select required>
-                            <option value="">اختر الوسيلة...</option>
-                            <option value="moto">دراجة نارية (Moto)</option>
-                            <option value="car">سيارة (Voiture)</option>
-                            <option value="velo">دراجة هوائية (Vélo)</option>
-                        </select>
-                    </div>
-
-                    <!-- شروط الاشتراك والتحويل البنكي -->
-                    <div class="bank-notice">
-                        <b>💳 شروط الاشتراك وتفعيل الحساب:</b><br>
-                        • <b>أدنى حد لشحن الاشتراك:</b> 30 درهم.<br>
-                        • <b>طريقة الدفع:</b> عبر التحويل البنكي (Virement / RIB).<br>
-                        • <b>نظام العمولة:</b> يخصم التطبيق 10% تلقائياً من رصيد محفظتك عن كل طلبية تُقبلها، وتحتفظ بالأجرة كاش كاملة من الزبون.
-                    </div>
-
-                    <!-- التنبيهات الأمنية للمنفذ -->
-                    <div class="security-notice">
-                        <b>🚨 التنبيهات الأمنية وشروط قبول الطلبية:</b><br>
-                        • <b>معاينة الطرد:</b> يلتزم المنفذ بمعاينة صورة الطرد ومطابقتها قبل الاستلام.<br>
-                        • <b>المنع المطلق:</b> يمنع منعاً باتاً قبول أو نقل أي طلبيات تشتمل على مواد غير قانونية أو ممنوعات.<br>
-                        • التثبت من هوية الزبون عند الاستلام والتسلم الكاش.
-                    </div>
-
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="driverTermsConsent" required>
-                        <label for="driverTermsConsent">أوافق على جميع شروط الاشتراك (30 درهم حد أدنى)، واقتطاع 10% عمولة، والتلتزم بالتنبيهات الأمنية لعدم نقل الممنوعات. *</label>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">تقديم طلب الانضمام وتأكيد الشروط ✅</button>
-                </form>
-            </div>
-        </div>
-
-        <!-- الدعم والخصوصية -->
-        <div class="footer-legal-bar">
-            <a onclick="showToast('📞 الدعم المباشر متوفر عبر الواتساب')">📞 الدعم الفني</a>
-            <span>|</span>
-            <a onclick="showToast('🔒 بياناتك مشفرة ومحمية بالكامل')">🔒 الخصوصية</a>
-            <span>|</span>
-            <a onclick="showToast('📜 الشروط: اقتطاع 10% كعمولة والأجرة كاش')">📜 الشروط والعمولة</a>
-        </div>
-
-        <!-- الشريط السفلي -->
-        <nav class="bottom-nav">
-            <button class="nav-item active" id="nav-customer" onclick="switchTab('customer-tab')">
-                <span>👤</span> الزبون
-            </button>
-            <button class="nav-item" id="nav-driver" onclick="switchTab('driver-tab')">
-                <span>📡</span> الرادار
-            </button>
-            <button class="nav-item" id="nav-register" onclick="switchTab('driver-register-tab')">
-                <span>📝</span> الانضمام
-            </button>
-        </nav>
     </div>
 
     <script>
-        let map;
-        let uploadedParcelImgData = "";
-        let pickupMarker, deliveryMarker;
-        let pickupCoords = [33.5731, -7.5898];
-        let deliveryCoords = [33.5850, -7.6100];
+        // 1. تهيئة الخريطة التفاعلية
+        const map = L.map('map', { zoomControl: false }).setView([33.5731, -7.5898], 14);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
 
-        window.onload = function() {
-            initProfessionalMap();
-        };
+        // إضافة مؤشرات وهمية للمتجر والمستلم
+        L.marker([33.5731, -7.5898]).addTo(map).bindPopup("🟢 مكان التسخيرة").openPopup();
+        L.marker([33.5850, -7.6100]).addTo(map).bindPopup("🔴 نقطة الوصول");
 
-        function initProfessionalMap() {
-            try {
-                map = L.map('map', { zoomControl: true }).setView([33.5731, -7.5898], 12);
-                L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
-
-                pickupMarker = L.marker(pickupCoords, {draggable: true}).addTo(map).bindPopup('🟢 <b>مكان الجلب</b>').openPopup();
-                deliveryMarker = L.marker(deliveryCoords, {draggable: true}).addTo(map).bindPopup('🔴 <b>عنوان التسليم</b>');
-
-                pickupMarker.on('dragend', function() {
-                    pickupCoords = [pickupMarker.getLatLng().lat, pickupMarker.getLatLng().lng];
-                    recalculatePrice();
-                });
-
-                deliveryMarker.on('dragend', function() {
-                    deliveryCoords = [deliveryMarker.getLatLng().lat, deliveryMarker.getLatLng().lng];
-                    recalculatePrice();
-                });
-
-                recalculatePrice();
-
-            } catch(e) { console.log(e); }
+        // 2. التحكم في التبويبات والأجرة
+        function setTab(btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
         }
 
-        // حساب المسافة والأجرة أوتوماتيكياً (30 درهم لكل 10 كم)
-        function recalculatePrice() {
-            if (!pickupCoords || !deliveryCoords) return;
-
-            // حساب المسافة الإقليدية التقديرية بالـ KM
-            let lat1 = pickupCoords[0], lon1 = pickupCoords[1];
-            let lat2 = deliveryCoords[0], lon2 = deliveryCoords[1];
-            
-            let R = 6371; // radius of earth in km
-            let dLat = (lat2 - lat1) * Math.PI / 180;
-            let dLon = (lon2 - lon1) * Math.PI / 180;
-            let a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                    Math.sin(dLon/2) * Math.sin(dLon/2);
-            let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            let distance = Math.max(1, Math.round(R * c * 1.3)); // تكبير طفيف لتقريب مسافة الطريق
-
-            document.getElementById('calculatedDistance').value = distance + ' كم';
-
-            // قاعدة الاحتساب: 3 دراهم لكل كم (أي 30 درهم لكل 10 كم)، والحد الأدنى هو 20 درهم
-            let weightMultiplier = parseInt(document.getElementById('packageWeight').value) || 1;
-            let basePrice = Math.max(20, Math.round(distance * 3));
-            let finalCalculatedPrice = basePrice * weightMultiplier;
-
-            document.getElementById('offeredPrice').value = finalCalculatedPrice;
+        function addFare(amount) {
+            const input = document.getElementById('offeredFare');
+            input.value = parseInt(input.value || 0) + amount;
         }
 
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+        // 3. بدء عملية التفاوض وبث العروض
+        function startBargaining() {
+            document.getElementById('stepOrderForm').style.display = 'none';
+            document.getElementById('stepBargaining').style.display = 'block';
 
-            const selectedTab = document.getElementById(tabId);
-            if (selectedTab) selectedTab.classList.add('active');
+            // محاكاة وصول عروض من موصلين بعد ثوانٍ
+            setTimeout(() => {
+                const offersContainer = document.getElementById('offersList');
+                const offeredFare = document.getElementById('offeredFare').value;
 
-            const activeBtn = document.querySelector(`.role-btn[data-tab="${tabId}"]`);
-            if (activeBtn) activeBtn.classList.add('active');
-
-            if (tabId === 'customer-tab') document.getElementById('nav-customer').classList.add('active');
-            if (tabId === 'driver-tab') document.getElementById('nav-driver').classList.add('active');
-            if (tabId === 'driver-register-tab') document.getElementById('nav-register').classList.add('active');
-
-            if (tabId === 'customer-tab' && map) {
-                setTimeout(() => map.invalidateSize(), 300);
-            }
-        }
-
-        function previewParcelImage(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    uploadedParcelImgData = e.target.result;
-                    const imgEl = document.getElementById('parcelPreviewImg');
-                    imgEl.src = uploadedParcelImgData;
-                    imgEl.style.display = 'block';
-                }
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function showToast(message) {
-            let toast = document.getElementById('notificationToast');
-            document.getElementById('toastText').innerText = message;
-            toast.classList.add('show');
-            setTimeout(() => { toast.classList.remove('show'); }, 3500);
-        }
-
-        function handleCustomerOrder(e) {
-            e.preventDefault();
-            const pickup = document.getElementById('pickupAddress').value || 'الموقع الأول على الخريطة';
-            const delivery = document.getElementById('deliveryAddress').value || 'الموقع الثاني على الخريطة';
-            const desc = document.getElementById('orderDescription').value;
-            const phone = document.getElementById('customerPhone').value;
-            const price = parseFloat(document.getElementById('offeredPrice').value);
-            const dist = document.getElementById('calculatedDistance').value;
-
-            if (!uploadedParcelImgData) {
-                showToast('⚠️ صورة الطرد إلزامية لتأكيد السلامة والأمن!');
-                return;
-            }
-
-            const ordersContainer = document.getElementById('availableOrdersList');
-            if (ordersContainer.innerHTML.includes('لا توجد طلبيات')) ordersContainer.innerHTML = '';
-
-            const orderId = 'ord_' + Date.now();
-            const commission = (price * 0.10).toFixed(2); // حساب 10% عمولة
-
-            const orderHTML = `
-                <div class="order-card" id="${orderId}">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-                        <strong style="color:var(--accent); font-size:13px;">📦 طلبية (${dist})</strong>
-                        <span style="color:var(--primary); font-weight:bold; font-size:13px;">${price} د.م (كاش)</span>
+                offersContainer.innerHTML = `
+                    <div class="driver-card">
+                        <div class="driver-info">
+                            <div class="driver-profile">
+                                <div class="driver-avatar">🛵</div>
+                                <div style="text-align: right;">
+                                    <div style="font-weight: 800; font-size: 13px;">ياسين العبدلاوي</div>
+                                    <div style="font-size: 11px; color: #f59e0b;">★ 4.9 (85 توصيلة)</div>
+                                </div>
+                            </div>
+                            <div style="text-align: left;">
+                                <div style="font-size: 16px; font-weight: 800; color: var(--primary);">${offeredFare} د.م</div>
+                                <div style="font-size: 10px; color: var(--text-muted);">10 دقائق وصول</div>
+                            </div>
+                        </div>
+                        <div class="driver-actions">
+                            <button class="btn-accept" onclick="acceptOffer()">قبول العرض ✅</button>
+                            <button class="btn-counter" onclick="alert('تم إرسال عرض مضاد بـ 5 دراهم إضافية')">طلب +5 د.م</button>
+                        </div>
                     </div>
-                    <p style="font-size:11px; color:white; margin-bottom:4px;">🟢 <b>مكان الأخذ:</b> ${pickup}</p>
-                    <p style="font-size:11px; color:white; margin-bottom:4px;">🔴 <b>التسليم:</b> ${delivery}</p>
-                    <p style="font-size:11px; color:var(--text-muted); margin-bottom:4px;">📝 <b>الوصف:</b> ${desc}</p>
-                    <div style="margin: 8px 0;">
-                        <p style="font-size:10px; color:var(--text-muted); margin-bottom:2px;">📸 معاينة صورة الطرد (معاينة أمنية):</p>
-                        <img src="${uploadedParcelImgData}" class="parcel-img-preview" alt="صورة الطرد">
-                    </div>
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; background:rgba(0,0,0,0.3); padding:8px; border-radius:10px;">
-                        <span style="font-size:11px; color:var(--orange);">💥 العمولة المستحقة (10%): <b>${commission} د.م</b></span>
-                        <button onclick="acceptOrder('${orderId}', ${price}, ${commission})" class="btn btn-primary" style="padding:6px 12px; font-size:11px; width:auto;">قبول الطلبية ✅</button>
-                    </div>
-                </div>
-            `;
 
-            ordersContainer.innerHTML += orderHTML;
-            showToast('✅ تم حساب المسافة والأجرة ونشر الطلبية على الرادار!');
-            e.target.reset();
-            document.getElementById('parcelPreviewImg').style.display = 'none';
-            uploadedParcelImgData = "";
+                    <div class="driver-card">
+                        <div class="driver-info">
+                            <div class="driver-profile">
+                                <div class="driver-avatar">🚲</div>
+                                <div style="text-align: right;">
+                                    <div style="font-weight: 800; font-size: 13px;">حمزة كريم</div>
+                                    <div style="font-size: 11px; color: #f59e0b;">★ 4.8 (40 توصيلة)</div>
+                                </div>
+                            </div>
+                            <div style="text-align: left;">
+                                <div style="font-size: 16px; font-weight: 800; color: #f59e0b;">${parseInt(offeredFare) + 5} د.م</div>
+                                <div style="font-size: 10px; color: var(--text-muted);">عرض مضاد</div>
+                            </div>
+                        </div>
+                        <div class="driver-actions">
+                            <button class="btn-accept" onclick="acceptOffer()">قبول بـ ${parseInt(offeredFare) + 5} د.م ✅</button>
+                        </div>
+                    </div>
+                `;
+            }, 1500);
         }
 
-        function acceptOrder(orderId, price, commission) {
-            let balanceEl = document.getElementById('driverBalance');
-            let currentBalance = parseFloat(balanceEl.innerText) || 0;
-
-            if (currentBalance < commission) {
-                showToast('❌ رصيدك غير كافٍ للاقتطاع (10%)! يرجى إعادة الشحن عبر التحويل البنكي (أدنى حد 30 درهم).');
-                return;
-            }
-
-            let newBalance = (currentBalance - commission).toFixed(2);
-            balanceEl.innerText = newBalance + ' د.م';
-
-            let earningsEl = document.getElementById('driverEarnings');
-            let currentEarnings = parseFloat(earningsEl.innerText) || 0;
-            earningsEl.innerText = (currentEarnings + price).toFixed(2) + ' د.م';
-
-            const orderEl = document.getElementById(orderId);
-            if (orderEl) orderEl.remove();
-
-            showToast(`🎉 تم قبول الطلبية! تم خصم ${commission} د.م (10% عمولة) وستستلم ${price} د.م كاش.`);
-            
-            if (newBalance <= 0) {
-                showToast('⚠️ انتهى رصيد محفظتك! يرجى تحويل أموال جديدة للاستمرار في استقبال الطلبات.');
-            }
+        // 4. قبول العرض والانتقال للتتبع
+        function acceptOffer() {
+            document.getElementById('stepBargaining').style.display = 'none';
+            document.getElementById('stepTracking').style.display = 'block';
         }
 
-        function handleDriverRegistration(e) {
-            e.preventDefault();
-            showToast('📩 تم إرسال طلب الانضمام! يرجى إجراء التحويل البنكي (30 درهم كحد أدنى) لتفعيل الحساب.');
-            e.target.reset();
+        function resetApp() {
+            document.getElementById('stepTracking').style.display = 'none';
+            document.getElementById('stepBargaining').style.display = 'none';
+            document.getElementById('stepOrderForm').style.display = 'block';
+            document.getElementById('offersList').innerHTML = '';
         }
     </script>
 </body>
