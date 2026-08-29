@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نقضيها عليك - النسخة الشاملة</title>
+    <title>نقضيها عليك - النسخة الشاملة والأصلية</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -39,7 +39,6 @@
 
         .top-sub-bar { background: rgba(7, 9, 19, 0.9); padding: 10px 18px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-muted); border-bottom: 1px solid var(--card-border); }
 
-        /* شريط الأدوار العلوي */
         .role-switcher { display: flex; background: #0b0e1b; padding: 6px; gap: 6px; margin: 10px 14px; border-radius: 14px; border: 1px solid var(--card-border); position: relative; z-index: 100; }
         .role-btn { flex: 1; padding: 10px; border: none; background: transparent; color: var(--text-muted); font-weight: 700; font-size: 13px; border-radius: 10px; cursor: pointer; transition: all 0.3s; }
         .role-btn.active { background: linear-gradient(135deg, var(--primary), #ff793f); color: white; box-shadow: 0 4px 15px var(--primary-glow); }
@@ -48,7 +47,6 @@
         .brand-header { background: linear-gradient(135deg, rgba(255, 87, 34, 0.9), rgba(221, 36, 118, 0.9)); color: white; padding: 16px 20px; margin: 0 14px 14px 14px; border-radius: 18px; display: flex; align-items: center; gap: 14px; cursor: pointer; }
         .brand-logo { font-size: 28px; background: rgba(255, 255, 255, 0.2); padding: 8px; border-radius: 14px; }
 
-        /* الأقسام الصفحات */
         .tab-content { display: none; padding: 0 14px 16px 14px; }
         .tab-content.active { display: block !important; }
 
@@ -59,17 +57,31 @@
 
         .field-group { margin-bottom: 14px; }
         .field-group label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 6px; color: var(--text-muted); }
-        .field-group input { width: 100%; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 12px; background: rgba(7, 9, 19, 0.7); color: white; font-size: 13px; outline: none; }
+        .field-group input, .field-group select { width: 100%; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 12px; background: rgba(7, 9, 19, 0.7); color: white; font-size: 13px; outline: none; }
 
         .btn { width: 100%; padding: 13px; border: none; border-radius: 12px; font-size: 14px; font-weight: 800; cursor: pointer; transition: 0.3s; }
         .btn-primary { background: linear-gradient(135deg, var(--primary), #ff793f); color: white; }
         .btn-success { background: linear-gradient(135deg, var(--indrive-green), #059669); color: #fff; }
 
+        /* الأقسام الأربعة للمنتجات والخدمات */
         .services-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
         .service-option { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--card-border); padding: 14px; border-radius: 16px; text-align: center; cursor: pointer; }
         .service-option.selected { border-color: var(--accent); background: rgba(0, 242, 254, 0.1); }
 
-        /* شريط التنقل السفلي */
+        /* الرادار الاحترافي */
+        .radar-card-container { background: rgba(11, 15, 30, 0.85); border: 1px solid rgba(0, 242, 254, 0.2); border-radius: 22px; padding: 18px; margin-bottom: 18px; text-align: center; }
+        .radar-screen { width: 220px; height: 220px; margin: 0 auto 14px auto; border-radius: 50%; border: 2px solid rgba(0, 242, 254, 0.5); background: radial-gradient(circle, rgba(15, 23, 42, 0.8) 0%, rgba(3, 4, 8, 0.95) 100%); position: relative; overflow: hidden; }
+        .radar-sweep { position: absolute; top: 0; left: 0; right: 0; bottom: 0; border-radius: 50%; background: conic-gradient(from 0deg, rgba(0, 242, 254, 0.4) 0deg, rgba(0, 242, 254, 0) 55deg); animation: radar-spin 2.5s linear infinite; transform-origin: center center; }
+        @keyframes radar-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .radar-center-driver { position: absolute; top: 50%; left: 50%; width: 14px; height: 14px; background: var(--primary); border: 2px solid #ffffff; border-radius: 50%; transform: translate(-50%, -50%); z-index: 10; }
+        .radar-blip { position: absolute; width: 10px; height: 10px; background: var(--indrive-green); border-radius: 50%; box-shadow: 0 0 8px var(--indrive-green); }
+
+        /* طرق الاشتراك والشروط */
+        .plan-card { background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+        .plan-card.highlight { border-color: var(--accent); background: rgba(0, 242, 254, 0.05); }
+        .conditions-list { list-style: none; padding-right: 0; font-size: 12px; color: var(--text-muted); line-height: 2; }
+        .conditions-list li { display: flex; align-items: center; gap: 8px; }
+
         .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 520px; background: rgba(7, 9, 19, 0.98); display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid var(--card-border); z-index: 9999; }
         .nav-item { color: var(--text-muted); font-size: 11px; text-align: center; cursor: pointer; border: none; background: transparent; flex: 1; outline: none; }
         .nav-item.active { color: var(--accent); font-weight: bold; }
@@ -83,16 +95,15 @@
 
     <div id="notificationToast">
         <span>🔔</span>
-        <span id="toastText">مرحباً بك في التطبيق</span>
+        <span id="toastText">مرحباً بك في المنصة</span>
     </div>
 
     <div class="app-container">
         <div class="top-sub-bar">
             <span>🛵 منصة "نقضيها عليك"</span>
-            <span>النسخة المحدثة 100%</span>
+            <span>النسخة التفاعلية الكاملة</span>
         </div>
 
-        <!-- شريط التبديل العلوي -->
         <div class="role-switcher">
             <button class="role-btn active" data-tab="customer-tab" onclick="switchTab('customer-tab')">الزبون</button>
             <button class="role-btn" data-tab="driver-tab" onclick="switchTab('driver-tab')">المنفذ / السائق</button>
@@ -103,28 +114,36 @@
             <span class="brand-logo">🛵</span>
             <div>
                 <h1 style="font-size: 19px; font-weight: 900;">نقضيها عليك</h1>
-                <span style="font-size: 11px; opacity: 0.95;">أنقر هنا لإظهار لوحة التحكم</span>
+                <span style="font-size: 11px; opacity: 0.95;">إدارتك الشاملة للتوصيل</span>
             </div>
         </header>
 
-        <!-- 1. واجهة الزبون -->
+        <!-- 1. واجهة الزبون (4 خيارات كاملة) -->
         <div id="customer-tab" class="tab-content active">
             <div class="card">
                 <h2 class="card-title">إنشاء طلب توصيل جديد</h2>
                 <div class="services-grid">
                     <div class="service-option selected" onclick="selectService('🛒 تسخير وسويقة', this)">
-                        <span style="font-size:24px; display:block;">🛒</span>
+                        <span style="font-size:26px; display:block;">🛒</span>
                         <p style="font-size:12px; font-weight:bold;">سويقة وتسخير</p>
                     </div>
                     <div class="service-option" onclick="selectService('📄 توصيل وثائق', this)">
-                        <span style="font-size:24px; display:block;">📄</span>
+                        <span style="font-size:26px; display:block;">📄</span>
                         <p style="font-size:12px; font-weight:bold;">وثائق وأوراق</p>
+                    </div>
+                    <div class="service-option" onclick="selectService('📦 توصيل طرد', this)">
+                        <span style="font-size:26px; display:block;">📦</span>
+                        <p style="font-size:12px; font-weight:bold;">طرود وأمانات</p>
+                    </div>
+                    <div class="service-option" onclick="selectService('💊 صيدلية', this)">
+                        <span style="font-size:26px; display:block;">💊</span>
+                        <p style="font-size:12px; font-weight:bold;">أدوية وصيدلية</p>
                     </div>
                 </div>
 
                 <div id="map"></div>
 
-                <form onsubmit="event.preventDefault(); showToast('✅ تم إرسال طلبك بنجاح!');">
+                <form onsubmit="event.preventDefault(); showToast('✅ تم إرسال طلبك ورصده بالرادار!');">
                     <div class="field-group">
                         <label>الخدمة المختارة</label>
                         <input type="text" id="selectedServiceInput" value="🛒 تسخير وسويقة" readonly>
@@ -142,31 +161,87 @@
             </div>
         </div>
 
-        <!-- 2. واجهة الطلبيات النشطة -->
+        <!-- 2. واجهة الطلبيات النشطة مع الرادار الاحترافي -->
         <div id="orders-tab" class="tab-content">
-            <div class="card" style="text-align: center;">
-                <h2 class="card-title">⚡ رادار الطلبيات المتاحة</h2>
-                <div style="padding: 30px 10px; color: var(--text-muted); font-size: 13px;">
-                    <p style="font-size:40px; margin-bottom:10px;">📡</p>
-                    لا توجد طلبيات جارية في منطقتك حالياً.
+            <div class="radar-card-container">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 11px;">
+                    <span style="color:var(--accent); font-weight:800;">⚡ رادار الطلبيات المباشر</span>
+                    <span style="color:var(--indrive-green); font-weight:bold;">جاري البحث عن طلبيات...</span>
+                </div>
+                <div class="radar-screen">
+                    <div class="radar-sweep"></div>
+                    <div class="radar-center-driver"></div>
+                    <!-- نقاط ملونة تحاكي الطلبات المتوفرة حول السائق -->
+                    <div class="radar-blip" style="top: 35%; left: 40%;"></div>
+                    <div class="radar-blip" style="top: 65%; left: 70%;"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">الطلبات المتاحة حالياً بالمنطقة</h2>
+                <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 12px; border: 1px solid var(--card-border); margin-bottom: 10px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:12px; font-weight:bold; color:var(--accent);">🛒 تسخير وسويقة</span>
+                        <span style="color:var(--indrive-green); font-weight:900;">35 درهم</span>
+                    </div>
+                    <p style="font-size:11px; color:var(--text-muted); margin-top:6px;">من: المعاريف 👈 إلى: عين الذئاب</p>
+                    <button onclick="showToast('تم قبول الطلب بنجاح!')" class="btn btn-success" style="margin-top:10px; padding:8px; font-size:12px;">قبول الطلب 🛵</button>
                 </div>
             </div>
         </div>
 
-        <!-- 3. واجهة السائق -->
+        <!-- 3. واجهة السائق والمنفذ (شروط الانخراط وطرق الاشتراك) -->
         <div id="driver-tab" class="tab-content">
+            <!-- قسم طرق الاشتراك -->
             <div class="card">
-                <h2 class="card-title">📝 تسجيل سائق / منخرط جديد</h2>
-                <form onsubmit="event.preventDefault(); showToast('✅ تم تقديم الطلب بنجاح!');">
+                <h2 class="card-title">💳 طرق وباقات الاشتراك</h2>
+                <div class="plan-card highlight">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h4 style="font-size:14px; color:white;">الباقة الشهرية المباشرة</h4>
+                        <span style="color:var(--indrive-green); font-weight:800;">150 درهم / شهر</span>
+                    </div>
+                    <p style="font-size:11px; color:var(--text-muted); margin-top:4px;">استقبال عدد لا محدود من الطلبات بدون عمولة اقتطاعية.</p>
+                </div>
+                <div class="plan-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h4 style="font-size:14px; color:white;">نظام النسبة بالطلب</h4>
+                        <span style="color:var(--accent); font-weight:800;">10% لكل طلب</span>
+                    </div>
+                    <p style="font-size:11px; color:var(--text-muted); margin-top:4px;">شحن المحفظة الإلكترونية مسبقاً والاقتطاع التلقائي.</p>
+                </div>
+            </div>
+
+            <!-- قسم شروط الانخراط -->
+            <div class="card">
+                <h2 class="card-title">📋 شروط الانخراط والعمل</h2>
+                <ul class="conditions-list">
+                    <li>✔️ ألا يقل عمر المتقدم عن 18 سنة.</li>
+                    <li>✔️ توفر دراجة نارية أو وسيلة نقل بمفهوم قانوني.</li>
+                    <li>✔️ البطاقة الوطنية للتعريف (CIN) سارية المفعول.</li>
+                    <li>✔️ الالتزام بحسن المعاملة والأمانة مع الزبناء.</li>
+                </ul>
+            </div>
+
+            <!-- استمارة التسجيل -->
+            <div class="card">
+                <h2 class="card-title">📝 تسجيل الانخراط</h2>
+                <form onsubmit="event.preventDefault(); showToast('✅ تم تقديم طلبك وسيتم تفعيله بعد المراجعة!');">
                     <div class="field-group">
                         <label>الاسم الكامل</label>
                         <input type="text" required placeholder="الاسم الشخصي والعائلي">
                     </div>
                     <div class="field-group">
-                        <label>رقم الهاتف</label>
+                        <label>رقم الهاتف (واتساب)</label>
                         <input type="tel" required placeholder="06XXXXXXXX">
                     </div>
-                    <button type="submit" class="btn btn-primary">تأكيد التسجيل 📤</button>
+                    <div class="field-group">
+                        <label>اختر باقة الاشتراك</label>
+                        <select>
+                            <option>الباقة الشهرية (150 درهم)</option>
+                            <option>نظام الاقتطاع بالعمولة (10%)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">إرسال وثائق الانخراط 📤</button>
                 </form>
             </div>
         </div>
@@ -200,7 +275,7 @@
             </div>
         </div>
 
-        <!-- شريط التنقل السفلي -->
+        <!-- شريط التنقل السفلي المضمون -->
         <nav class="bottom-nav">
             <button class="nav-item active" data-tab="customer-tab" onclick="switchTab('customer-tab')">
                 <span>🏠</span> الرئيسية
@@ -227,23 +302,17 @@
             } catch(e) {}
         };
 
-        // دالة موحدة ومضمونة لتبديل الخانات
         function switchTab(tabId) {
-            // 1. إخفاء جميع الصفحات
-            const allTabs = document.querySelectorAll('.tab-content');
-            allTabs.forEach(tab => {
+            document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
             });
 
-            // 2. إظهار الصفحة المطلوبة
             const selectedTab = document.getElementById(tabId);
             if (selectedTab) {
                 selectedTab.classList.add('active');
             }
 
-            // 3. تحديث الأزرار المحددة (سواء العلوي أو السفلي)
-            const allBtns = document.querySelectorAll('.role-btn, .nav-item');
-            allBtns.forEach(btn => {
+            document.querySelectorAll('.role-btn, .nav-item').forEach(btn => {
                 if (btn.getAttribute('data-tab') === tabId) {
                     btn.classList.add('active');
                 } else {
@@ -251,7 +320,6 @@
                 }
             });
 
-            // إعادة توجيه الخريطة في حال الانتقال للرئيسية لضمان عدم حدوث تشوه
             if (tabId === 'customer-tab' && map) {
                 setTimeout(() => { map.invalidateSize(); }, 200);
             }
