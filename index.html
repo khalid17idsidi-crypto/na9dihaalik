@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نقضيها عليك - التطبيق الكامل</title>
+    <title>نقضيها عليك - المنصة الشاملة</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -16,6 +16,7 @@
             --accent: #00f2fe;
             --indrive-green: #10b981;
             --danger: #ff4757;
+            --warning: #ffa500;
             --bg: #070913;
             --card-bg: rgba(21, 26, 48, 0.85);
             --card-border: rgba(255, 255, 255, 0.1);
@@ -39,8 +40,8 @@
 
         .top-sub-bar { background: rgba(7, 9, 19, 0.9); padding: 10px 18px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-muted); border-bottom: 1px solid var(--card-border); }
 
-        .role-switcher { display: flex; background: #0b0e1b; padding: 6px; gap: 6px; margin: 10px 14px; border-radius: 14px; border: 1px solid var(--card-border); position: relative; z-index: 100; }
-        .role-btn { flex: 1; padding: 10px; border: none; background: transparent; color: var(--text-muted); font-weight: 700; font-size: 13px; border-radius: 10px; cursor: pointer; transition: all 0.3s; }
+        .role-switcher { display: flex; background: #0b0e1b; padding: 6px; gap: 4px; margin: 10px 14px; border-radius: 14px; border: 1px solid var(--card-border); position: relative; z-index: 100; overflow-x: auto; }
+        .role-btn { flex: 1; min-width: 80px; padding: 10px 6px; border: none; background: transparent; color: var(--text-muted); font-weight: 700; font-size: 12px; border-radius: 10px; cursor: pointer; transition: all 0.3s; text-align: center; white-space: nowrap; }
         .role-btn.active { background: linear-gradient(135deg, var(--primary), #ff793f); color: white; box-shadow: 0 4px 15px var(--primary-glow); }
         .admin-btn-tab { display: none; background: linear-gradient(135deg, #8e44ad, #9b59b6) !important; color: white !important; }
 
@@ -51,15 +52,19 @@
         .tab-content.active { display: block !important; }
 
         .card { background: var(--card-bg); padding: 18px; border-radius: 20px; border: 1px solid var(--card-border); margin-bottom: 16px; }
-        .card-title { font-size: 16px; font-weight: 800; margin-bottom: 14px; border-right: 4px solid var(--accent); padding-right: 10px; color: var(--text-main); }
+        .card-title { font-size: 15px; font-weight: 800; margin-bottom: 14px; border-right: 4px solid var(--accent); padding-right: 10px; color: var(--text-main); }
 
         #map { width: 100%; height: 200px; border-radius: 14px; border: 1px solid var(--card-border); margin-bottom: 14px; z-index: 1; }
 
         .field-group { margin-bottom: 14px; }
         .field-group label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 6px; color: var(--text-muted); }
         .field-group input, .field-group select, .field-group textarea { width: 100%; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 12px; background: rgba(7, 9, 19, 0.7); color: white; font-size: 13px; outline: none; }
-        .field-group textarea { resize: none; height: 70px; }
+        .field-group textarea { resize: none; height: 75px; }
         .field-group input[type="file"] { padding: 8px; font-size: 11px; background: rgba(255,255,255,0.03); }
+
+        .security-notice { background: rgba(255, 71, 87, 0.1); border: 1px solid var(--danger); padding: 12px; border-radius: 12px; margin-bottom: 14px; font-size: 11px; line-height: 1.6; color: #ff8a93; }
+        .checkbox-group { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 14px; font-size: 11px; color: var(--text-main); line-height: 1.5; }
+        .checkbox-group input { margin-top: 3px; accent-color: var(--primary); }
 
         .btn { width: 100%; padding: 13px; border: none; border-radius: 12px; font-size: 14px; font-weight: 800; cursor: pointer; transition: 0.3s; }
         .btn-primary { background: linear-gradient(135deg, var(--primary), #ff793f); color: white; }
@@ -76,11 +81,9 @@
 
         .cash-badge { display: inline-block; background: rgba(16, 185, 129, 0.2); border: 1px solid var(--indrive-green); color: var(--indrive-green); font-size: 11px; padding: 4px 8px; border-radius: 8px; font-weight: bold; margin-bottom: 12px; }
 
-        /* الرابط المشفر المحمي */
         .secure-link-box { background: rgba(0, 242, 254, 0.05); border: 1px dashed var(--accent); padding: 12px; border-radius: 12px; text-align: center; margin-top: 10px; }
         .secure-link { color: var(--accent); text-decoration: underline; font-size: 12px; font-weight: bold; cursor: pointer; word-break: break-all; }
 
-        /* نافذة الإيداع السرية Modal */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 999999; padding: 20px; }
         .modal-overlay.show { display: flex; }
         .modal-content { background: #0e1326; border: 1px solid var(--accent); border-radius: 20px; padding: 20px; width: 100%; max-width: 420px; text-align: right; }
@@ -93,9 +96,9 @@
         .order-card { background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); padding: 14px; border-radius: 14px; margin-bottom: 12px; }
 
         .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 520px; background: rgba(7, 9, 19, 0.98); display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid var(--card-border); z-index: 9999; }
-        .nav-item { color: var(--text-muted); font-size: 11px; text-align: center; cursor: pointer; border: none; background: transparent; flex: 1; outline: none; }
+        .nav-item { color: var(--text-muted); font-size: 10px; text-align: center; cursor: pointer; border: none; background: transparent; flex: 1; outline: none; }
         .nav-item.active { color: var(--accent); font-weight: bold; }
-        .nav-item span { font-size: 20px; display: block; margin-bottom: 2px; }
+        .nav-item span { font-size: 18px; display: block; margin-bottom: 2px; }
     </style>
 </head>
 <body>
@@ -152,7 +155,11 @@
 
         <div class="role-switcher">
             <button class="role-btn active" data-tab="customer-tab" onclick="switchTab('customer-tab')">الزبون</button>
+
             <button class="role-btn" data-tab="driver-tab" onclick="switchTab('driver-tab')">المنفذ / السائق</button>
+            <button class="role-btn" data-tab="driver-register-tab" onclick="switchTab('driver-register-tab')">طلب انضمام منفذ</button>
+            <button class="role-btn" data-tab="orders-history-tab" onclick="switchTab('orders-history-tab')">الطلبيات</button>
+            <button class="role-btn" data-tab="support-privacy-tab" onclick="switchTab('support-privacy-tab')">الدعم والخصوصية</button>
             <button class="role-btn admin-btn-tab" id="btnAdminTab" data-tab="admin-tab" onclick="switchTab('admin-tab')">🔑 الأدمن</button>
         </div>
 
@@ -160,22 +167,22 @@
             <span class="brand-logo">🛵</span>
             <div>
                 <h1 style="font-size: 19px; font-weight: 900;">نقضيها عليك</h1>
-                <span style="font-size: 11px; opacity: 0.95;">اضغط هنا للتنشيط السريع لوحة الأدمن</span>
+                <span style="font-size: 11px; opacity: 0.95;">أنقر هنا للتنشيط السريع لوحة التحكم الأدمن</span>
             </div>
         </header>
 
-        <!-- 1. واجهة الزبون (إعادة الخانات الكاملة) -->
+        <!-- 1. واجهة الزبون -->
         <div id="customer-tab" class="tab-content active">
             <div class="card">
-                <h2 class="card-title">طلب توصيل جديد</h2>
+                <h2 class="card-title">إنشاء طلب توصيل جديد</h2>
                 <div class="cash-badge">💵 نظام التعامل: الدفع كاش المباشر عند استلام الطلب</div>
                 
                 <div class="services-grid">
-                    <div class="service-option selected" id="srv-sweiqa" onclick="selectService('🛒 تسخير وسويقة', this)">
+                    <div class="service-option selected" onclick="selectService('🛒 تسخير وسويقة', this)">
                         <span style="font-size:26px; display:block;">🛒</span>
                         <p style="font-size:12px; font-weight:bold;">سويقة وتسخير</p>
                     </div>
-                    <div class="service-option" id="srv-docs" onclick="selectService('📄 توصيل وثائق', this)">
+                    <div class="service-option" onclick="selectService('📄 توصيل وثائق', this)">
                         <span style="font-size:26px; display:block;">📄</span>
                         <p style="font-size:12px; font-weight:bold;">وثائق وأوراق</p>
                     </div>
@@ -212,6 +219,17 @@
                     <div class="field-group">
                         <label>العرض السعري الموحد (أجرة التوصيل بالدرهم) *</label>
                         <input type="number" id="offeredPrice" required placeholder="مثال: 20">
+                    </div>
+
+                    <!-- التنبيه الأمني والموافقة الإجبارية للزبون -->
+                    <div class="security-notice">
+                        <b>⚠️ تنبيه أمني وحماية قانونية:</b>
+                        يمنع منعاً باتاً نقل المواد المحظورة أو المشبوهة. جميع بياناتك (الهاتف، العنوان، الهوية) مسجلة وسوف تُسلم <b>مباشرة للشرطة والجهات الأمنية المختصة</b> في حال وجود أي بلاغ أو مخالفة.
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="customerSecurityConsent" required>
+                        <label for="customerSecurityConsent">أوافق إجبارياً على شروط الاستخدام وأتحمل كامل المسؤولية القانونية عن محتوى الطلب وتزويد المصالح الأمنية ببياناتي عند اللزوم. *</label>
                     </div>
 
                     <button type="submit" class="btn btn-primary">إرسال الطلب الآن 🚀</button>
@@ -253,12 +271,116 @@
             </div>
         </div>
 
-        <!-- 3. واجهة الأدمن -->
+        <!-- 3. واجهة طريقة الاشتراك للمنفذ (التسجيل والوثائق) -->
+        <div id="driver-register-tab" class="tab-content">
+            <div class="card">
+                <h2 class="card-title" style="border-color: var(--warning);">📝 طريقة وخطوات الاشتراك كـ (منفذ / سائق)</h2>
+                
+                <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px; line-height:1.6;">
+                    للانضمام إلى فريق المنفذين في منصة "نقضيها عليك"، يرجى تعبئة البيانات التالية وإرفاق وثائقك الرسمية للتحقق والتفعيل:
+                </p>
+
+                <form onsubmit="handleDriverRegistration(event)">
+                    <div class="field-group">
+                        <label>الاسم الكامل *</label>
+                        <input type="text" required placeholder="الاسم الشخصي والعائلي">
+                    </div>
+
+                    <div class="field-group">
+                        <label>رقم الهاتف (الواتساب) *</label>
+                        <input type="tel" required placeholder="06XXXXXXXX">
+                    </div>
+
+                    <div class="field-group">
+                        <label>رقم البطاقة الوطنية (CIN) *</label>
+                        <input type="text" required placeholder="مثال: AB123456">
+                    </div>
+
+                    <div class="field-group">
+                        <label>نوع وسيلة النقل *</label>
+                        <select required>
+                            <option value="">اختر وسيلة النقل...</option>
+                            <option value="دراجة نارية">دراجة نارية (Moto)</option>
+                            <option value="دراجة هوائية">دراجة هوائية (Vélo)</option>
+                            <option value="سيارة">سيارة نفعية / صغيرة</option>
+                        </select>
+                    </div>
+
+                    <div class="field-group">
+                        <label>صورة البطاقة الوطنية (وجهين) *</label>
+                        <input type="file" required accept="image/*">
+                    </div>
+
+                    <div class="field-group">
+                        <label>صورة رخصة السياقة (Permis) *</label>
+                        <input type="file" required accept="image/*">
+                    </div>
+
+                    <div class="field-group">
+                        <label>صورة الورقة الرمادية (Carte Grise) *</label>
+                        <input type="file" required accept="image/*">
+                    </div>
+
+                    <!-- التنبيه الأمني والموافقة الإجبارية للمنفذ -->
+                    <div class="security-notice">
+                        <b>🚨 تنبيه أمني وإقرار مسؤولية إجباري:</b><br>
+                        تطبيق "نقضيها عليك" يلتزم بالكامل بالتعاون مع مصالح <b>الشرطة والأمن الوطني والدرك الملكي</b>. يتم تقديم وثائقك وبياناتك الشخصية وتتبع موقعك للجهات الأمنية فوراً عند طلبها أو في حال الشبهة أو ارتكاب أي مخالفة أو سرقة.
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="driverSecurityConsent" required>
+                        <label for="driverSecurityConsent">أقر وأوافق إجبارياً على منح التطبيق الحق المطلق في تقديم كامل وثائقي وبياناتي الشخصية للشرطة والجهات القضائية عند الحاجة. *</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-success">إرسال طلب الانضمام والوثائق 📤</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 4. واجهة الطلبيات والسجل -->
+        <div id="orders-history-tab" class="tab-content">
+            <div class="card">
+                <h2 class="card-title">📦 سجل طلباتي النشطة والسابقة</h2>
+                <div id="userOrdersHistoryList">
+                    <p style="font-size:12px; color:var(--text-muted); text-align:center;">لا توجد طلبات جارية حالياً.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. واجهة الدعم والخصوصية والتنبيهات الأمنية -->
+        <div id="support-privacy-tab" class="tab-content">
+            <div class="card">
+                <h2 class="card-title" style="border-color: var(--accent);">🎧 الدعم الفني وخدمة العملاء</h2>
+                <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">نحن هنا لخدمتك 24/7 لمساعدتك في أي مشكلة أو استفسار:</p>
+                
+                <a href="https://wa.me/212600000000" target="_blank" class="btn btn-success" style="text-decoration:none; display:block; text-align:center; margin-bottom:10px;">
+                    💬 التواصل المباشر عبر الواتساب
+                </a>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title" style="border-color: var(--danger);">🛡️ سياسة الخصوصية والتنبيهات الأمنية</h2>
+                <div style="font-size:11px; color:var(--text-muted); line-height:1.7;">
+                    <p style="margin-bottom:8px;">• <b>حماية البيانات:</b> نقوم بتشفير بيانات المستخدم والمنفذ لحمايتها من أي اختراق خارجي.</p>
+                    <p style="margin-bottom:8px;">• <b>التعاون مع السلطات الأمنية:</b> بموجب القوانين الجاري بها العمل، يلتزم التطبيق بتقديم كل البيانات الشخصية والموقعية للشرطة والأجهزة الأمنية القضائية دون إشعار مسبق عند وجود طلب رسمي أو تحقيق في جريمة/مخالفة.</p>
+                    <p>• <b>منع المواد المحظورة:</b> يمنع استخدام منصتنا لنقل أي مواد مخالفة للقانون تحت طائلة المتابعة القضائية المباشرة.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. واجهة الأدمن -->
         <div id="admin-tab" class="tab-content">
             <div class="card">
                 <h2 class="card-title" style="color: #a78bfa;">💳 طلبات شحن المحافظ (CIH)</h2>
                 <div id="adminDepositRequests">
                     <p style="font-size:12px; color:var(--text-muted);">لا توجد طلبات شحن معلقة حالياً.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title" style="color: #a78bfa;">📑 طلبات انضمام المنفذين والوثائق</h2>
+                <div id="adminDriverApplications">
+                    <p style="font-size:12px; color:var(--text-muted);">لا توجد طلبات انضمام معلقة.</p>
                 </div>
             </div>
 
@@ -276,6 +398,12 @@
             </button>
             <button class="nav-item" id="nav-driver" onclick="switchTab('driver-tab')">
                 <span>🛵</span> السائق
+            </button>
+            <button class="nav-item" id="nav-orders" onclick="switchTab('orders-history-tab')">
+                <span>📦</span> طلباتي
+            </button>
+            <button class="nav-item" id="nav-support" onclick="switchTab('support-privacy-tab')">
+                <span>🛡️</span> الخصوصية
             </button>
         </nav>
     </div>
@@ -304,6 +432,8 @@
 
             if (tabId === 'customer-tab') document.getElementById('nav-customer').classList.add('active');
             if (tabId === 'driver-tab') document.getElementById('nav-driver').classList.add('active');
+            if (tabId === 'orders-history-tab') document.getElementById('nav-orders').classList.add('active');
+            if (tabId === 'support-privacy-tab') document.getElementById('nav-support').classList.add('active');
         }
 
         function selectService(name, elem) {
@@ -312,13 +442,8 @@
             document.getElementById('selectedServiceInput').value = name;
         }
 
-        function openDepositModal() {
-            document.getElementById('depositModal').classList.add('show');
-        }
-
-        function closeDepositModal() {
-            document.getElementById('depositModal').classList.remove('show');
-        }
+        function openDepositModal() { document.getElementById('depositModal').classList.add('show'); }
+        function closeDepositModal() { document.getElementById('depositModal').classList.remove('show'); }
 
         function copyRIB() {
             const ribText = document.getElementById('cihRib').innerText.replace(/\s+/g, '');
@@ -355,11 +480,16 @@
             const price = document.getElementById('offeredPrice').value;
 
             const ordersContainer = document.getElementById('availableOrdersList');
-            if (activeOrdersCount === 0) ordersContainer.innerHTML = '';
+            const userHistoryContainer = document.getElementById('userOrdersHistoryList');
+
+            if (activeOrdersCount === 0) {
+                ordersContainer.innerHTML = '';
+                userHistoryContainer.innerHTML = '';
+            }
             activeOrdersCount++;
 
             const orderId = 'ord_' + Date.now();
-            ordersContainer.innerHTML += `
+            const orderHTML = `
                 <div class="order-card" id="${orderId}">
                     <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
                         <strong style="color:var(--accent); font-size:13px;">${service}</strong>
@@ -373,7 +503,10 @@
                 </div>
             `;
 
-            showToast('✅ تم نشر طلبك بنجاح! انتقل لواجهة المنفذ لرؤيته.');
+            ordersContainer.innerHTML += orderHTML;
+            userHistoryContainer.innerHTML += orderHTML;
+
+            showToast('✅ تم نشر طلبك والموافقة على التنبيه الأمني!');
             e.target.reset();
             document.getElementById('selectedServiceInput').value = '🛒 تسخير وسويقة';
         }
@@ -387,17 +520,14 @@
                 return;
             }
 
-            // خصم عمولة المنصة (2 درهم)
             balanceEl.innerText = (currentBalance - 2) + ' د.م';
 
-            // تحديث الأرباح وعدد الطلبات
             let countEl = document.getElementById('driverOrdersCount');
             countEl.innerText = parseInt(countEl.innerText) + 1;
 
             let earnEl = document.getElementById('driverEarnings');
             earnEl.innerText = (parseInt(earnEl.innerText) + parseInt(price)) + ' د.م';
 
-            // نقل الطلب للأدمن
             const orderEl = document.getElementById(orderId);
             const historyContainer = document.getElementById('adminOrdersHistory');
             if (historyContainer.innerHTML.includes('لم يتم إنهاء')) historyContainer.innerHTML = '';
@@ -409,8 +539,14 @@
                 </div>
             `;
 
-            orderEl.remove();
+            if (orderEl) orderEl.remove();
             showToast('🎉 تم قبول الطلب وخصم 2 درهم عمولة!');
+        }
+
+        function handleDriverRegistration(e) {
+            e.preventDefault();
+            showToast('📩 تم إرسال وثائقك وطلب الانضمام بنجاح لمراجعة الأدمن!');
+            e.target.reset();
         }
 
         function handleDepositSubmit(e) {
