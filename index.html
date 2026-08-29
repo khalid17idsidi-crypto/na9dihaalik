@@ -336,8 +336,8 @@
                 <div class="wallet-card">
                     <div style="font-size: 12px; color: var(--text-muted);">💰 رصيد المحفظة السحابية:</div>
                     <div class="wallet-balance"><span id="balanceAmount">100.00</span> درهم</div>
-
-
+                </div>
+            </div>
         </div>
 
         <!-- الأدمن -->
@@ -351,19 +351,13 @@
                     <tbody id="adminDriversTable"></tbody>
                 </table>
             </div>
-    
+        </div>
 
         <nav class="bottom-nav">
-    <button class="nav-item active" onclick="switchNavTab('customer-tab', this)"><span>🏠</span> الرئيسية</button>
-    <button class="nav-item" onclick="switchNavTab('orders-tab', this)"><span>⚡</span> الطلبيات</button>
-    <button class="nav-item" onclick="switchNavTab('driver-tab', this)"><span>🛵</span> السائق</button>
-</nav>
-                
-
-
-
-
-
+            <button class="nav-item active" onclick="switchNavTab('customer-tab', this)"><span>🏠</span> الرئيسية</button>
+            <button class="nav-item" onclick="switchNavTab('indrive-orders-tab', this)"><span>⚡</span> الطلبيات</button>
+            <button class="nav-item" onclick="switchNavTab('driver-tab', this)"><span>🛵</span> السائق</button>
+        </nav>
     </div>
 
     <script>
@@ -396,7 +390,7 @@
                     authenticatedUserEmail = user.email;
                     document.getElementById('currentUserEmailBadge').innerText = user.email;
                     document.getElementById('authModal').style.display = 'none';
-                    showToast(`🔐 تم تسجيل الدخول بـ: {user.email}`);
+                    showToast(`🔐 تم تسجيل الدخول بـ: ${user.email}`);
                     checkDriverRegisteredInDb(user.email);
                 } else {
                     authenticatedUserEmail = null;
@@ -458,15 +452,13 @@
 
         function initFirebaseListeners() {
             const db = window.FB_db;
-            const { collection, onSnapshot } = window;
 
-            onSnapshot(window.FB_collection(db, "orders"), (snapshot) => {
+            window.FB_onSnapshot(window.FB_collection(db, "orders"), (snapshot) => {
                 let newOrdersList = [];
                 snapshot.forEach((doc) => {
                     newOrdersList.push({ id: doc.id, ...doc.data() });
                 });
 
-                // تفعيل الإشعار الصوتي الفوري (FCM Simulation) عند دخول طلب جديد للرادار
                 if (newOrdersList.length > lastKnownOrdersCount && lastKnownOrdersCount !== 0) {
                     playNotificationSound();
                     showToast("🚨 تنبيه فوري: وصل طلب توصيل جديد للرادار!");
@@ -476,7 +468,7 @@
                 refreshAppStates();
             });
 
-            onSnapshot(window.FB_collection(db, "drivers"), (snapshot) => {
+            window.FB_onSnapshot(window.FB_collection(db, "drivers"), (snapshot) => {
                 cloudDrivers = [];
                 snapshot.forEach((doc) => {
                     cloudDrivers.push({ id: doc.id, ...doc.data() });
@@ -485,7 +477,6 @@
             });
         }
 
-        // نظام التنبيه الصوتي الفوري للإشعارات
         function playNotificationSound() {
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -495,7 +486,7 @@
                 osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
                 osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15);
                 gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime += 0.4);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
                 osc.start();
@@ -515,243 +506,45 @@
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
             let p1 = L.latLng(33.5883, -7.6329);
-            let p2 = L.latLng(33.5500, -7.6500);
+            let p2 = L.latLng(33.5731, -7.5898);
 
-            pickupMarker = L.marker(p1, {draggable: true}).addTo(map);
-            dropMarker = L.marker(p2, {draggable: true}).addTo(map);
+            pickupMarker = L.marker(p1).addTo(map).bindPopup("🟢 نقطة الانطلاق");
+            dropMarker = L.marker(p2).addTo(map).bindPopup("🔴 نقطة الوصول");
 
             routingControl = L.Routing.control({
                 waypoints: [p1, p2],
-                routeWhileDragging: true,
                 createMarker: function() { return null; },
+                show: false,
                 addWaypoints: false
             }).addTo(map);
         }
 
-        async function handleCustomerOrderSubmit(e) {
-            e.preventDefault();
-            let service = document.getElementById('selectedServiceInput').value;
-            let name = document.getElementById('custName').value;
-            let phone = document.getElementById('custPhone').value;
-            let pickup = document.getElementById('custPickup').value;
-            let drop = document.getElementById('custDrop').value;
-            let priceText = document.getElementById('custPrice').value;
-            let trackerCode = "TRK-" + Math.floor(1000 + Math.random() * 9000);
-
-            let newOrder = {
-                service, name, phone, pickup, drop, priceText, trackerCode,
-                createdAt: new Date().toISOString(),
-                posX: Math.floor(Math.random() * 60) + 20,
-                posY: Math.floor(Math.random() * 60) + 20,
-                messages: []
-            };
-
-            try {
-                await window.FB_addDoc(window.FB_collection(window.FB_db, "orders"), newOrder);
-                showToast(`✅ تم إرسال الطلب وإشعار السائقين فورياً! الكود: ${trackerCode}`);
-                e.target.reset();
-            } catch (err) {
-                alert("خطأ في حفظ الطلب: " + err.message);
-            }
-        }
-
-        // رفع الصور سحابياً إلى Firebase Storage والحصول على روابط تحميل مباشرة
-        async function handleDriverRegister(e) {
-            e.preventDefault();
-            let name = document.getElementById('regFullName').value.trim();
-            let cin = document.getElementById('regCinNumber').value.trim();
-            let phone = document.getElementById('regPhone').value.trim();
-            let driverCode = "DSP-" + Math.floor(1000 + Math.random() * 9000);
-
-            let photoFile = document.getElementById('regPhoto').files[0];
-            let selfieFile = document.getElementById('regSelfieCin').files[0];
-            let docFile = document.getElementById('regOwnershipDoc').files[0];
-
-            let submitBtn = document.getElementById('uploadSubmitBtn');
-            submitBtn.innerText = "⏳ جاري رفع الصور إلى Firebase Storage...";
-            submitBtn.disabled = true;
-
-            try {
-                const storage = window.FB_storage;
-                const { ref, uploadBytes, getDownloadURL } = window;
-
-                // رفع الصورة الشخصية
-                let photoRef = ref(storage, `drivers_docs/${cin}_photo_${Date.now()}`);
-                await uploadBytes(photoRef, photoFile);
-                let photoUrl = await getDownloadURL(photoRef);
-
-                // رفع سيلفي البطاقة الوطنية
-                let selfieRef = ref(storage, `drivers_docs/${cin}_selfie_${Date.now()}`);
-                await uploadBytes(selfieRef, selfieFile);
-                let selfieUrl = await getDownloadURL(selfieRef);
-
-                // رفع وثيقة الملكية
-                let docRefStorage = ref(storage, `drivers_docs/${cin}_doc_${Date.now()}`);
-                await uploadBytes(docRefStorage, docFile);
-                let docUrl = await getDownloadURL(docRefStorage);
-
-                let newDriver = {
-                    code: driverCode, name, cin, phone, 
-                    email: authenticatedUserEmail || "driver@naqdiha.ma",
-                    photoUrl, selfieUrl, docUrl, 
-                    walletBalance: driverWalletBalance, status: "approved"
-                };
-
-                const docRef = await window.FB_addDoc(window.FB_collection(window.FB_db, "drivers"), newDriver);
-                currentDriverId = docRef.id;
-                localStorage.setItem('appDriverDocId', currentDriverId);
-                driverStatus = "approved";
-                localStorage.setItem('appDriverStatus', 'approved');
-                
-                showToast("✅ تم رفع الملفات سحابياً بنجاح وتفعيل الحساب!");
-                renderDriverUI();
-            } catch (err) {
-                alert("خطأ في الرفع السحابي (تأكد من إعدادات قواعد Firebase Storage): " + err.message);
-                submitBtn.innerText = "رفع الصور سحابياً وإتمام الانخراط 📤";
-                submitBtn.disabled = false;
-            }
+        function switchNavTab(tabId, btnElement) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.role-btn, .nav-item').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            if (btnElement) btnElement.classList.add('active');
         }
 
         function renderDriverUI() {
-            let container = document.getElementById('driverStatusContainer');
-            let regCard = document.getElementById('driverRegisterCard');
-            let activePanel = document.getElementById('driverActivePanel');
-
             if (driverStatus === 'approved') {
-                container.innerHTML = '<div style="background:rgba(16, 185, 129, 0.15); border:1px solid var(--indrive-green); color:var(--indrive-green); padding:12px; border-radius:12px; font-size:12px; font-weight:bold; text-align:center; margin-bottom:14px;">✅ الحساب ومحفظة الاشتراك السحابية نشطة مع تخزين سحابي للصور</div>';
-                regCard.style.display = 'none';
-                activePanel.style.display = 'block';
+                document.getElementById('driverRegisterCard').style.display = 'none';
+                document.getElementById('driverActivePanel').style.display = 'block';
+            } else {
+                document.getElementById('driverRegisterCard').style.display = 'block';
+                document.getElementById('driverActivePanel').style.display = 'none';
             }
         }
 
         function refreshAppStates() {
-            renderRadarAndOrders(cloudOrders);
-            renderAdminDrivers(cloudDrivers);
-        }
-
-        function renderRadarAndOrders(orders) {
-            let blipsContainer = document.getElementById('radarBlipsContainer');
-            let ordersList = document.getElementById('indriveOrdersList');
-            document.getElementById('ordersRadarCount').innerText = orders.length + " طلبيات";
-            blipsContainer.innerHTML = ''; ordersList.innerHTML = '';
-
-            if (orders.length === 0) {
-                ordersList.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted); font-size:12px;">📡 لا توجد طلبيات حالياً. بانتظار الطلبات الواردة...</div>';
-                return;
-            }
-
-            orders.forEach((ord) => {
-                let blip = document.createElement('div');
-                blip.className = 'radar-blip';
-                blip.style.left = (ord.posX || 50) + '%';
-                blip.style.top = (ord.posY || 50) + '%';
-                blipsContainer.appendChild(blip);
-
-                let card = document.createElement('div');
-                card.className = 'pro-order-card';
-                card.innerHTML = `
-                    <div class="order-top-bar">
-                        <span class="service-tag">${ord.service}</span>
-                        <span class="price-tag">💵 كاش</span>
-                    </div>
-                    <div style="font-size: 12px; margin-bottom: 10px; line-height: 1.7;">
-                        <div>🏷️ <strong>الكود:</strong> ${ord.trackerCode || 'N/A'}</div>
-                        <div>🟢 <strong>من:</strong> ${ord.pickup}</div>
-                        <div>🔴 <strong>إلى:</strong> ${ord.drop}</div>
-                        <div style="color:var(--indrive-green); font-size:12px; margin-top:4px;"><strong>${ord.priceText}</strong></div>
-                    </div>
-                    <button class="btn btn-success" style="padding:8px; font-size:11px;" onclick="acceptOrder('${ord.trackerCode}')">قبول الطلب وتنسيق التوصيل</button>
-                `;
-                ordersList.appendChild(card);
-            });
-        }
-
-        function acceptOrder(trackerCode) {
-            showToast(`✅ تم قبول الطلب (${trackerCode}). استعد لتنفيذ التوصيل!`);
-        }
-
-        function renderAdminDrivers(drivers) {
-            let tableBody = document.getElementById('adminDriversTable');
-            tableBody.innerHTML = '';
-
-            if (drivers.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--text-muted);">لا توجد بيانات مسجلة بعد</td></tr>';
-                return;
-            }
-
-            drivers.forEach(d => {
-                tableBody.innerHTML += `
-                    <tr>
-                        <td><strong style="color:var(--accent);">${d.email}</strong><br><span style="font-size:10px; color:var(--text-muted);">${d.code}</span></td>
-                        <td>
-                            <div style="margin-bottom:4px;"><strong>${d.name}</strong></div>
-                            <a href="${d.photoUrl}" target="_blank"><img src="${d.photoUrl}" class="doc-preview-img" title="صورة البروفايل السحابية"></a>
-                            <a href="${d.selfieUrl}" target="_blank"><img src="${d.selfieUrl}" class="doc-preview-img" title="سيلفي البطاقة"></a>
-                            <a href="${d.docUrl}" target="_blank"><img src="${d.docUrl}" class="doc-preview-img" title="وثيقة الملكية"></a>
-                        </td>
-                        <td style="color:var(--indrive-green); font-weight:bold;">${d.walletBalance || 100} درهم</td>
-                    </tr>`;
-            });
-        }
-
-        function selectService(name, el) {
-            document.querySelectorAll('.service-option').forEach(s => s.classList.remove('selected'));
-            el.classList.add('selected');
-            document.getElementById('selectedServiceInput').value = name;
+            document.getElementById('ordersRadarCount').innerText = `${cloudOrders.length} طلبيات`;
         }
 
         function handleSecretAdminClick() {
-            document.getElementById('btnAdminTab').style.display = 'block';
-            switchNavTab('admin-tab', document.getElementById('btnAdminTab'));
-            showToast('🔓 تم فتح لوحة الأدمن الخاصة!');
-        }
-
-        function switchNavTab(id, btn) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
-
-            document.getElementById(id).classList.add('active');
-            if (btn) btn.classList.add('active');
-            if (id === 'customer-tab' && map) setTimeout(() => map.invalidateSize(), 200);
-        }
-            <!-- نافذة الشروط القانونية وسياسة الخصوصية -->
-    <div class="legal-modal-overlay" id="legalModal" style="display: none;">
-        <div class="legal-box">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border); padding-bottom: 10px; margin-bottom: 12px;">
-                <h3 style="color: var(--accent); font-size: 15px;">⚖️ الشروط القانونية وسياسة الخصوصية</h3>
-                <button onclick="closeLegalModal()" style="background:none; border:none; color:white; font-size:16px; cursor:pointer;">✕</button>
-            </div>
-            <div class="legal-content">
-                <h4>1. سياسة الخصوصية وحماية البيانات</h4>
-                <p>نحن في منصة "نقضيها عليك" نحترم خصوصيتك ونلتزم بحماية بياناتك الشخصية (الاسم، الهاتف، العنوان، وصور وثائق السائقين). تُستخدم هذه البيانات حصرياً لتسهيل وتأمين عمليات التوصيل والتحقق من الهوية، ولا يتم مشاركتها أو بيعها لأي جهة تجارية خارجية.</p>
-                
-                <h4>2. شروط الخدمة والمسؤولية</h4>
-                <p>المنصة تعتبر وسيطاً تقنياً يربط بين الزبون والسائق المنفذ. نحن لا نتحمل أي مسؤولية قانونية عن محتويات الطرود المرسلة أو أي نزاعات تنشأ مباشرة بين الطرفين خارج نطاق الضوابط التقنية للمنصة.</p>
-
-                <h4>3. التنبيهات الأمنية والتعاون مع السلطات</h4>
-                <p>جميع العمليات، أرقام الهواتف، وبيانات البطاقات الوطنية (CIN) مسجلة ومؤمنة سحابياً. تنص قوانين المنصة صراحة على <strong>التعاون التام والمشاركة الفورية للبيانات مع السلطات الأمنية والشرطة</strong> في حال تلقي أي بلاغ أو الاشتباه في أي نشاط غير قانوني، احتيالي، أو مخالف للقوانين الجاري بها العمل.</p>
-            </div>
-            <button onclick="closeLegalModal()" class="btn btn-primary" style="margin-top: 14px; padding: 10px; font-size: 12px;">فهمت ووافقـت ✓</button>
-        </div>
-    </div>
-
-    <!-- زر عرض الشروط القانونية في أسفل التطبيق -->
-    <div style="text-align: center; margin: 15px 0;">
-        <button onclick="openLegalModal()" style="background: none; border: none; color: var(--text-muted); font-size: 10px; text-decoration: underline; cursor: pointer;">سياسة الخصوصية والشروط الأمنية والقانونية</button>
-    </div>
-
-        <script>
-        function openLegalModal() {
-            document.getElementById('legalModal').style.display = 'flex';
-        }
-        function closeLegalModal() {
-            document.getElementById('legalModal').style.display = 'none';
+            let btn = document.getElementById('btnAdminTab');
+            btn.style.display = btn.style.display === 'block' ? 'none' : 'block';
         }
     </script>
-
 </body>
 </html>
-
-
-
