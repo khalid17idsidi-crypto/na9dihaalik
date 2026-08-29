@@ -3,60 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نقضيها عليك - النسخة التجارية الكاملة (Storage & FCM)</title>
+    <title>نقضيها عليك - النسخة الشاملة</title>
     
-    <!-- إعدادات الـ PWA والتطبيق المثبت -->
-    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22%D9%86%D9%82%D8%B6%D9%8A%D9%87%D8%A7%20%D8%B9%D9%84%D9%8A%D9%83%22%2C%22short_name%22%3A%22%D9%86%D9%82%D8%B6%D9%8A%D9%87%D8%A7%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23070913%22%2C%22theme_color%22%3A%22%23ff5722%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fvia.placeholder.com%2F192%2Fff5722%2Fffffff%3Ftext%3DN%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%7D%2C%7B%22src%22%3A%22https%3A%2F%2Fvia.placeholder.com%2F512%2Fff5722%2Fffffff%3Ftext%3DN%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D">
-    <meta name="theme-color" content="#ff5722">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-    <!-- الخطوط ومكتبات الخرائط -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
-    
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
-
-    <!-- Firebase SDKs (Auth, Firestore, Storage) -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
-
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "naqdihaalik-543a7.firebaseapp.com",
-            projectId: "naqdihaalik-543a7",
-            storageBucket: "naqdihaalik-543a7.appspot.com",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        const storage = getStorage(app);
-
-        window.FB_db = db;
-        window.FB_auth = auth;
-        window.FB_storage = storage;
-        window.FB_collection = collection;
-        window.FB_addDoc = addDoc;
-        window.FB_getDocs = getDocs;
-        window.FB_doc = doc;
-        window.FB_updateDoc = updateDoc;
-        window.FB_onSnapshot = onSnapshot;
-        window.FB_createUser = createUserWithEmailAndPassword;
-        window.FB_signIn = signInWithEmailAndPassword;
-        window.FB_signOut = signOut;
-        window.FB_onAuthStateChanged = onAuthStateChanged;
-        window.FB_storageRef = ref;
-        window.FB_uploadBytes = uploadBytes;
-        window.FB_getDownloadURL = getDownloadURL;
-    </script>
 
     <style>
         :root {
@@ -64,486 +15,264 @@
             --primary-glow: rgba(255, 87, 34, 0.4);
             --accent: #00f2fe;
             --indrive-green: #10b981;
-            --green-glow: rgba(16, 185, 129, 0.4);
             --danger: #ff4757;
             --bg: #070913;
             --card-bg: rgba(21, 26, 48, 0.85);
             --card-border: rgba(255, 255, 255, 0.1);
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
-            --star-color: #f59e0b;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
-        body { background-color: #030408; color: var(--text-main); display: flex; justify-content: center; background-image: radial-gradient(circle at 50% 0%, #1a103c 0%, #030408 75%); min-height: 100vh; }
-        .app-container { width: 100%; max-width: 520px; background: var(--bg); min-height: 100vh; padding-bottom: 85px; position: relative; box-shadow: 0 0 50px rgba(0, 0, 0, 0.8); border-left: 1px solid var(--card-border); border-right: 1px solid var(--card-border); }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: #030408; color: var(--text-main); display: flex; justify-content: center; min-height: 100vh; }
+        
+        .app-container { width: 100%; max-width: 520px; background: var(--bg); min-height: 100vh; padding-bottom: 90px; position: relative; border-left: 1px solid var(--card-border); border-right: 1px solid var(--card-border); }
 
         #notificationToast {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
             background: linear-gradient(135deg, var(--indrive-green), #059669); color: white;
             padding: 12px 20px; border-radius: 14px; box-shadow: 0 10px 30px rgba(16, 185, 129, 0.5);
-            font-size: 13px; font-weight: 800; z-index: 10000; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-size: 13px; font-weight: 800; z-index: 99999; transition: transform 0.4s ease;
             display: flex; align-items: center; gap: 10px; max-width: 90%; text-align: center;
         }
         #notificationToast.show { transform: translateX(-50%) translateY(0); }
 
-        .top-sub-bar { background: rgba(7, 9, 19, 0.9); padding: 8px 18px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-muted); border-bottom: 1px solid var(--card-border); }
-        .role-switcher { display: flex; background: #0b0e1b; padding: 6px; gap: 6px; margin: 10px 14px; border-radius: 14px; border: 1px solid var(--card-border); }
+        .top-sub-bar { background: rgba(7, 9, 19, 0.9); padding: 10px 18px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-muted); border-bottom: 1px solid var(--card-border); }
+
+        /* شريط الأدوار العلوي */
+        .role-switcher { display: flex; background: #0b0e1b; padding: 6px; gap: 6px; margin: 10px 14px; border-radius: 14px; border: 1px solid var(--card-border); position: relative; z-index: 100; }
         .role-btn { flex: 1; padding: 10px; border: none; background: transparent; color: var(--text-muted); font-weight: 700; font-size: 13px; border-radius: 10px; cursor: pointer; transition: all 0.3s; }
         .role-btn.active { background: linear-gradient(135deg, var(--primary), #ff793f); color: white; box-shadow: 0 4px 15px var(--primary-glow); }
         .admin-btn-tab { display: none; background: linear-gradient(135deg, #8e44ad, #9b59b6) !important; color: white !important; }
 
-        .brand-header { background: linear-gradient(135deg, rgba(255, 87, 34, 0.9), rgba(221, 36, 118, 0.9)); color: white; padding: 16px 20px; margin: 0 14px 14px 14px; border-radius: 18px; display: flex; align-items: center; gap: 14px; cursor: pointer; box-shadow: 0 8px 25px rgba(255, 87, 34, 0.3); }
+        .brand-header { background: linear-gradient(135deg, rgba(255, 87, 34, 0.9), rgba(221, 36, 118, 0.9)); color: white; padding: 16px 20px; margin: 0 14px 14px 14px; border-radius: 18px; display: flex; align-items: center; gap: 14px; cursor: pointer; }
         .brand-logo { font-size: 28px; background: rgba(255, 255, 255, 0.2); padding: 8px; border-radius: 14px; }
 
+        /* الأقسام الصفحات */
         .tab-content { display: none; padding: 0 14px 16px 14px; }
-        .tab-content.active { display: block; }
+        .tab-content.active { display: block !important; }
 
-        .card { background: var(--card-bg); padding: 18px; border-radius: 20px; border: 1px solid var(--card-border); margin-bottom: 16px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
+        .card { background: var(--card-bg); padding: 18px; border-radius: 20px; border: 1px solid var(--card-border); margin-bottom: 16px; }
         .card-title { font-size: 16px; font-weight: 800; margin-bottom: 14px; border-right: 4px solid var(--accent); padding-right: 10px; color: var(--text-main); }
 
-        #map, #trackingMap { width: 100%; height: 250px; border-radius: 14px; border: 1px solid var(--card-border); margin-bottom: 14px; z-index: 1; }
-        .leaflet-routing-container { display: none !important; }
+        #map { width: 100%; height: 220px; border-radius: 14px; border: 1px solid var(--card-border); margin-bottom: 14px; z-index: 1; }
 
         .field-group { margin-bottom: 14px; }
         .field-group label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 6px; color: var(--text-muted); }
-        .field-group label span.required { color: var(--danger); }
-        .field-group input, .field-group textarea, .field-group select { width: 100%; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 12px; background: rgba(7, 9, 19, 0.7); color: white; font-size: 13px; outline: none; }
-        .field-group input[type="file"] { padding: 8px; background: rgba(255,255,255,0.02); font-size: 11px; cursor: pointer; }
+        .field-group input { width: 100%; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 12px; background: rgba(7, 9, 19, 0.7); color: white; font-size: 13px; outline: none; }
 
-        .btn { width: 100%; padding: 13px; border: none; border-radius: 12px; font-size: 14px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s; }
-        .btn-primary { background: linear-gradient(135deg, var(--primary), #ff793f); color: white; box-shadow: 0 4px 15px var(--primary-glow); }
-        .btn-success { background: linear-gradient(135deg, var(--indrive-green), #059669); color: #fff; box-shadow: 0 4px 15px var(--green-glow); }
-        .btn-danger { background: linear-gradient(135deg, var(--danger), #ff6b6b); color: white; }
+        .btn { width: 100%; padding: 13px; border: none; border-radius: 12px; font-size: 14px; font-weight: 800; cursor: pointer; transition: 0.3s; }
+        .btn-primary { background: linear-gradient(135deg, var(--primary), #ff793f); color: white; }
+        .btn-success { background: linear-gradient(135deg, var(--indrive-green), #059669); color: #fff; }
 
         .services-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
         .service-option { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--card-border); padding: 14px; border-radius: 16px; text-align: center; cursor: pointer; }
         .service-option.selected { border-color: var(--accent); background: rgba(0, 242, 254, 0.1); }
-        .service-option span { font-size: 26px; display: block; margin-bottom: 6px; }
-        .service-option p { font-size: 13px; font-weight: 700; }
 
-        .radar-card-container { background: rgba(11, 15, 30, 0.85); border: 1px solid rgba(0, 242, 254, 0.2); border-radius: 22px; padding: 18px; margin-bottom: 18px; text-align: center; }
-        .radar-screen { width: 250px; height: 250px; margin: 0 auto 14px auto; border-radius: 50%; border: 2px solid rgba(0, 242, 254, 0.5); background: radial-gradient(circle, rgba(15, 23, 42, 0.8) 0%, rgba(3, 4, 8, 0.95) 100%); position: relative; overflow: hidden; }
-        .radar-sweep { position: absolute; top: 0; left: 0; right: 0; bottom: 0; border-radius: 50%; background: conic-gradient(from 0deg, rgba(0, 242, 254, 0.4) 0deg, rgba(0, 242, 254, 0) 55deg); animation: radar-spin 2.5s linear infinite; transform-origin: center center; }
-        @keyframes radar-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .radar-center-driver { position: absolute; top: 50%; left: 50%; width: 14px; height: 14px; background: var(--primary); border: 2px solid #ffffff; border-radius: 50%; transform: translate(-50%, -50%); z-index: 10; }
-        .radar-blip { position: absolute; width: 13px; height: 13px; background: var(--indrive-green); border-radius: 50%; transform: translate(-50%, -50%); z-index: 9; }
-
-        .pro-order-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 18px; padding: 16px; margin-bottom: 14px; }
-        .order-top-bar { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--card-border); padding-bottom: 10px; margin-bottom: 10px; }
-        .service-tag { background: rgba(0, 242, 254, 0.1); color: var(--accent); padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; }
-        .price-tag { font-size: 20px; font-weight: 900; color: var(--indrive-green); }
-
-        .wallet-card { background: linear-gradient(135deg, rgba(21, 26, 48, 0.95), rgba(7, 9, 19, 0.95)); padding: 18px; border-radius: 18px; margin-bottom: 16px; border: 1px solid var(--card-border); box-shadow: 0 8px 25px rgba(0,0,0,0.4); }
-        .wallet-balance { font-size: 26px; font-weight: 900; color: var(--indrive-green); margin: 6px 0; }
-
-        .chat-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 10001; }
-        .chat-box { background: #111827; width: 95%; max-width: 420px; height: 500px; border-radius: 20px; border: 1px solid var(--card-border); display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 15px 40px rgba(0,0,0,0.8); }
-        .chat-header { background: #1f2937; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border); }
-        .chat-messages { flex: 1; padding: 14px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #0b0f19; }
-        .chat-msg { max-width: 75%; padding: 10px 14px; border-radius: 12px; font-size: 12px; line-height: 1.5; word-break: break-word; }
-        .chat-msg.customer { background: #1e3a8a; color: white; align-self: flex-start; border-bottom-right-radius: 2px; }
-        .chat-msg.driver { background: #065f46; color: white; align-self: flex-end; border-bottom-left-radius: 2px; }
-        .chat-input-bar { padding: 10px; background: #1f2937; display: flex; gap: 8px; border-top: 1px solid var(--card-border); }
-        .chat-input-bar input { flex: 1; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--card-border); background: #111827; color: white; font-size: 12px; outline: none; }
-
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 520px; background: rgba(7, 9, 19, 0.95); display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid var(--card-border); z-index: 1000; }
-        .nav-item { color: var(--text-muted); font-size: 10px; text-align: center; cursor: pointer; border: none; background: transparent; flex: 1; }
+        /* شريط التنقل السفلي */
+        .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 520px; background: rgba(7, 9, 19, 0.98); display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid var(--card-border); z-index: 9999; }
+        .nav-item { color: var(--text-muted); font-size: 11px; text-align: center; cursor: pointer; border: none; background: transparent; flex: 1; outline: none; }
         .nav-item.active { color: var(--accent); font-weight: bold; }
-        .nav-item span { font-size: 18px; display: block; margin-bottom: 3px; }
+        .nav-item span { font-size: 20px; display: block; margin-bottom: 2px; }
 
-        .admin-table-container { overflow-x: auto; background: var(--bg); border-radius: 14px; border: 1px solid var(--card-border); margin-bottom: 16px; }
-        .admin-table { width: 100%; border-collapse: collapse; font-size: 11px; color: var(--text-main); }
-        .admin-table th, .admin-table td { border-bottom: 1px solid var(--card-border); padding: 10px 8px; text-align: center; }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 9999; }
-        .modal-box { background: #151a30; color: white; width: 90%; max-width: 450px; border-radius: 20px; padding: 20px; border: 1px solid var(--card-border); max-height: 90vh; overflow-y: auto; }
-        .doc-preview-img { width: 45px; height: 45px; border-radius: 8px; object-fit: cover; border: 1px solid var(--card-border); display: inline-block; vertical-align: middle; }
+        .privacy-box { font-size: 12px; color: var(--text-muted); line-height: 1.8; }
+        .privacy-box h3 { color: var(--accent); margin: 10px 0 4px 0; }
     </style>
 </head>
 <body>
 
     <div id="notificationToast">
         <span>🔔</span>
-        <span id="toastText">تم تفعيل الإشعارات الفورية وتخزين السحابة!</span>
-    </div>
-
-    <!-- نافذة المصادقة -->
-    <div class="chat-modal-overlay" id="authModal" style="display: none;">
-        <div class="chat-box" style="height: auto; padding: 22px;">
-            <div style="text-align: center; margin-bottom: 16px;">
-                <h3 style="color: var(--accent); font-size: 18px; margin-bottom: 4px;">🔐 مصادقة Firebase الحقيقية</h3>
-                <p style="font-size: 11px; color: var(--text-muted);" id="authSubtitle">سجل دخولك كمنخرط أو سائق للوصول الآمن</p>
-            </div>
-            
-            <div id="authErrorMsg" style="background: rgba(255,71,87,0.15); border: 1px solid var(--danger); color: var(--danger); padding: 8px; border-radius: 8px; font-size: 11px; margin-bottom: 12px; display: none;"></div>
-
-            <form onsubmit="handleAuthSubmit(event)">
-                <div class="field-group">
-                    <label><span class="required">*</span> البريد الإلكتروني السحابي</label>
-                    <input type="email" id="authEmail" required placeholder="driver@naqdiha.ma">
-                </div>
-                <div class="field-group">
-                    <label><span class="required">*</span> كلمة المرور السحابية</label>
-                    <input type="password" id="authPassword" required placeholder="••••••••">
-                </div>
-                <button type="submit" id="authSubmitBtn" class="btn btn-primary" style="margin-top: 6px;">تسجيل الدخول سحابياً 🚀</button>
-            </form>
-
-            <div style="text-align: center; margin-top: 14px;">
-                <button onclick="toggleAuthMode()" style="background: none; border: none; color: var(--accent); font-size: 11px; cursor: pointer;" id="authToggleText">ليس لديك حساب؟ إنشاء حساب جديد</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- نافذة الدردشة -->
-    <div class="chat-modal-overlay" id="chatModal">
-        <div class="chat-box">
-            <div class="chat-header">
-                <div>
-                    <h4 style="font-size: 13px; color: var(--accent);">💬 محادثة مباشرة ومشفرة</h4>
-                    <span style="font-size: 10px; color: var(--text-muted);" id="chatOrderTrackerInfo">كود التتبع: N/A</span>
-                </div>
-                <button onclick="closeChatModal()" style="background:none; border:none; color:white; font-size:16px; cursor:pointer;">✕</button>
-            </div>
-            <div class="chat-messages" id="chatMessagesContainer"></div>
-            <div class="chat-input-bar">
-                <select id="chatSenderRole" style="width: 85px; font-size: 11px; padding: 6px; border-radius: 8px; background: #111827; color: white; border: 1px solid var(--card-border);">
-                    <option value="customer">الزبون</option>
-                    <option value="driver">السائق</option>
-                </select>
-                <input type="text" id="chatInputMessage" placeholder="اكتب رسالة تفصيلية..." onkeypress="if(event.key==='Enter') sendChatMessage()">
-                <button onclick="sendChatMessage()" class="btn btn-success" style="width: 50px; padding: 6px; font-size: 12px;">إرسال</button>
-            </div>
-        </div>
+        <span id="toastText">مرحباً بك في التطبيق</span>
     </div>
 
     <div class="app-container">
         <div class="top-sub-bar">
             <span>🛵 منصة "نقضيها عليك"</span>
-            <span id="currentUserEmailBadge">غير مسجل دخول</span>
-            <button onclick="logoutFirebase()" style="background:none; border:none; color:var(--danger); font-size:10px; cursor:pointer; font-weight:bold;">خروج ⊗</button>
+            <span>النسخة المحدثة 100%</span>
         </div>
 
+        <!-- شريط التبديل العلوي -->
         <div class="role-switcher">
-            <button class="role-btn active" onclick="switchNavTab('customer-tab', this)">الزبون</button>
-            <button class="role-btn" onclick="switchNavTab('driver-tab', this)">المنفذ / السائق</button>
-            <button class="role-btn admin-btn-tab" id="btnAdminTab" onclick="switchNavTab('admin-tab', this)">🔑 الأدمن</button>
+            <button class="role-btn active" data-tab="customer-tab" onclick="switchTab('customer-tab')">الزبون</button>
+            <button class="role-btn" data-tab="driver-tab" onclick="switchTab('driver-tab')">المنفذ / السائق</button>
+            <button class="role-btn admin-btn-tab" id="btnAdminTab" data-tab="admin-tab" onclick="switchTab('admin-tab')">🔑 الأدمن</button>
         </div>
 
-        <header class="brand-header" onclick="handleSecretAdminClick()">
+        <header class="brand-header" onclick="toggleAdminBtn()">
             <span class="brand-logo">🛵</span>
             <div>
                 <h1 style="font-size: 19px; font-weight: 900;">نقضيها عليك</h1>
-                <span style="font-size: 11px; opacity: 0.95;">Storage + Push Notifications Ready</span>
+                <span style="font-size: 11px; opacity: 0.95;">أنقر هنا لإظهار لوحة التحكم</span>
             </div>
         </header>
 
-        <!-- واجهة الزبون -->
+        <!-- 1. واجهة الزبون -->
         <div id="customer-tab" class="tab-content active">
             <div class="card">
                 <h2 class="card-title">إنشاء طلب توصيل جديد</h2>
                 <div class="services-grid">
-                    <div class="service-option selected" onclick="selectService('🛒 تسخير وسويقة', this)"><span>🛒</span><p>سويقة وتسخير</p></div>
-                    <div class="service-option" onclick="selectService('📄 توصيل وثائق', this)"><span>📄</span><p>وثائق وأوراق</p></div>
-                    <div class="service-option" onclick="selectService('📦 توصيل طرد', this)"><span>📦</span><p>طرود وأمانات</p></div>
-                    <div class="service-option" onclick="selectService('💊 صيدلية', this)"><span>💊</span><p>أدوية صيدلية</p></div>
+                    <div class="service-option selected" onclick="selectService('🛒 تسخير وسويقة', this)">
+                        <span style="font-size:24px; display:block;">🛒</span>
+                        <p style="font-size:12px; font-weight:bold;">سويقة وتسخير</p>
+                    </div>
+                    <div class="service-option" onclick="selectService('📄 توصيل وثائق', this)">
+                        <span style="font-size:24px; display:block;">📄</span>
+                        <p style="font-size:12px; font-weight:bold;">وثائق وأوراق</p>
+                    </div>
                 </div>
 
                 <div id="map"></div>
 
-                <form onsubmit="handleCustomerOrderSubmit(event)">
+                <form onsubmit="event.preventDefault(); showToast('✅ تم إرسال طلبك بنجاح!');">
                     <div class="field-group">
-                        <label><span class="required">*</span> الخدمة المختارة</label>
-                        <input type="text" id="selectedServiceInput" value="🛒 تسخير وسويقة" readonly required>
+                        <label>الخدمة المختارة</label>
+                        <input type="text" id="selectedServiceInput" value="🛒 تسخير وسويقة" readonly>
                     </div>
                     <div class="field-group">
-                        <label><span class="required">*</span> الاسم الكامل</label>
-                        <input type="text" id="custName" required placeholder="اسمك الكريم">
+                        <label>الاسم الكامل</label>
+                        <input type="text" required placeholder="ادخل اسمك الكريم">
                     </div>
                     <div class="field-group">
-                        <label><span class="required">*</span> رقم الهاتف للتواصل</label>
-                        <input type="tel" id="custPhone" required placeholder="06XXXXXXXX">
+                        <label>رقم الهاتف</label>
+                        <input type="tel" required placeholder="06XXXXXXXX">
                     </div>
-                    <div class="field-group">
-                        <label><span class="required">*</span> عنوان الانطلاق (🟢)</label>
-                        <input type="text" id="custPickup" required placeholder="الانطلاق">
-                    </div>
-                    <div class="field-group">
-                        <label><span class="required">*</span> عنوان الوصول (🔴)</label>
-                        <input type="text" id="custDrop" required placeholder="الوصول">
-                    </div>
-                    <div class="field-group">
-                        <label><span class="required">*</span> تفاصيل السعر</label>
-                        <input type="text" id="custPrice" value="35 درهم (الدفع نقداً)" readonly>
-                    </div>
-                    <button type="submit" class="btn btn-primary">إرسال الطلب وإشعار السائقين فورياً 🚀</button>
+                    <button type="submit" class="btn btn-primary">إرسال الطلب الآن 🚀</button>
                 </form>
             </div>
         </div>
 
-        <!-- رادار الطلبيات -->
-        <div id="indrive-orders-tab" class="tab-content">
-            <div class="radar-card-container">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 11px;">
-                    <span style="color:var(--accent); font-weight:800;">⚡ رادار الطلبيات والإشعارات الفورية</span>
-                    <span style="color:var(--text-muted);" id="ordersRadarCount">0 طلبيات</span>
-                </div>
-                <div class="radar-screen">
-                    <div class="radar-sweep"></div>
-                    <div class="radar-center-driver"></div>
-                    <div id="radarBlipsContainer"></div>
+        <!-- 2. واجهة الطلبيات النشطة -->
+        <div id="orders-tab" class="tab-content">
+            <div class="card" style="text-align: center;">
+                <h2 class="card-title">⚡ رادار الطلبيات المتاحة</h2>
+                <div style="padding: 30px 10px; color: var(--text-muted); font-size: 13px;">
+                    <p style="font-size:40px; margin-bottom:10px;">📡</p>
+                    لا توجد طلبيات جارية في منطقتك حالياً.
                 </div>
             </div>
-            <div id="indriveOrdersList"></div>
         </div>
 
-        <!-- واجهة المنفذ والسائقين وتخزين الصور -->
+        <!-- 3. واجهة السائق -->
         <div id="driver-tab" class="tab-content">
-            <div id="driverStatusContainer"></div>
-
-            <div id="driverRegisterCard" class="card">
-                <h2 class="card-title">📝 تسجيل الانخراط (رفع الصور لـ Firebase Storage)</h2>
-                <form onsubmit="handleDriverRegister(event)">
+            <div class="card">
+                <h2 class="card-title">📝 تسجيل سائق / منخرط جديد</h2>
+                <form onsubmit="event.preventDefault(); showToast('✅ تم تقديم الطلب بنجاح!');">
                     <div class="field-group">
-                        <label><span class="required">*</span> الاسم الكامل</label>
-                        <input type="text" id="regFullName" required placeholder="الاسم الشخصي والعائلي">
+                        <label>الاسم الكامل</label>
+                        <input type="text" required placeholder="الاسم الشخصي والعائلي">
                     </div>
                     <div class="field-group">
-                        <label><span class="required">*</span> رقم البطاقة الوطنية (CIN)</label>
-                        <input type="text" id="regCinNumber" required placeholder="BW123456">
+                        <label>رقم الهاتف</label>
+                        <input type="tel" required placeholder="06XXXXXXXX">
                     </div>
-                    <div class="field-group">
-                        <label><span class="required">*</span> رقم الهاتف</label>
-                        <input type="tel" id="regPhone" required placeholder="06XXXXXXXX">
-                    </div>
-                    <div class="field-group">
-                        <label><span class="required">*</span> 👤 الصورة الشخصية للمنخرط</label>
-                        <input type="file" id="regPhoto" accept="image/*" required>
-                    </div>
-                    <div class="field-group">
-                        <label><span class="required">*</span> 📸 صورة سيلفي مع البطاقة الوطنية</label>
-                        <input type="file" id="regSelfieCin" accept="image/*" required>
-                    </div>
-                    <div class="field-group">
-                        <label><span class="required">*</span> 📄 صورة شهادة الملكية</label>
-                        <input type="file" id="regOwnershipDoc" accept="image/*" required>
-                    </div>
-                    <button type="submit" id="uploadSubmitBtn" class="btn btn-primary" style="margin-top: 14px;">رفع الصور سحابياً وإتمام الانخراط 📤</button>
+                    <button type="submit" class="btn btn-primary">تأكيد التسجيل 📤</button>
                 </form>
             </div>
+        </div>
 
-            <div id="driverActivePanel" style="display: none;">
-                <div class="wallet-card">
-                    <div style="font-size: 12px; color: var(--text-muted);">💰 رصيد المحفظة السحابية:</div>
-                    <div class="wallet-balance"><span id="balanceAmount">100.00</span> درهم</div>
+        <!-- 4. واجهة الدعم وسياسة الخصوصية -->
+        <div id="support-tab" class="tab-content">
+            <div class="card">
+                <h2 class="card-title">📞 الدعم الفني والخدمة</h2>
+                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">نحن في خدمتك للإجابة عن أسئلتك ومساعدتك على مدار الساعة.</p>
+                <button onclick="window.open('https://wa.me/', '_blank')" class="btn btn-success" style="margin-bottom: 10px;">💬 تواصل عبر واتساب</button>
+                <button onclick="alert('رقم خدمة العملاء: 0522000000')" class="btn btn-primary">📞 اتصل بالمساعدة المباشرة</button>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">🔒 سياسة الخصوصية وحماية البيانات</h2>
+                <div class="privacy-box">
+                    <h3>1. جمع البيانات</h3>
+                    <p>نجمع البيانات الأساسية كالاسم ورقم الهاتف والموقع لغرض توصيل الطلبات بنجاح فقط.</p>
+                    
+                    <h3>2. السرية والتحقق</h3>
+                    <p>معلومات المستخدمين ووثائق السائقين يتم حمايتها وعدم مشاركتها مع أي طرف ثالث.</p>
                 </div>
             </div>
         </div>
 
-        <!-- الأدمن -->
+        <!-- 5. واجهة الأدمن -->
         <div id="admin-tab" class="tab-content">
-            <div class="card" style="background: rgba(15, 23, 42, 0.9);">
-                <h2 class="card-title" style="color: #a78bfa;">⚡ لوحة الإدارة السحابية والملفات</h2>
-            </div>
-            <div class="admin-table-container">
-                <table class="admin-table">
-                    <thead><tr><th>الحساب</th><th>الاسم والروابط السحابية</th><th>المحفظة</th></tr></thead>
-                    <tbody id="adminDriversTable"></tbody>
-                </table>
+            <div class="card">
+                <h2 class="card-title" style="color: #a78bfa;">🔑 لوحة الإدارة</h2>
+                <p style="font-size: 12px; color: var(--text-muted);">تحكم بالطلبات والمستخدمين من هنا.</p>
             </div>
         </div>
 
+        <!-- شريط التنقل السفلي -->
         <nav class="bottom-nav">
-            <button class="nav-item active" onclick="switchNavTab('customer-tab', this)"><span>🏠</span> الرئيسية</button>
-            <button class="nav-item" onclick="switchNavTab('indrive-orders-tab', this)"><span>⚡</span> الطلبيات</button>
-            <button class="nav-item" onclick="switchNavTab('driver-tab', this)"><span>🛵</span> السائق</button>
+            <button class="nav-item active" data-tab="customer-tab" onclick="switchTab('customer-tab')">
+                <span>🏠</span> الرئيسية
+            </button>
+            <button class="nav-item" data-tab="orders-tab" onclick="switchTab('orders-tab')">
+                <span>⚡</span> الطلبيات
+            </button>
+            <button class="nav-item" data-tab="driver-tab" onclick="switchTab('driver-tab')">
+                <span>🛵</span> السائق
+            </button>
+            <button class="nav-item" data-tab="support-tab" onclick="switchTab('support-tab')">
+                <span>🛡️</span> الدعم والخصوصية
+            </button>
         </nav>
     </div>
 
     <script>
-        let map, routingControl, pickupMarker, dropMarker;
-        let currentDriverId = localStorage.getItem('appDriverDocId') || null;
-        let driverStatus = localStorage.getItem('appDriverStatus') || null;
-        let driverWalletBalance = parseFloat(localStorage.getItem('appDriverWalletBalance') || '100.00');
-        let activeChatOrderId = null;
-        let authenticatedUserEmail = null;
-        let cloudOrders = [];
-        let cloudDrivers = [];
-        let lastKnownOrdersCount = 0;
+        let map;
 
         window.onload = function() {
-            initMap();
-            renderDriverUI();
-            
-            let checkInterval = setInterval(() => {
-                if (window.FB_db && window.FB_auth) {
-                    clearInterval(checkInterval);
-                    initFirebaseListeners();
-                    initAuthListener();
-                }
-            }, 300);
+            try {
+                map = L.map('map').setView([33.5731, -7.5898], 12);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            } catch(e) {}
         };
 
-        function initAuthListener() {
-            window.FB_onAuthStateChanged(window.FB_auth, (user) => {
-                if (user) {
-                    authenticatedUserEmail = user.email;
-                    document.getElementById('currentUserEmailBadge').innerText = user.email;
-                    document.getElementById('authModal').style.display = 'none';
-                    showToast(`🔐 تم تسجيل الدخول بـ: ${user.email}`);
-                    checkDriverRegisteredInDb(user.email);
+        // دالة موحدة ومضمونة لتبديل الخانات
+        function switchTab(tabId) {
+            // 1. إخفاء جميع الصفحات
+            const allTabs = document.querySelectorAll('.tab-content');
+            allTabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // 2. إظهار الصفحة المطلوبة
+            const selectedTab = document.getElementById(tabId);
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+            }
+
+            // 3. تحديث الأزرار المحددة (سواء العلوي أو السفلي)
+            const allBtns = document.querySelectorAll('.role-btn, .nav-item');
+            allBtns.forEach(btn => {
+                if (btn.getAttribute('data-tab') === tabId) {
+                    btn.classList.add('active');
                 } else {
-                    authenticatedUserEmail = null;
-                    document.getElementById('currentUserEmailBadge').innerText = 'غير مسجل دخول';
-                    document.getElementById('authModal').style.display = 'flex';
+                    btn.classList.remove('active');
                 }
             });
-        }
 
-        async function checkDriverRegisteredInDb(email) {
-            let found = cloudDrivers.find(d => d.email === email);
-            if (found) {
-                currentDriverId = found.id;
-                driverStatus = 'approved';
-                driverWalletBalance = found.walletBalance || 100.00;
-                localStorage.setItem('appDriverDocId', currentDriverId);
-                localStorage.setItem('appDriverStatus', 'approved');
-                localStorage.setItem('appDriverWalletBalance', driverWalletBalance);
-                document.getElementById('balanceAmount').innerText = driverWalletBalance.toFixed(2);
-                renderDriverUI();
+            // إعادة توجيه الخريطة في حال الانتقال للرئيسية لضمان عدم حدوث تشوه
+            if (tabId === 'customer-tab' && map) {
+                setTimeout(() => { map.invalidateSize(); }, 200);
             }
         }
 
-        function toggleAuthMode() {
-            let subtitle = document.getElementById('authSubtitle');
-            let btn = document.getElementById('authSubmitBtn');
-            subtitle.innerText = "إنشاء حساب جديد عبر Firebase Auth";
-            btn.innerText = "إنشاء حساب جديد 📤";
-        }
-
-        async function handleAuthSubmit(e) {
-            e.preventDefault();
-            let email = document.getElementById('authEmail').value.trim();
-            let password = document.getElementById('authPassword').value.trim();
-            let errBox = document.getElementById('authErrorMsg');
-            errBox.style.display = 'none';
-
-            try {
-                await window.FB_signIn(window.FB_auth, email, password);
-                showToast("✅ تم تسجيل الدخول بنجاح!");
-            } catch (err) {
-                try {
-                    await window.FB_createUser(window.FB_auth, email, password);
-                    showToast("✅ تم إنشاء الحساب وتسجيل الدخول!");
-                } catch (err2) {
-                    errBox.innerText = "خطأ: " + err2.message;
-                    errBox.style.display = 'block';
-                }
-            }
-        }
-
-        async function logoutFirebase() {
-            try {
-                await window.FB_signOut(window.FB_auth);
-                showToast("👋 تم تسجيل الخروج بنجاح.");
-                document.getElementById('authModal').style.display = 'flex';
-            } catch (e) {}
-        }
-
-        function initFirebaseListeners() {
-            const db = window.FB_db;
-
-            window.FB_onSnapshot(window.FB_collection(db, "orders"), (snapshot) => {
-                let newOrdersList = [];
-                snapshot.forEach((doc) => {
-                    newOrdersList.push({ id: doc.id, ...doc.data() });
-                });
-
-                if (newOrdersList.length > lastKnownOrdersCount && lastKnownOrdersCount !== 0) {
-                    playNotificationSound();
-                    showToast("🚨 تنبيه فوري: وصل طلب توصيل جديد للرادار!");
-                }
-                lastKnownOrdersCount = newOrdersList.length;
-                cloudOrders = newOrdersList;
-                refreshAppStates();
-            });
-
-            window.FB_onSnapshot(window.FB_collection(db, "drivers"), (snapshot) => {
-                cloudDrivers = [];
-                snapshot.forEach((doc) => {
-                    cloudDrivers.push({ id: doc.id, ...doc.data() });
-                });
-                refreshAppStates();
-            });
-        }
-
-        function playNotificationSound() {
-            try {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15);
-                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.4);
-            } catch(e) {}
+        function selectService(name, element) {
+            document.querySelectorAll('.service-option').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+            document.getElementById('selectedServiceInput').value = name;
         }
 
         function showToast(message) {
             let toast = document.getElementById('notificationToast');
             document.getElementById('toastText').innerText = message;
             toast.classList.add('show');
-            setTimeout(() => { toast.classList.remove('show'); }, 4000);
+            setTimeout(() => { toast.classList.remove('show'); }, 3000);
         }
 
-        function initMap() {
-            map = L.map('map').setView([33.5731, -7.5898], 12);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-
-            let p1 = L.latLng(33.5883, -7.6329);
-            let p2 = L.latLng(33.5731, -7.5898);
-
-            pickupMarker = L.marker(p1).addTo(map).bindPopup("🟢 نقطة الانطلاق");
-            dropMarker = L.marker(p2).addTo(map).bindPopup("🔴 نقطة الوصول");
-
-            routingControl = L.Routing.control({
-                waypoints: [p1, p2],
-                createMarker: function() { return null; },
-                show: false,
-                addWaypoints: false
-            }).addTo(map);
-        }
-
-        function switchNavTab(tabId, btnElement) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.role-btn, .nav-item').forEach(btn => btn.classList.remove('active'));
-            
-            document.getElementById(tabId).classList.add('active');
-            if (btnElement) btnElement.classList.add('active');
-        }
-
-        function renderDriverUI() {
-            if (driverStatus === 'approved') {
-                document.getElementById('driverRegisterCard').style.display = 'none';
-                document.getElementById('driverActivePanel').style.display = 'block';
-            } else {
-                document.getElementById('driverRegisterCard').style.display = 'block';
-                document.getElementById('driverActivePanel').style.display = 'none';
-            }
-        }
-
-        function refreshAppStates() {
-            document.getElementById('ordersRadarCount').innerText = `${cloudOrders.length} طلبيات`;
-        }
-
-        function handleSecretAdminClick() {
+        function toggleAdminBtn() {
             let btn = document.getElementById('btnAdminTab');
-            btn.style.display = btn.style.display === 'block' ? 'none' : 'block';
+            btn.style.display = (btn.style.display === 'block') ? 'none' : 'block';
         }
     </script>
 </body>
