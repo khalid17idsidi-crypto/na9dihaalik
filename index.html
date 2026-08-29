@@ -396,7 +396,7 @@
                     authenticatedUserEmail = user.email;
                     document.getElementById('currentUserEmailBadge').innerText = user.email;
                     document.getElementById('authModal').style.display = 'none';
-                    showToast(`🔐 تم تسجيل الدخول بـ: ${user.email}`);
+                    showToast(`🔐 تم تسجيل الدخول بـ: {user.email}`);
                     checkDriverRegisteredInDb(user.email);
                 } else {
                     authenticatedUserEmail = null;
