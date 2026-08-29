@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نقضيها عليك - رابط الإيداع الآمن</title>
+    <title>نقضيها عليك - التطبيق الكامل</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -53,18 +53,18 @@
         .card { background: var(--card-bg); padding: 18px; border-radius: 20px; border: 1px solid var(--card-border); margin-bottom: 16px; }
         .card-title { font-size: 16px; font-weight: 800; margin-bottom: 14px; border-right: 4px solid var(--accent); padding-right: 10px; color: var(--text-main); }
 
-        #map { width: 100%; height: 220px; border-radius: 14px; border: 1px solid var(--card-border); margin-bottom: 14px; z-index: 1; }
+        #map { width: 100%; height: 200px; border-radius: 14px; border: 1px solid var(--card-border); margin-bottom: 14px; z-index: 1; }
 
         .field-group { margin-bottom: 14px; }
         .field-group label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 6px; color: var(--text-muted); }
-        .field-group input, .field-group select { width: 100%; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 12px; background: rgba(7, 9, 19, 0.7); color: white; font-size: 13px; outline: none; }
+        .field-group input, .field-group select, .field-group textarea { width: 100%; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 12px; background: rgba(7, 9, 19, 0.7); color: white; font-size: 13px; outline: none; }
+        .field-group textarea { resize: none; height: 70px; }
         .field-group input[type="file"] { padding: 8px; font-size: 11px; background: rgba(255,255,255,0.03); }
 
         .btn { width: 100%; padding: 13px; border: none; border-radius: 12px; font-size: 14px; font-weight: 800; cursor: pointer; transition: 0.3s; }
         .btn-primary { background: linear-gradient(135deg, var(--primary), #ff793f); color: white; }
         .btn-success { background: linear-gradient(135deg, var(--indrive-green), #059669); color: #fff; }
         .btn-danger { background: linear-gradient(135deg, var(--danger), #c0392b); color: #fff; }
-        .btn-action-group { display: flex; gap: 8px; margin-top: 10px; }
 
         .services-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
         .service-option { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--card-border); padding: 14px; border-radius: 16px; text-align: center; cursor: pointer; }
@@ -74,21 +74,23 @@
         .wallet-stat-box { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--card-border); padding: 12px; border-radius: 14px; text-align: center; }
         .wallet-stat-val { font-size: 16px; font-weight: 900; color: var(--accent); margin-top: 4px; }
 
-        .cash-badge { display: inline-block; background: rgba(16, 185, 129, 0.2); border: 1px solid var(--indrive-green); color: var(--indrive-green); font-size: 11px; padding: 4px 8px; border-radius: 8px; font-weight: bold; margin-bottom: 8px; }
+        .cash-badge { display: inline-block; background: rgba(16, 185, 129, 0.2); border: 1px solid var(--indrive-green); color: var(--indrive-green); font-size: 11px; padding: 4px 8px; border-radius: 8px; font-weight: bold; margin-bottom: 12px; }
 
         /* الرابط المشفر المحمي */
         .secure-link-box { background: rgba(0, 242, 254, 0.05); border: 1px dashed var(--accent); padding: 12px; border-radius: 12px; text-align: center; margin-top: 10px; }
         .secure-link { color: var(--accent); text-decoration: underline; font-size: 12px; font-weight: bold; cursor: pointer; word-break: break-all; }
 
-        /* نافذة الإيداع السرية (Modal) */
+        /* نافذة الإيداع السرية Modal */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 999999; padding: 20px; }
         .modal-overlay.show { display: flex; }
-        .modal-content { background: #0e1326; border: 1px solid var(--accent); border-radius: 20px; padding: 20px; width: 100%; max-width: 420px; text-align: right; position: relative; }
+        .modal-content { background: #0e1326; border: 1px solid var(--accent); border-radius: 20px; padding: 20px; width: 100%; max-width: 420px; text-align: right; }
         
         .rib-box { background: rgba(0, 0, 0, 0.4); border: 1px dashed var(--accent); padding: 14px; border-radius: 12px; font-size: 12px; color: var(--text-main); margin: 12px 0; line-height: 1.8; }
         .rib-code-wrapper { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 8px; margin: 8px 0; }
         .rib-code { font-family: monospace; font-size: 12px; font-weight: bold; color: #00f2fe; direction: ltr; word-break: break-all; }
         .btn-copy { background: rgba(0, 242, 254, 0.2); border: 1px solid var(--accent); color: white; padding: 4px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; }
+
+        .order-card { background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); padding: 14px; border-radius: 14px; margin-bottom: 12px; }
 
         .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 520px; background: rgba(7, 9, 19, 0.98); display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid var(--card-border); z-index: 9999; }
         .nav-item { color: var(--text-muted); font-size: 11px; text-align: center; cursor: pointer; border: none; background: transparent; flex: 1; outline: none; }
@@ -109,7 +111,7 @@
             <h3 style="color:white; font-size:16px; margin-bottom:4px; display:flex; align-items:center; gap:8px;">
                 <span>🔒</span> رابط الشحن البنكي المشفر
             </h3>
-            <p style="font-size:11px; color:var(--text-muted);">هذه البيانات سرية وخاصة بعمليات شحن المحفظة عبر CIH Bank</p>
+            <p style="font-size:11px; color:var(--text-muted);">بيانات سرية خاصة لشحن حساب المنفذ عبر CIH Bank</p>
 
             <div class="rib-box">
                 <strong>🏛️ الحساب البنكي الرسمي (CIH Bank):</strong>
@@ -122,6 +124,10 @@
             </div>
 
             <form onsubmit="handleDepositSubmit(event)">
+                <div class="field-group">
+                    <label>اسم المنفذ / السائق *</label>
+                    <input type="text" id="driverDepositName" required placeholder="أدخل اسمك الكامل">
+                </div>
                 <div class="field-group">
                     <label>المبلغ المحول (بالدرهم) *</label>
                     <input type="number" id="depositAmount" required min="30" placeholder="مثال: 50">
@@ -141,7 +147,7 @@
     <div class="app-container">
         <div class="top-sub-bar">
             <span>🛵 منصة "نقضيها عليك"</span>
-            <span>نظام الشحن والتحكم الإداري</span>
+            <span>الخدمة الذكية للتوصيل والتسخير</span>
         </div>
 
         <div class="role-switcher">
@@ -154,26 +160,62 @@
             <span class="brand-logo">🛵</span>
             <div>
                 <h1 style="font-size: 19px; font-weight: 900;">نقضيها عليك</h1>
-                <span style="font-size: 11px; opacity: 0.95;">أنقر هنا للتنشيط السريع للأدمن</span>
+                <span style="font-size: 11px; opacity: 0.95;">اضغط هنا للتنشيط السريع لوحة الأدمن</span>
             </div>
         </header>
 
-        <!-- 1. واجهة الزبون -->
+        <!-- 1. واجهة الزبون (إعادة الخانات الكاملة) -->
         <div id="customer-tab" class="tab-content active">
             <div class="card">
-                <h2 class="card-title">إنشاء طلب توصيل جديد</h2>
-                <div class="cash-badge">💵 نظام التعامل: أداء كاش المباشر عند استلام الطلب</div>
+                <h2 class="card-title">طلب توصيل جديد</h2>
+                <div class="cash-badge">💵 نظام التعامل: الدفع كاش المباشر عند استلام الطلب</div>
+                
                 <div class="services-grid">
-                    <div class="service-option selected" onclick="selectService('🛒 تسخير وسويقة', this)">
+                    <div class="service-option selected" id="srv-sweiqa" onclick="selectService('🛒 تسخير وسويقة', this)">
                         <span style="font-size:26px; display:block;">🛒</span>
                         <p style="font-size:12px; font-weight:bold;">سويقة وتسخير</p>
                     </div>
-                    <div class="service-option" onclick="selectService('📄 توصيل وثائق', this)">
+                    <div class="service-option" id="srv-docs" onclick="selectService('📄 توصيل وثائق', this)">
                         <span style="font-size:26px; display:block;">📄</span>
                         <p style="font-size:12px; font-weight:bold;">وثائق وأوراق</p>
                     </div>
                 </div>
+
                 <div id="map"></div>
+
+                <form onsubmit="handleCustomerOrder(event)">
+                    <div class="field-group">
+                        <label>نوع الخدمة المختارة</label>
+                        <input type="text" id="selectedServiceInput" value="🛒 تسخير وسويقة" readonly style="color:var(--accent); font-weight:bold;">
+                    </div>
+
+                    <div class="field-group">
+                        <label>عنوان الانطلاق (أين نأخذ الطلب؟) *</label>
+                        <input type="text" id="pickupAddress" required placeholder="مثال: الحي المحمدي، شارع فلسطين">
+                    </div>
+
+                    <div class="field-group">
+                        <label>عنوان التسليم (أين نوصل الطلب؟) *</label>
+                        <input type="text" id="deliveryAddress" required placeholder="مثال: المعاريف، قرب مقهى...">
+                    </div>
+
+                    <div class="field-group">
+                        <label>تفاصيل ووصف الطلب / المشتريات *</label>
+                        <textarea id="orderDescription" required placeholder="اكتب قائمة المشتريات أو الوثائق المطلوبة بدقة..."></textarea>
+                    </div>
+
+                    <div class="field-group">
+                        <label>رقم الهاتف للتواصل *</label>
+                        <input type="tel" id="customerPhone" required placeholder="06XXXXXXXX">
+                    </div>
+
+                    <div class="field-group">
+                        <label>العرض السعري الموحد (أجرة التوصيل بالدرهم) *</label>
+                        <input type="number" id="offeredPrice" required placeholder="مثال: 20">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">إرسال الطلب الآن 🚀</button>
+                </form>
             </div>
         </div>
 
@@ -188,11 +230,11 @@
                     </div>
                     <div class="wallet-stat-box">
                         <span style="font-size:10px; color:var(--text-muted); display:block;">طلبات اليوم</span>
-                        <div class="wallet-stat-val" style="color:var(--accent);">4</div>
+                        <div class="wallet-stat-val" id="driverOrdersCount" style="color:var(--accent);">0</div>
                     </div>
                     <div class="wallet-stat-box">
                         <span style="font-size:10px; color:var(--text-muted); display:block;">أرباحك (كاش)</span>
-                        <div class="wallet-stat-val" style="color:#ffd700;">140 د.م</div>
+                        <div class="wallet-stat-val" id="driverEarnings" style="color:#ffd700;">0 د.م</div>
                     </div>
                 </div>
 
@@ -202,6 +244,13 @@
                     <a class="secure-link" onclick="openDepositModal()">https://secure.pay.link/cih-deposit</a>
                 </div>
             </div>
+
+            <div class="card">
+                <h2 class="card-title">📢 الطلبات المتاحة القريبة منك</h2>
+                <div id="availableOrdersList">
+                    <p style="font-size:12px; color:var(--text-muted); text-align:center;">لا توجد طلبات جديدة حالياً. أنشئ طلباً من واجهة الزبون للتجربة.</p>
+                </div>
+            </div>
         </div>
 
         <!-- 3. واجهة الأدمن -->
@@ -209,16 +258,23 @@
             <div class="card">
                 <h2 class="card-title" style="color: #a78bfa;">💳 طلبات شحن المحافظ (CIH)</h2>
                 <div id="adminDepositRequests">
-                    <p style="font-size:12px; color:var(--text-muted);">لا توجد طلبات معلقة حالياً.</p>
+                    <p style="font-size:12px; color:var(--text-muted);">لا توجد طلبات شحن معلقة حالياً.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title" style="color: #a78bfa;">📊 السجل العام للطلبات المنفذة</h2>
+                <div id="adminOrdersHistory">
+                    <p style="font-size:12px; color:var(--text-muted);">لم يتم إنهاء أي طلبات بعد.</p>
                 </div>
             </div>
         </div>
 
         <nav class="bottom-nav">
-            <button class="nav-item active" data-tab="customer-tab" onclick="switchTab('customer-tab')">
+            <button class="nav-item active" id="nav-customer" onclick="switchTab('customer-tab')">
                 <span>🏠</span> الرئيسية
             </button>
-            <button class="nav-item" data-tab="driver-tab" onclick="switchTab('driver-tab')">
+            <button class="nav-item" id="nav-driver" onclick="switchTab('driver-tab')">
                 <span>🛵</span> السائق
             </button>
         </nav>
@@ -226,6 +282,7 @@
 
     <script>
         let map;
+        let activeOrdersCount = 0;
 
         window.onload = function() {
             try {
@@ -236,8 +293,23 @@
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+
             const selectedTab = document.getElementById(tabId);
             if (selectedTab) selectedTab.classList.add('active');
+
+            const activeBtn = document.querySelector(`.role-btn[data-tab="${tabId}"]`);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            if (tabId === 'customer-tab') document.getElementById('nav-customer').classList.add('active');
+            if (tabId === 'driver-tab') document.getElementById('nav-driver').classList.add('active');
+        }
+
+        function selectService(name, elem) {
+            document.querySelectorAll('.service-option').forEach(el => el.classList.remove('selected'));
+            elem.classList.add('selected');
+            document.getElementById('selectedServiceInput').value = name;
         }
 
         function openDepositModal() {
@@ -259,28 +331,106 @@
             let toast = document.getElementById('notificationToast');
             document.getElementById('toastText').innerText = message;
             toast.classList.add('show');
-            setTimeout(() => { toast.classList.remove('show'); }, 3000);
+            setTimeout(() => { toast.classList.remove('show'); }, 3500);
         }
 
         function toggleAdminBtn() {
             let btn = document.getElementById('btnAdminTab');
-            btn.style.display = (btn.style.display === 'block') ? 'none' : 'block';
+            if (btn.style.display === 'block') {
+                btn.style.display = 'none';
+                showToast('🔒 تم إخفاء تبويب الأدمن');
+            } else {
+                btn.style.display = 'block';
+                showToast('🔑 تم إظهار تبويب الأدمن!');
+            }
+        }
+
+        function handleCustomerOrder(e) {
+            e.preventDefault();
+            const service = document.getElementById('selectedServiceInput').value;
+            const pickup = document.getElementById('pickupAddress').value;
+            const delivery = document.getElementById('deliveryAddress').value;
+            const desc = document.getElementById('orderDescription').value;
+            const phone = document.getElementById('customerPhone').value;
+            const price = document.getElementById('offeredPrice').value;
+
+            const ordersContainer = document.getElementById('availableOrdersList');
+            if (activeOrdersCount === 0) ordersContainer.innerHTML = '';
+            activeOrdersCount++;
+
+            const orderId = 'ord_' + Date.now();
+            ordersContainer.innerHTML += `
+                <div class="order-card" id="${orderId}">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                        <strong style="color:var(--accent); font-size:13px;">${service}</strong>
+                        <span style="color:var(--indrive-green); font-weight:bold; font-size:13px;">${price} د.م (كاش)</span>
+                    </div>
+                    <p style="font-size:11px; color:var(--text-muted); margin-bottom:4px;">📍 <b>من:</b> ${pickup}</p>
+                    <p style="font-size:11px; color:var(--text-muted); margin-bottom:4px;">🎯 <b>إلى:</b> ${delivery}</p>
+                    <p style="font-size:11px; color:white; margin-bottom:4px;">📝 <b>التفاصيل:</b> ${desc}</p>
+                    <p style="font-size:11px; color:var(--text-muted); margin-bottom:8px;">📞 <b>الهاتف:</b> ${phone}</p>
+                    <button onclick="acceptOrder('${orderId}', ${price})" class="btn btn-success" style="padding:8px; font-size:12px;">قبول الطلب وتنفيذه ✅</button>
+                </div>
+            `;
+
+            showToast('✅ تم نشر طلبك بنجاح! انتقل لواجهة المنفذ لرؤيته.');
+            e.target.reset();
+            document.getElementById('selectedServiceInput').value = '🛒 تسخير وسويقة';
+        }
+
+        function acceptOrder(orderId, price) {
+            let balanceEl = document.getElementById('driverBalance');
+            let currentBalance = parseInt(balanceEl.innerText) || 0;
+
+            if (currentBalance < 2) {
+                showToast('⚠️ رصيدك أقل من العمولة (2 د.م). يرجى الشحن عبر الرابط المشفر!');
+                return;
+            }
+
+            // خصم عمولة المنصة (2 درهم)
+            balanceEl.innerText = (currentBalance - 2) + ' د.م';
+
+            // تحديث الأرباح وعدد الطلبات
+            let countEl = document.getElementById('driverOrdersCount');
+            countEl.innerText = parseInt(countEl.innerText) + 1;
+
+            let earnEl = document.getElementById('driverEarnings');
+            earnEl.innerText = (parseInt(earnEl.innerText) + parseInt(price)) + ' د.م';
+
+            // نقل الطلب للأدمن
+            const orderEl = document.getElementById(orderId);
+            const historyContainer = document.getElementById('adminOrdersHistory');
+            if (historyContainer.innerHTML.includes('لم يتم إنهاء')) historyContainer.innerHTML = '';
+            
+            historyContainer.innerHTML += `
+                <div class="order-card">
+                    <span style="font-size:11px; color:var(--indrive-green);">✅ مكتمل - عمولة 2 د.م</span>
+                    <p style="font-size:12px; font-weight:bold; color:white;">أجرة السائق: ${price} د.م</p>
+                </div>
+            `;
+
+            orderEl.remove();
+            showToast('🎉 تم قبول الطلب وخصم 2 درهم عمولة!');
         }
 
         function handleDepositSubmit(e) {
             e.preventDefault();
+            const driverName = document.getElementById('driverDepositName').value;
             const amount = document.getElementById('depositAmount').value;
             
             const adminDepContainer = document.getElementById('adminDepositRequests');
+            if (adminDepContainer.innerHTML.includes('لا توجد طلبات')) adminDepContainer.innerHTML = '';
+            
             const newId = 'dep_' + Date.now();
             adminDepContainer.innerHTML += `
-                <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:10px; margin-bottom:8px;" id="${newId}">
-                    <h4 style="font-size:12px; color:var(--accent);">💰 طلب شحن جديد (${amount} درهم)</h4>
-                    <button onclick="approveDeposit('${newId}', ${amount})" class="btn btn-success" style="padding:6px; font-size:11px; margin-top:6px;">تأكيد ✅</button>
+                <div style="background:rgba(255,255,255,0.03); border:1px solid var(--card-border); padding:10px; border-radius:10px; margin-bottom:8px;" id="${newId}">
+                    <h4 style="font-size:12px; color:var(--accent);">💰 طلب شحن: ${driverName} (${amount} درهم)</h4>
+                    <p style="font-size:10px; color:var(--text-muted);">تم الاستلام عبر رابط الإيداع المشفر</p>
+                    <button onclick="approveDeposit('${newId}', ${amount})" class="btn btn-success" style="padding:6px; font-size:11px; margin-top:6px;">تأكيد وشحن المحفظة ✅</button>
                 </div>
             `;
 
-            showToast('📩 تم إرسال طلبك عبر الرابط الآمن!');
+            showToast('📩 تم إرسال وصل الإيداع بنجاح للأدمن!');
             closeDepositModal();
             e.target.reset();
         }
@@ -290,7 +440,7 @@
             let balanceEl = document.getElementById('driverBalance');
             let currentBalance = parseInt(balanceEl.innerText) || 0;
             balanceEl.innerText = (currentBalance + parseInt(amount)) + ' د.م';
-            showToast(`💰 تم تفعيل الرصيد!`);
+            showToast(`💰 تم شحن محفظة السائق بـ ${amount} درهم!`);
         }
     </script>
 </body>
