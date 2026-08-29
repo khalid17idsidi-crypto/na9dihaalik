@@ -23,6 +23,7 @@
             --danger: #ef4444;
             --warning: #f59e0b;
             --info: #3b82f6;
+            --whatsapp: #25d366;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
@@ -34,7 +35,8 @@
         }
 
         /* الخريطة */
-        #map { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; }
+        #map { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; transition: opacity 0.3s; }
+        #map.hide-map { opacity: 0; pointer-events: none; }
 
         /* شريط التنقل العلوي */
         .main-nav {
@@ -55,7 +57,12 @@
             position: absolute; bottom: 0; left: 0; right: 0; z-index: 10;
             background: var(--card-bg); border-top-left-radius: 24px; border-top-right-radius: 24px;
             padding: 20px; box-shadow: 0 -10px 30px rgba(0,0,0,0.6); border-top: 1px solid var(--border);
-            max-height: 82vh; overflow-y: auto; transition: all 0.4s ease;
+            max-height: 85vh; overflow-y: auto; transition: all 0.4s ease;
+        }
+
+        .bottom-sheet.full-screen {
+            max-height: 90vh;
+            height: 90vh;
         }
 
         .sheet-handle { width: 40px; height: 4px; background: var(--text-muted); border-radius: 10px; margin: 0 auto 15px auto; opacity: 0.4; }
@@ -81,10 +88,6 @@
         .security-box {
             background: rgba(239, 68, 68, 0.1); border: 1px dashed var(--danger);
             padding: 10px; border-radius: 10px; font-size: 11px; color: #fca5a5; margin-bottom: 12px;
-        }
-        .info-box {
-            background: rgba(59, 130, 246, 0.1); border: 1px solid var(--info);
-            padding: 10px; border-radius: 10px; font-size: 11px; color: #93c5fd; margin-bottom: 12px;
         }
         .legal-checkbox { display: flex; align-items: flex-start; gap: 8px; margin-top: 6px; cursor: pointer; color: white; font-size: 10px; line-height: 1.4; }
 
@@ -121,7 +124,7 @@
 
         /* الرادار الاحترافي */
         .radar-box {
-            position: relative; width: 140px; height: 140px; margin: 15px auto; border-radius: 50%;
+            position: relative; width: 130px; height: 130px; margin: 10px auto; border-radius: 50%;
             border: 2px solid var(--primary); background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, rgba(15, 23, 42, 0.8) 80%);
             display: flex; align-items: center; justify-content: center; overflow: hidden;
         }
@@ -134,29 +137,36 @@
         .radar-dot { width: 8px; height: 8px; background: #fff; border-radius: 50%; box-shadow: 0 0 8px var(--primary); z-index: 2; }
 
         /* الشات الداخلي */
-        .chat-box { background: rgba(0,0,0,0.3); border-radius: 10px; padding: 10px; height: 130px; overflow-y: auto; margin-bottom: 10px; display: flex; flex-direction: column; gap: 6px; }
+        .chat-box { background: rgba(0,0,0,0.3); border-radius: 10px; padding: 10px; height: 110px; overflow-y: auto; margin-bottom: 10px; display: flex; flex-direction: column; gap: 6px; }
         .chat-msg { font-size: 11px; padding: 6px 10px; border-radius: 8px; max-width: 80%; }
         .chat-msg.client { background: var(--primary-dark); align-self: flex-end; color: white; }
         .chat-msg.driver { background: rgba(255,255,255,0.1); align-self: flex-start; color: white; }
 
-        .secure-link {
-            color: #60a5fa; text-decoration: underline; cursor: pointer; word-break: break-all; font-weight: 700; font-size: 11px;
+        .btn-whatsapp {
+            background: var(--whatsapp); color: white; border: none; padding: 8px 12px; border-radius: 8px;
+            font-weight: 700; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; margin-bottom: 8px; text-decoration: none;
         }
+
+        /* نظام التقييم */
+        .star-rating { display: flex; gap: 4px; font-size: 16px; cursor: pointer; color: #475569; margin: 4px 0; }
+        .star-rating .star.active { color: #f59e0b; }
+
+        .secure-link { color: #60a5fa; text-decoration: underline; cursor: pointer; word-break: break-all; font-weight: 700; font-size: 11px; }
     </style>
 </head>
 <body>
 
     <div class="app-container">
-        <!-- الخريطة -->
+        <!-- الخريطة (تخفى في واجهات معينة) -->
         <div id="map"></div>
 
         <!-- التنقل العلوي -->
         <nav class="main-nav">
             <button class="nav-btn active" onclick="switchMainView('clientView', this)">🙋‍♂️ الزبون</button>
             <button class="nav-btn" onclick="switchMainView('driverView', this)">🛵 المندوب</button>
-            <button class="nav-btn" onclick="switchMainView('ordersView', this)">📡 الرادار والطلبيات</button>
+            <button class="nav-btn" onclick="switchMainView('ordersView', this)">📡 الطلبيات والرادار</button>
             <button class="nav-btn" onclick="switchMainView('registerView', this)">📝 الانضمام</button>
-            <button class="nav-btn admin-btn" onclick="switchMainView('adminView', this)">⚙️ الأدمن</button>
+            <button class="nav-btn admin-btn" onclick="openAdminPanel(this)">⚙️ الأدمن</button>
         </nav>
 
         <!-- اللوحة السفلية -->
@@ -242,8 +252,14 @@
                     </p>
                 </div>
 
-                <h4 style="font-size: 12px; margin-bottom: 8px;">💬 المحادثة والتواصل الداخلي مع الزبون:</h4>
+                <!-- خيارات التواصل والتات -->
+                <h4 style="font-size: 12px; margin-bottom: 8px;">💬 التواصل المباشر مع الزبون:</h4>
+                <a href="https://wa.me/212600000000" target="_blank" class="btn-whatsapp">
+                    📲 التواصل المباشر عبر واتساب (WhatsApp)
+                </a>
+
                 <div class="card">
+                    <h5 style="font-size: 11px; margin-bottom: 6px; color: var(--text-muted);">المحادثة المكتوبة داخل التطبيق:</h5>
                     <div class="chat-box" id="chatBox">
                         <div class="chat-msg client">الزبون: السلام عليكم، في انتظار استلام الطرد.</div>
                         <div class="chat-msg driver">المندوب: وعليكم السلام، أنا في الطريق للمتجر الآن.</div>
@@ -253,28 +269,60 @@
                         <button class="quick-btn" style="background: var(--primary);" onclick="sendMessage()">إرسال 📤</button>
                     </div>
                 </div>
+
+                <!-- زر الوصول التام للمندوب -->
+                <div class="card" style="border-color: var(--primary);">
+                    <h4 style="font-size: 12px; margin-bottom: 6px;">🛵 إدارة الطلبية الحالية (#4829)</h4>
+                    <p style="font-size: 10px; color: var(--text-muted); margin-bottom: 8px;">عند تسليم الطرد للزبون بالكامل اضغط على زر التكفل والوصول:</p>
+                    <button class="btn-submit" style="background: var(--primary);" onclick="markComplete('4829')">✅ الوصول التام وإنهاء الطلبية</button>
+                </div>
+
+                <!-- نظام التقييم -->
+                <div class="card">
+                    <h4 style="font-size: 12px; margin-bottom: 4px;">⭐ تقييم الزبون</h4>
+                    <p style="font-size: 10px; color: var(--text-muted);">قيم تجربة التعامل مع الزبون بعد الانتهاء:</p>
+                    <div class="star-rating" onclick="rateUser(event)">
+                        <span class="star" data-value="1">★</span>
+                        <span class="star" data-value="2">★</span>
+                        <span class="star" data-value="3">★</span>
+                        <span class="star" data-value="4">★</span>
+                        <span class="star" data-value="5">★</span>
+                    </div>
+                </div>
             </div>
 
-            <!-- 3. واجهة الطلبيات والرادار -->
+            <!-- 3. واجهة الطلبيات والرادار (بدون خريطة) -->
             <div id="ordersView" class="view-panel">
                 <div class="radar-box">
                     <div class="radar-sweep"></div>
                     <div class="radar-dot"></div>
                 </div>
-                <p style="text-align: center; font-size: 11px; color: var(--text-muted); margin-bottom: 15px;">جاري البحث عن طلبيات قريبة منك عبر الرادار...</p>
+                <p style="text-align: center; font-size: 11px; color: var(--text-muted); margin-bottom: 15px;">جاري البث والتنقيب عن طلبيات قريبة منك عبر الرادار...</p>
 
-                <h4 style="font-size: 13px; margin-bottom: 10px;">📋 طلباتك الحالية وتتبعها:</h4>
+                <h4 style="font-size: 13px; margin-bottom: 10px;">📋 القائمة المباشرة للطلبيات المتاحة:</h4>
 
                 <div class="card">
-                    <div style="display: flex; justify-content: space-between;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
                         <b>طلب رقم: #4829 (نقل طرد)</b>
-                        <span class="badge badge-warning">قيد التوصيل 🛵</span>
+                        <span class="badge badge-warning" id="status-4829">قيد التوصيل 🛵</span>
                     </div>
                     <p style="font-size: 11px; color: var(--text-muted); margin-top: 5px;">الزبون: محمد أمين (0600000000)</p>
+                    <p style="font-size: 11px; color: var(--text-muted);">الرقم التتبعي: <b style="color: var(--info);">TRK-4829-MA</b></p>
                     <p style="font-size: 11px; color: var(--text-muted);">الأجرة: 35.00 درهم</p>
                     <div style="background: rgba(255,255,255,0.05); padding: 6px; border-radius: 6px; margin-top: 6px; font-size: 11px;">
                         رمز أمان الاستلام (OTP): <b style="color: var(--warning);">4921</b>
                     </div>
+                </div>
+
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <b>طلب رقم: #4830 (صيدلية)</b>
+                        <span class="badge badge-success">جديد 🟢</span>
+                    </div>
+                    <p style="font-size: 11px; color: var(--text-muted); margin-top: 5px;">الزبون: ياسين العبدلاوي</p>
+                    <p style="font-size: 11px; color: var(--text-muted);">الرقم التتبعي: <b style="color: var(--info);">TRK-4830-MA</b></p>
+                    <p style="font-size: 11px; color: var(--text-muted);">الأجرة: 30.00 درهم</p>
+                    <button class="quick-btn" style="background: var(--primary); width: 100%; margin-top: 6px;" onclick="alert('تم قبول الطلب بنجاح!')">قبول الطلب الآن ✋</button>
                 </div>
             </div>
 
@@ -324,9 +372,19 @@
                 <button class="btn-submit" id="submitDriverBtn" disabled onclick="alert('تم إرسال طلب الانضمام مكللاً بالنجاح! ستتم مراجعته من الإدارة.')">تقديم طلب الانضمام 📩</button>
             </div>
 
-            <!-- 5. لوحة تحكم الأدمن -->
+            <!-- 5. لوحة تحكم الأدمن الخاصّة (محمية برمز السر) -->
             <div id="adminView" class="view-panel">
                 <h3 style="font-size: 14px; color: var(--danger); margin-bottom: 12px;">⚙️ لوحة تحكم المدير (الأدمن)</h3>
+
+                <!-- تتبع الطلبيات الشامل -->
+                <div class="card">
+                    <h4 style="font-size: 12px; margin-bottom: 6px;">🔎 نظام تتبع الطلبيات الشامل</h4>
+                    <div style="background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; margin-bottom: 6px; font-size: 11px;">
+                        <b>الطلب: #4829</b> | التتبع: <span style="color: var(--info);">TRK-4829-MA</span><br>
+                        الزبون: محمد أمين | المندوب: خالد السعدي<br>
+                        الحالة: <b id="adminStatus-4829" style="color: var(--warning);">قيد التوصيل 🛵</b>
+                    </div>
+                </div>
 
                 <div class="card">
                     <h4 style="font-size: 12px; margin-bottom: 6px;">💵 تعديل تسعيرة التطبيق</h4>
@@ -365,16 +423,70 @@
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
         L.marker([33.5731, -7.5898]).addTo(map).bindPopup("🟢 موقعك الحقيقي").openPopup();
 
-        // 2. التنقل بين الواجهات
+        const mapElement = document.getElementById('map');
+        const bottomSheet = document.getElementById('bottomSheet');
+
+        // 2. التنقل بين الواجهات وإخفاء الخريطة عند الحاجة
         function switchMainView(viewId, btn) {
             document.querySelectorAll('.view-panel').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
 
             document.getElementById(viewId).classList.add('active');
             btn.classList.add('active');
+
+            // إخفاء الخريطة في واجهات الطلبيات والمندوب
+            if (viewId === 'ordersView' || viewId === 'driverView') {
+                mapElement.classList.add('hide-map');
+                bottomSheet.classList.add('full-screen');
+            } else {
+                mapElement.classList.remove('hide-map');
+                bottomSheet.classList.remove('full-screen');
+            }
         }
 
-        // 3. التحقق من نموذج الزبون (إلزامية الاسم، الصورة والتعهد)
+        // 3. فتح لوحة تحكم الأدمن بالكود الخاص (115460)
+        function openAdminPanel(btn) {
+            const pass = prompt("🔐 أدخل كود الوصول الخاص بالأدمن:");
+            if (pass === "115460") {
+                switchMainView('adminView', btn);
+            } else if (pass !== null) {
+                alert("❌ كود الوصول غير صحيح!");
+            }
+        }
+
+        // 4. تفعيل الوصول التام وتحديث الحالة لدى الأدمن والمندوب
+        function markComplete(orderId) {
+            alert('✅ تم إنهاء الطلبية بنجاح وتوثيق الوصول التام!');
+            const statusBadge = document.getElementById('status-' + orderId);
+            const adminStatus = document.getElementById('adminStatus-' + orderId);
+            
+            if (statusBadge) {
+                statusBadge.className = "badge badge-success";
+                statusBadge.innerText = "الوصول التام ✅";
+            }
+            if (adminStatus) {
+                adminStatus.style.color = "var(--primary)";
+                adminStatus.innerText = "الوصول التام مكتمل ✅";
+            }
+        }
+
+        // 5. نظام التقييم بالنظام التفاعلي (نجوم)
+        function rateUser(e) {
+            if (e.target.classList.contains('star')) {
+                const val = e.target.getAttribute('data-value');
+                const stars = e.currentTarget.querySelectorAll('.star');
+                stars.forEach((star, index) => {
+                    if (index < val) {
+                        star.classList.add('active');
+                    } else {
+                        star.classList.remove('active');
+                    }
+                });
+                alert('تم تسجيل التقييم بـ ' + val + ' نجوم بنجاح! ⭐');
+            }
+        }
+
+        // 6. التحقق من نموذج الزبون
         let clientImageUploaded = false;
         function handleClientImage(input) {
             if (input.files && input.files[0]) {
@@ -399,7 +511,7 @@
             submitBtn.disabled = !(name && phone && clientImageUploaded && agree);
         }
 
-        // 4. إدارة الأجرة ابتداءً من 30 درهم
+        // 7. التحكم في الأجرة
         function checkMinFare(input) {
             if (parseInt(input.value) < 30 || !input.value) {
                 input.value = 30;
@@ -411,7 +523,7 @@
             input.value = Math.max(30, current + amount);
         }
 
-        // 5. التحقق من نموذج الانضمام للمندوب
+        // 8. التحقق من نموذج المندوب
         function validateDriverReg() {
             const name = document.getElementById('regName').value.trim();
             const phone = document.getElementById('regPhone').value.trim();
@@ -425,13 +537,13 @@
             submitBtn.disabled = !(name && phone && cin && cinFront && cinBack && bikeDoc && agree);
         }
 
-        // 6. نسخ ورابط الحساب البنكي الآمن
+        // 9. نسخ رقم الحساب البنكي
         function copyRIB(rib) {
             navigator.clipboard.writeText(rib.replace(/\s+/g, ''));
-            alert("رقم الحساب البنكي للتطبيق:\n" + rib + "\n\nتم النسخ للحافظة بنجاح!");
+            alert("رقم الحساب البنكي للتطبيق:\n" + rib + "\n\nتم النسخ بنجاح!");
         }
 
-        // 7. الدردشة والمحادثة الداخلية
+        // 10. المحادثة الكتابية
         function sendMessage() {
             const input = document.getElementById('chatInput');
             const msg = input.value.trim();
