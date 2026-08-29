@@ -12,7 +12,7 @@
 
     <style>
         :root {
-            --primary: #10b981; /* أخضر inDrive/توصيل */
+            --primary: #10b981; /* أخضر توصيل */
             --primary-dark: #059669;
             --accent: #ff5722;
             --bg-dark: #0f172a;
@@ -20,6 +20,8 @@
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --border: rgba(255, 255, 255, 0.1);
+            --danger: #ef4444;
+            --warning: #f59e0b;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
@@ -30,10 +32,22 @@
             position: relative; overflow: hidden; display: flex; flex-direction: column;
         }
 
-        /* 1. طبقة الخريطة تغطي الخلفية */
+        /* 1. الخريطة */
         #map { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; }
 
-        /* 2. شريط سفلي قابل للتغيير (Bottom Sheet) */
+        /* شريط الوضع (زبون / موصل) */
+        .role-switcher {
+            position: absolute; top: 15px; left: 15px; right: 15px; z-index: 20;
+            background: rgba(30, 41, 59, 0.9); backdrop-filter: blur(8px);
+            padding: 6px; border-radius: 30px; display: flex; border: 1px solid var(--border);
+        }
+        .role-btn {
+            flex: 1; padding: 8px; border: none; border-radius: 20px; color: var(--text-muted);
+            background: transparent; font-weight: 700; cursor: pointer; transition: 0.3s; font-size: 12px;
+        }
+        .role-btn.active { background: var(--primary); color: white; }
+
+        /* 2. اللوحة السفلية */
         .bottom-sheet {
             position: absolute; bottom: 0; left: 0; right: 0; z-index: 10;
             background: var(--card-bg); border-top-left-radius: 24px; border-top-right-radius: 24px;
@@ -61,30 +75,47 @@
         }
         .field-group textarea { resize: none; height: 60px; }
 
+        /* إخلاء المسؤولية القانونية والصورة الإجبارية */
+        .legal-box {
+            background: rgba(239, 68, 68, 0.1); border: 1px dashed var(--danger);
+            padding: 10px; border-radius: 10px; font-size: 11px; color: #fca5a5; margin-bottom: 12px;
+        }
+        .legal-checkbox { display: flex; align-items: center; gap: 8px; margin-top: 6px; cursor: pointer; color: white; font-size: 11px; }
+
+        .file-upload-btn {
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            padding: 10px; background: rgba(255,255,255,0.08); border: 1px dashed var(--primary);
+            border-radius: 10px; font-size: 12px; color: var(--primary); cursor: pointer; width: 100%; margin-top: 5px;
+        }
+        .preview-img { width: 100%; height: 100px; object-fit: cover; border-radius: 8px; margin-top: 8px; display: none; }
+
         /* تحديد الأجرة */
         .fare-box { background: rgba(16, 185, 129, 0.1); border: 1px solid var(--primary); padding: 12px; border-radius: 14px; margin-bottom: 15px; }
         .fare-input-wrapper { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
         .fare-input-wrapper input { font-size: 18px; font-weight: 800; text-align: center; color: var(--primary); }
         .quick-btn { background: rgba(255,255,255,0.1); border: none; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; }
 
+        .cash-notice { font-size: 11px; color: var(--warning); display: flex; align-items: center; gap: 5px; margin-top: 8px; }
+
         .btn-submit {
             width: 100%; padding: 14px; background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white; border: none; border-radius: 14px; font-size: 15px; font-weight: 800; cursor: pointer;
             box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
         }
+        .btn-submit:disabled { background: #475569; cursor: not-allowed; box-shadow: none; }
 
         /* 3. شاشة العروض والتفاوض */
-        .radar-box { text-align: center; padding: 20px 0; display: none; }
+        .radar-box { text-align: center; padding: 10px 0; display: none; }
         .radar-spinner {
-            width: 60px; height: 60px; border: 4px solid rgba(16, 185, 129, 0.2);
-            border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px auto;
+            width: 50px; height: 50px; border: 4px solid rgba(16, 185, 129, 0.2);
+            border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 10px auto;
         }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
         /* بطاقة الموصل */
         .driver-card {
             background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 14px;
-            border-radius: 16px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 10px;
+            border-radius: 16px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 10px; text-align: right;
         }
         .driver-info { display: flex; align-items: center; justify-content: space-between; }
         .driver-profile { display: flex; align-items: center; gap: 10px; }
@@ -95,8 +126,22 @@
 
         /* شاشة التتبع */
         .tracking-box { display: none; text-align: center; }
-        .otp-badge { background: #334155; padding: 8px 16px; border-radius: 20px; font-weight: 800; color: #f59e0b; display: inline-block; margin: 10px 0; }
-        .file-upload-btn { display: inline-block; padding: 8px 12px; background: rgba(255,255,255,0.08); border: 1px dashed var(--border); border-radius: 8px; font-size: 11px; color: var(--text-muted); cursor: pointer; text-align: center; width: 100%; margin-top: 5px; }
+        .otp-badge { background: #334155; padding: 8px 16px; border-radius: 20px; font-weight: 800; color: var(--warning); display: inline-block; margin: 10px 0; }
+
+        /* --- محفظة وواجهة الموصل --- */
+        .driver-panel { display: none; }
+        .wallet-card {
+            background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid var(--border);
+            border-radius: 16px; padding: 15px; margin-bottom: 15px;
+        }
+        .wallet-balance { font-size: 24px; font-weight: 800; color: var(--primary); margin: 5px 0; }
+        .btn-recharge { background: rgba(255,255,255,0.1); border: 1px solid var(--border); color: white; padding: 6px 12px; border-radius: 8px; font-size: 11px; cursor: pointer; }
+        
+        .order-radar-card {
+            background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 12px;
+            border-radius: 12px; margin-bottom: 10px; text-align: right;
+        }
+        .commission-badge { font-size: 10px; background: rgba(239, 68, 68, 0.2); color: #fca5a5; padding: 2px 6px; border-radius: 4px; display: inline-block; }
     </style>
 </head>
 <body>
@@ -105,82 +150,163 @@
         <!-- الخريطة -->
         <div id="map"></div>
 
+        <!-- تبديل الوضع (عميل / موصل) -->
+        <div class="role-switcher">
+            <button class="role-btn active" id="btnRoleClient" onclick="switchRole('client')">🙋‍♂️ أنا زبون (أطلب)</button>
+            <button class="role-btn" id="btnRoleDriver" onclick="switchRole('driver')">🛵 أنا موصل (رادار)</button>
+        </div>
+
         <!-- اللوحة السفلية -->
         <div class="bottom-sheet" id="bottomSheet">
             <div class="sheet-handle"></div>
 
-            <!-- المرحلة 1: إدخال طلب التسخيرة -->
-            <div id="stepOrderForm">
-                <div class="service-tabs">
-                    <button class="tab-btn active" onclick="setTab(this)">🛒 شراء مستلزمات</button>
-                    <button class="tab-btn" onclick="setTab(this)">📦 نقل طرد / وثيقة</button>
-                    <button class="tab-btn" onclick="setTab(this)">💊 صيدلية / أدوات</button>
-                </div>
-
-                <div class="field-group">
-                    <label>🟢 مكان الأخذ / المتجر</label>
-                    <input type="text" id="pickupPos" value="مرجان - شارع الجيش الملكي">
-                </div>
-
-                <div class="field-group">
-                    <label>🔴 عنوان التسليم</label>
-                    <input type="text" id="deliveryPos" placeholder="حدد عنوانك المستهدف...">
-                </div>
-
-                <div class="field-group">
-                    <label>📝 قائمة المشتريات / تفاصيل الإرسالية</label>
-                    <textarea placeholder="اكتب التفاصيل هنا (مثال: حليب، خبز، زبدة...)"></textarea>
-                    <label class="file-upload-btn">
-                        📎 إرفاق صورة اللائحة أو الوثيقة (اختياري)
-                        <input type="file" accept="image/*" style="display: none;">
-                    </label>
-                </div>
-
-                <div class="fare-box">
-                    <label style="font-size: 11px; color: var(--text-muted);">💰 الأجرة المقترحة للتوصيل (درهم)</label>
-                    <div class="fare-input-wrapper">
-                        <input type="number" id="offeredFare" value="20">
-                        <button class="quick-btn" onclick="addFare(5)">+5</button>
-                        <button class="quick-btn" onclick="addFare(10)">+10</button>
+            <!-- ================== واجهة الزبون ================== -->
+            <div id="clientView">
+                <!-- المرحلة 1: إدخال طلب التسخيرة -->
+                <div id="stepOrderForm">
+                    <div class="service-tabs">
+                        <button class="tab-btn active" onclick="setTab(this)">🛒 شراء مستلزمات</button>
+                        <button class="tab-btn" onclick="setTab(this)">📦 نقل طرد / وثيقة</button>
+                        <button class="tab-btn" onclick="setTab(this)">💊 صيدلية / أدوات</button>
                     </div>
+
+                    <div class="field-group">
+                        <label>🟢 مكان الأخذ / المتجر</label>
+                        <input type="text" id="pickupPos" value="مرجان - شارع الجيش الملكي">
+                    </div>
+
+                    <div class="field-group">
+                        <label>🔴 عنوان التسليم</label>
+                        <input type="text" id="deliveryPos" placeholder="حدد عنوانك المستهدف...">
+                    </div>
+
+                    <div class="field-group">
+                        <label>📝 قائمة المشتريات / تفاصيل الإرسالية</label>
+                        <textarea id="orderDetails" placeholder="اكتب التفاصيل هنا (مثال: حليب، خبز، زبدة...)"></textarea>
+                    </div>
+
+                    <!-- شرط الصورة الإجباري -->
+                    <div class="field-group">
+                        <label>📸 صورة الطرد / المشتريات الإلزامية *</label>
+                        <label class="file-upload-btn">
+                            📷 التقاط أو إرفاق صورة وضاحة
+                            <input type="file" id="packageImg" accept="image/*" style="display: none;" onchange="handleImage(this)">
+                        </label>
+                        <img id="imgPreview" class="preview-img">
+                    </div>
+
+                    <!-- التعهد القانوني -->
+                    <div class="legal-box">
+                        ⚠️ **التزام قانوني:** أقر بمسؤوليتي الكاملة عن محتوى الطرد، وأتعهد بعدم إرسال أي مواد محظورة أو مخالفة للقانون.
+                        <label class="legal-checkbox">
+                            <input type="checkbox" id="legalAgree" onchange="validateForm()"> أوافق على التعهد والمسؤولية الكاملة
+                        </label>
+                    </div>
+
+                    <div class="fare-box">
+                        <label style="font-size: 11px; color: var(--text-muted);">💰 الأجرة المقترحة للتوصيل (درهم)</label>
+                        <div class="fare-input-wrapper">
+                            <input type="number" id="offeredFare" value="20">
+                            <button class="quick-btn" onclick="addFare(5)">+5</button>
+                            <button class="quick-btn" onclick="addFare(10)">+10</button>
+                        </div>
+                        <div class="cash-notice">💵 الدفع نقداً (كاش) فور استلام الطلب والتسخيرة.</div>
+                    </div>
+
+                    <button class="btn-submit" id="submitOrderBtn" disabled onclick="startBargaining()">اطلب الآن وأرسل للموصلين 🚀</button>
                 </div>
 
-                <button class="btn-submit" onclick="startBargaining()">اطلب الآن و أرسل للموصلين 🚀</button>
+                <!-- المرحلة 2: الرادار وعروض التفاوض -->
+                <div id="stepBargaining" class="radar-box">
+                    <div class="radar-spinner"></div>
+                    <h3 style="font-size: 15px; margin-bottom: 5px;">جارٍ البحث عن موصل قريب...</h3>
+                    <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 15px;">تم إرسال طلبك للموصلين بالمنطقة</p>
+                    <div id="offersList"></div>
+                </div>
+
+                <!-- المرحلة 3: التتبع المباشر -->
+                <div id="stepTracking" class="tracking-box">
+                    <h3 style="font-size: 16px; color: var(--primary);">🛵 الموصل في الطريق إليك!</h3>
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">يقوم بجمع الطلبات / المشتريات الآن</p>
+                    
+                    <div class="otp-badge">رمز تأكيد الاستلام (OTP): <span id="otpCode">4821</span></div>
+                    
+                    <p style="font-size: 11px; color: var(--text-muted);">مزّد الموصل بهذا الرمز فور استلام تسخيرتك لتأكيد التسليم والدفع كاش.</p>
+                    <button class="btn-submit" style="margin-top: 15px; background: #334155;" onclick="resetApp()">إلغاء أو إنهاء الطلب</button>
+                </div>
             </div>
 
-            <!-- المرحلة 2: الرادار وعروض التفاوض -->
-            <div id="stepBargaining" class="radar-box">
-                <div class="radar-spinner"></div>
-                <h3 style="font-size: 15px; margin-bottom: 5px;">جارٍ البحث عن موصل قريب...</h3>
-                <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 15px;">تم إرسال طلبك لعشرات الموصلين بالمنطقة</p>
+            <!-- ================== واجهة الموصل (الرادار والمحفظة) ================== -->
+            <div id="driverView" class="driver-panel">
+                <!-- المحفظة والاشتراك -->
+                <div class="wallet-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 12px; color: var(--text-muted);">محفظة العمولة (10%)</span>
+                        <button class="btn-recharge" onclick="rechargeWallet()">💳 شحن الرصيد</button>
+                    </div>
+                    <div class="wallet-balance" id="driverWallet">30.00 د.م</div>
+                    <p style="font-size: 10px; color: var(--text-muted);">الحد الأدنى للشحن: 30 درهم (تحويل بنكي). يتوقف استقبال الطلبات عند نفاد الرصيد.</p>
+                </div>
 
-                <!-- العروض المتلقاة -->
-                <div id="offersList"></div>
+                <!-- رادار الطلبات المتاحة -->
+                <h4 style="font-size: 13px; margin-bottom: 10px; text-align: right;">📡 الرادار المباشر للطلبات القريبة:</h4>
+                <div id="radarOrdersList">
+                    <!-- طلبات محاكاة -->
+                </div>
             </div>
 
-            <!-- المرحلة 3: التتبع المباشر -->
-            <div id="stepTracking" class="tracking-box">
-                <h3 style="font-size: 16px; color: var(--primary);">🛵 الموصل في الطريق إليك!</h3>
-                <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">يقوم بجمع الطلبات الآن</p>
-                
-                <div class="otp-badge">رمز تأكيد الاستلام (OTP): 4821</div>
-                
-                <p style="font-size: 11px; color: var(--text-muted);">مزّد الموصل بهذا الرمز فور استلام تسخيرتك لتأكيد العملية.</p>
-                <button class="btn-submit" style="margin-top: 15px; background: #334155;" onclick="resetApp()">إلغاء أو إنهاء الطلب</button>
-            </div>
         </div>
     </div>
 
     <script>
-        // 1. تهيئة الخريطة التفاعلية
+        // 1. تهيئة الخريطة
         const map = L.map('map', { zoomControl: false }).setView([33.5731, -7.5898], 14);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
 
-        // إضافة مؤشرات وهمية للمتجر والمستلم
-        L.marker([33.5731, -7.5898]).addTo(map).bindPopup("🟢 مكان التسخيرة").openPopup();
-        L.marker([33.5850, -7.6100]).addTo(map).bindPopup("🔴 نقطة الوصول");
+        L.marker([33.5731, -7.5898]).addTo(map).bindPopup("🟢 نقطة الأخذ / المتجر").openPopup();
+        L.marker([33.5850, -7.6100]).addTo(map).bindPopup("🔴 عنوان التسليم");
 
-        // 2. التحكم في التبويبات والأجرة
+        // بيانات المحفظة والوضع الحالي
+        let walletBalance = 30.00;
+        let imageUploaded = false;
+
+        // 2. التبديل بين الزبون والموصل
+        function switchRole(role) {
+            document.getElementById('btnRoleClient').classList.toggle('active', role === 'client');
+            document.getElementById('btnRoleDriver').classList.toggle('active', role === 'driver');
+            
+            if (role === 'client') {
+                document.getElementById('clientView').style.display = 'block';
+                document.getElementById('driverView').style.display = 'none';
+            } else {
+                document.getElementById('clientView').style.display = 'none';
+                document.getElementById('driverView').style.display = 'block';
+                updateDriverRadar();
+            }
+        }
+
+        // 3. التحقق من رفع الصورة والتعهد القانوني
+        function handleImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById('imgPreview');
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                    imageUploaded = true;
+                    validateForm();
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function validateForm() {
+            const agree = document.getElementById('legalAgree').checked;
+            const submitBtn = document.getElementById('submitOrderBtn');
+            submitBtn.disabled = !(agree && imageUploaded);
+        }
+
+        // 4. التحكم في التبويبات والأجرة
         function setTab(btn) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
@@ -191,12 +317,11 @@
             input.value = parseInt(input.value || 0) + amount;
         }
 
-        // 3. بدء عملية التفاوض وبث العروض
+        // 5. بدء التفاوض للزبون
         function startBargaining() {
             document.getElementById('stepOrderForm').style.display = 'none';
             document.getElementById('stepBargaining').style.display = 'block';
 
-            // محاكاة وصول عروض من موصلين بعد ثوانٍ
             setTimeout(() => {
                 const offersContainer = document.getElementById('offersList');
                 const offeredFare = document.getElementById('offeredFare').value;
@@ -206,7 +331,7 @@
                         <div class="driver-info">
                             <div class="driver-profile">
                                 <div class="driver-avatar">🛵</div>
-                                <div style="text-align: right;">
+                                <div>
                                     <div style="font-weight: 800; font-size: 13px;">ياسين العبدلاوي</div>
                                     <div style="font-size: 11px; color: #f59e0b;">★ 4.9 (85 توصيلة)</div>
                                 </div>
@@ -217,37 +342,18 @@
                             </div>
                         </div>
                         <div class="driver-actions">
-                            <button class="btn-accept" onclick="acceptOffer()">قبول العرض ✅</button>
-                            <button class="btn-counter" onclick="alert('تم إرسال عرض مضاد بـ 5 دراهم إضافية')">طلب +5 د.م</button>
-                        </div>
-                    </div>
-
-                    <div class="driver-card">
-                        <div class="driver-info">
-                            <div class="driver-profile">
-                                <div class="driver-avatar">🚲</div>
-                                <div style="text-align: right;">
-                                    <div style="font-weight: 800; font-size: 13px;">حمزة كريم</div>
-                                    <div style="font-size: 11px; color: #f59e0b;">★ 4.8 (40 توصيلة)</div>
-                                </div>
-                            </div>
-                            <div style="text-align: left;">
-                                <div style="font-size: 16px; font-weight: 800; color: #f59e0b;">${parseInt(offeredFare) + 5} د.م</div>
-                                <div style="font-size: 10px; color: var(--text-muted);">عرض مضاد</div>
-                            </div>
-                        </div>
-                        <div class="driver-actions">
-                            <button class="btn-accept" onclick="acceptOffer()">قبول بـ ${parseInt(offeredFare) + 5} د.م ✅</button>
+                            <button class="btn-accept" onclick="acceptOffer()">قبول العرض (كاش) ✅</button>
+                            <button class="btn-counter" onclick="alert('تم إرسال اقتراح +5 دراهم للموصل')">طلب +5 د.م</button>
                         </div>
                     </div>
                 `;
             }, 1500);
         }
 
-        // 4. قبول العرض والانتقال للتتبع
         function acceptOffer() {
             document.getElementById('stepBargaining').style.display = 'none';
             document.getElementById('stepTracking').style.display = 'block';
+            document.getElementById('otpCode').innerText = Math.floor(1000 + Math.random() * 9000);
         }
 
         function resetApp() {
@@ -255,6 +361,56 @@
             document.getElementById('stepBargaining').style.display = 'none';
             document.getElementById('stepOrderForm').style.display = 'block';
             document.getElementById('offersList').innerHTML = '';
+        }
+
+        // 6. منطق الموصل والعمولة والرادار
+        function updateDriverRadar() {
+            const radarContainer = document.getElementById('radarOrdersList');
+            
+            if (walletBalance < 2.00) {
+                radarContainer.innerHTML = `
+                    <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid var(--danger); padding: 15px; border-radius: 12px; text-align: center;">
+                        <p style="color: #fca5a5; font-size: 12px; font-weight: 700;">⚠️ تم إيقاف استقبال الطلبات!</p>
+                        <p style="color: var(--text-muted); font-size: 11px; margin-top: 4px;">نفد رصيد المحفظة. يرجى شحن 30 درهم على الأقل لاستئناف العمل.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            radarContainer.innerHTML = `
+                <div class="order-radar-card">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <span style="font-weight: 800; font-size: 13px;">🛒 شراء مستلزمات وسوبرماركت</span>
+                            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">من: مرجان ➔ إلى: حي السلام</div>
+                        </div>
+                        <span style="font-size: 16px; font-weight: 800; color: var(--primary);">25 د.م</span>
+                    </div>
+                    <div style="margin-top: 8px; display: flex; justify-content: space-between; align-items: center;">
+                        <span class="commission-badge">خصم العمولة (10%): 2.50 د.م</span>
+                        <button class="quick-btn" style="background: var(--primary);" onclick="acceptDriverOrder(25, 2.5)">قبول الطلب 🚀</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function acceptDriverOrder(fare, commission) {
+            if (walletBalance >= commission) {
+                walletBalance -= commission;
+                document.getElementById('driverWallet').innerText = walletBalance.toFixed(2) + " د.م";
+                alert(`✅ تم قبول الطلبية بنجاح!\nخصم ${commission} د.م عمولة من المحفظة.\nستتحصل على ${fare} د.م كاش من الزبون عند التسليم.`);
+                updateDriverRadar();
+            } else {
+                alert("⚠️ رصيدك لا يكفي لتغطية عمولة هذه الطلبية!");
+            }
+        }
+
+        function rechargeWallet() {
+            alert("💳 شحن المحفظة عبر التحويل البنكي:\n\nقم بالتحويل لحساب الشركة (RIB: 230110000012345678901234).\nالحد الأدنى: 30 درهم.\nأرسل الوصل للواتساب لتفعيل الرصيد.");
+            // محاكاة إضافة رصيد
+            walletBalance += 30;
+            document.getElementById('driverWallet').innerText = walletBalance.toFixed(2) + " د.م";
+            updateDriverRadar();
         }
     </script>
 </body>
