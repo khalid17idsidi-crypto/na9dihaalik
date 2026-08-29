@@ -88,6 +88,19 @@
         .checkbox-group input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--primary); cursor: pointer; }
         .checkbox-group label { font-size: 11px; color: var(--text-main); font-weight: bold; cursor: pointer; line-height: 1.5; }
 
+        /* محفظة المنفذ السريعة */
+        .driver-wallet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+        .wallet-stat-box { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--card-border); padding: 12px; border-radius: 14px; text-align: center; }
+        .wallet-stat-val { font-size: 16px; font-weight: 900; color: var(--accent); margin-top: 4px; }
+
+        /* نظام التقييمات للزبون */
+        .rating-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 999999; padding: 20px; }
+        .rating-modal-overlay.show { display: flex; }
+        .rating-modal { background: #0e1326; border: 1px solid var(--accent); border-radius: 20px; padding: 24px; width: 100%; max-width: 400px; text-align: center; }
+        .star-rating { font-size: 28px; color: #ffd700; cursor: pointer; margin: 14px 0; }
+        .star-rating span { transition: transform 0.2s; display: inline-block; padding: 0 4px; }
+        .star-rating span:hover { transform: scale(1.2); }
+
         .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 520px; background: rgba(7, 9, 19, 0.98); display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid var(--card-border); z-index: 9999; }
         .nav-item { color: var(--text-muted); font-size: 11px; text-align: center; cursor: pointer; border: none; background: transparent; flex: 1; outline: none; }
         .nav-item.active { color: var(--accent); font-weight: bold; }
@@ -102,6 +115,28 @@
     <div id="notificationToast">
         <span>🔔</span>
         <span id="toastText">مرحباً بك في المنصة</span>
+    </div>
+
+    <!-- نافذة تقييم المنفذ من طرف الزبون -->
+    <div id="ratingModal" class="rating-modal-overlay">
+        <div class="rating-modal">
+            <h3 style="color:white; font-size:17px; margin-bottom:6px;">🌟 تقييم خدمة التوصيل</h3>
+            <p style="font-size:12px; color:var(--text-muted);">كيف كانت تجربتك مع السائق/المنفذ في هذه المهمة؟</p>
+            
+            <div class="star-rating" id="starContainer">
+                <span onclick="setRating(1)">★</span>
+                <span onclick="setRating(2)">★</span>
+                <span onclick="setRating(3)">★</span>
+                <span onclick="setRating(4)">★</span>
+                <span onclick="setRating(5)">★</span>
+            </div>
+
+            <div class="field-group" style="margin-bottom:14px;">
+                <input type="text" id="ratingComment" placeholder="ملاحظة إضافية (اختياري)...">
+            </div>
+
+            <button onclick="submitRating()" class="btn btn-primary">تأكيد التقييم وإغلاق الطلب 👍</button>
+        </div>
     </div>
 
     <div class="app-container">
@@ -124,7 +159,7 @@
             </div>
         </header>
 
-        <!-- 1. واجهة الزبون (4 خيارات كاملة) -->
+        <!-- 1. واجهة الزبون -->
         <div id="customer-tab" class="tab-content active">
             <div class="card">
                 <h2 class="card-title">إنشاء طلب توصيل جديد</h2>
@@ -164,6 +199,9 @@
                     </div>
                     <button type="submit" class="btn btn-primary">إرسال الطلب الآن 🚀</button>
                 </form>
+
+                <!-- زر محاكاة إنهاء المهمة وعرض التقييم -->
+                <button onclick="openRatingModal()" class="btn btn-success" style="margin-top:10px; background: linear-gradient(135deg, #8e44ad, #3498db);">⭐ إنهاء المهمة وتقييم المنفذ (تجربة)</button>
             </div>
         </div>
 
@@ -195,26 +233,44 @@
             </div>
         </div>
 
-        <!-- 3. واجهة السائق والمنفذ (نظام المحفظة الشحني، الشروط الصارمة، والالتزام القانوني) -->
+        <!-- 3. واجهة السائق والمنفذ (المحفظة + شروط وإجباريّة الانخراط) -->
         <div id="driver-tab" class="tab-content">
-            <!-- نظام شحن الرصيد والعمولة -->
+            <!-- محفظة المنفذ المالية -->
+            <div class="card" style="border-color: var(--accent);">
+                <h2 class="card-title" style="border-color: var(--indrive-green);">💼 محفظتي المالية اليومية</h2>
+                <div class="driver-wallet-grid">
+                    <div class="wallet-stat-box">
+                        <span style="font-size:10px; color:var(--text-muted); display:block;">رصيد الإيداع</span>
+                        <div class="wallet-stat-val" style="color:var(--indrive-green);">30 د.م</div>
+                    </div>
+                    <div class="wallet-stat-box">
+                        <span style="font-size:10px; color:var(--text-muted); display:block;">طلبات اليوم</span>
+                        <div class="wallet-stat-val" style="color:var(--accent);">4</div>
+                    </div>
+                    <div class="wallet-stat-box">
+                        <span style="font-size:10px; color:var(--text-muted); display:block;">أرباح اليوم</span>
+                        <div class="wallet-stat-val" style="color:#ffd700;">140 د.م</div>
+                    </div>
+                </div>
+                <p style="font-size:11px; color:var(--text-muted); text-align:center;">يتم خصم 10% عمولة عند كل طلب. عند انتهاء 30 درهم يلزمك إعادة الشحن.</p>
+            </div>
+
             <div class="card">
-                <h2 class="card-title">💳 نظام المحفظة واقتطاع العمولة</h2>
+                <h2 class="card-title">💳 نظام المحفظة والعمولة</h2>
                 <div class="plan-card highlight">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <h4 style="font-size:14px; color:white;">نظام الإيداع المسبق</h4>
                         <span style="color:var(--indrive-green); font-weight:800;">أقل مبلغ للشحن: 30 درهم</span>
                     </div>
                     <p style="font-size:11px; color:var(--text-muted); margin-top:8px; line-height:1.6;">
-                        • يتم اقتطاع عمولة التطبيق قدرها **10%** تلقائياً عن كل طلب يتم تنفيذه.<br>
-                        • بعد نفاذ الرصيد من محفظتك، يجب إعادة الشحن لاستكمال استقبال الطلبيات.
+                        • اقتطاع عمولة **10%** تلقائياً عن كل طلب يتم تنفيذه.<br>
+                        • بعد نفاذ الرصيد من محفظتك، يلزمك إعادة الشحن لاستقبال الطلبيات.
                     </p>
                 </div>
             </div>
 
-            <!-- الشروط والوثائق المطلوبة -->
             <div class="card">
-                <h2 class="card-title">📋 الشروط والوثائق المطلوبة للتفعيل</h2>
+                <h2 class="card-title">📋 الشروط والوثائق الإجبارية للتفعيل</h2>
                 <ul class="conditions-list">
                     <li>📌 الاسم الكامل المطابق للهوية.</li>
                     <li>📌 صورة واضحـة للبطاقة الوطنية للتعريف (CIN).</li>
@@ -223,9 +279,9 @@
                 </ul>
             </div>
 
-            <!-- استمارة التسجيل مع الموافقة القانونية الإجبارية -->
+            <!-- استمارة التسجيل الإجبارية بالكامل -->
             <div class="card">
-                <h2 class="card-title">📝 تسجيل منخرط جديد</h2>
+                <h2 class="card-title">📝 تسجيل منخرط جديد (جميع الخانات إجبارية)</h2>
                 
                 <div class="legal-notice-box">
                     <h4>⚖️ تنبيه قانوني وإخلاء مسؤولية:</h4>
@@ -236,29 +292,29 @@
 
                 <form onsubmit="handleDriverSubmit(event)">
                     <div class="field-group">
-                        <label>الاسم الكامل (كما في البطاقة الوطنية)</label>
+                        <label>الاسم الكامل (كما في البطاقة الوطنية) *</label>
                         <input type="text" required placeholder="الاسم الشخصي والعائلي">
                     </div>
                     <div class="field-group">
-                        <label>رقم الهاتف (واتساب)</label>
+                        <label>رقم الهاتف (واتساب) *</label>
                         <input type="tel" required placeholder="06XXXXXXXX">
                     </div>
                     <div class="field-group">
-                        <label>صورة البطاقة الوطنية (CIN)</label>
+                        <label>صورة البطاقة الوطنية (CIN) *</label>
                         <input type="file" required accept="image/*">
                     </div>
                     <div class="field-group">
-                        <label>صورة شخصية (Selfie)</label>
+                        <label>صورة شخصية (Selfie) *</label>
                         <input type="file" required accept="image/*">
                     </div>
                     <div class="field-group">
-                        <label>شهادة ملكية الدراجة النارية</label>
+                        <label>شهادة ملكية الدراجة النارية *</label>
                         <input type="file" required accept="image/*">
                     </div>
 
                     <div class="checkbox-group">
                         <input type="checkbox" id="legalAgreement" required>
-                        <label for="legalAgreement">أوافق على الشروط وأقرّ بتحويل بياناتي للشرف والأجهزة الأمنية والشرطة في حال أي بلاغ أو شكاية ضدّي.</label>
+                        <label for="legalAgreement">أوافق على الشروط وأقرّ بتحويل بياناتي للشرف والأجهزة الأمنية والشرطة في حال أي بلاغ أو شكاية ضدّي. *</label>
                     </div>
 
                     <button type="submit" class="btn btn-primary">إرسال الطلب للمراجعة 📤</button>
@@ -295,7 +351,6 @@
             </div>
         </div>
 
-        <!-- شريط التنقل السفلي المضمون -->
         <nav class="bottom-nav">
             <button class="nav-item active" data-tab="customer-tab" onclick="switchTab('customer-tab')">
                 <span>🏠</span> الرئيسية
@@ -314,6 +369,7 @@
 
     <script>
         let map;
+        let selectedStars = 5;
 
         window.onload = function() {
             try {
@@ -370,7 +426,25 @@
                 alert('يجب الموافقة على شرط تسليم البيانات للشرطة في حالة الشكاية لتأكيد التسجيل!');
                 return;
             }
-            showToast('✅ تم تقديم طلبك مع الوثائق والموافقة القانونية بنجاح!');
+            showToast('✅ تم تقديم طلبك مع كافة الوثائق الإجبارية والموافقة بنجاح!');
+        }
+
+        // أجهزة نظام التقييم
+        function openRatingModal() {
+            document.getElementById('ratingModal').classList.add('show');
+        }
+
+        function setRating(stars) {
+            selectedStars = stars;
+            const spans = document.querySelectorAll('#starContainer span');
+            spans.forEach((span, index) => {
+                span.style.color = (index < stars) ? '#ffd700' : '#4a5568';
+            });
+        }
+
+        function submitRating() {
+            document.getElementById('ratingModal').classList.remove('show');
+            showToast(`⭐ شكراً لك! تم تسجيل التقييم (${selectedStars}/5) بنجاح.`);
         }
     </script>
 </body>
