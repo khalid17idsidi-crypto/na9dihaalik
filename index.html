@@ -64,6 +64,8 @@
         .field-group input:focus, .field-group select:focus, .field-group textarea:focus { border-color: var(--accent); box-shadow: 0 0 10px rgba(0, 242, 254, 0.2); }
         .field-group textarea { resize: none; height: 70px; }
 
+        .pricing-info-box { background: rgba(16, 185, 129, 0.1); border: 1px solid var(--primary); padding: 12px; border-radius: 12px; margin-bottom: 14px; font-size: 11px; color: #a7f3d0; line-height: 1.5; }
+
         .security-notice { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.4); padding: 12px 14px; border-radius: 12px; margin-bottom: 14px; font-size: 11px; line-height: 1.6; color: #fca5a5; }
         .bank-notice { background: rgba(0, 242, 254, 0.08); border: 1px dashed var(--accent); padding: 12px 14px; border-radius: 12px; margin-bottom: 14px; font-size: 11px; line-height: 1.6; color: #a5f3fc; }
 
@@ -133,15 +135,34 @@
                     <div id="map"></div>
                 </div>
 
+                <div class="pricing-info-box">
+                    <b>📐 نظام التسعير الأوتوماتيكي:</b> يتم حساب المسافة تلقائياً بالخريطة بناءً على <b>30 درهم لكل 10 كيلو</b> (3 دراهم/كم).
+                </div>
+
                 <form onsubmit="handleCustomerOrder(event)">
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
                         <div class="field-group">
                             <label>🟢 نقطة الانطلاق / الجلب *</label>
-                            <input type="text" id="pickupAddress" required placeholder="مكان الأخذ...">
+                            <input type="text" id="pickupAddress" required placeholder="انقر الخريطة أو اكتب..." onchange="recalculatePrice()">
                         </div>
                         <div class="field-group">
                             <label>🔴 نقطة التسليم *</label>
-                            <input type="text" id="deliveryAddress" required placeholder="عنوان المستلم...">
+                            <input type="text" id="deliveryAddress" required placeholder="انقر الخريطة أو اكتب..." onchange="recalculatePrice()">
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                        <div class="field-group">
+                            <label>⚖️ الوزن التقديري *</label>
+                            <select id="packageWeight" onchange="recalculatePrice()">
+                                <option value="1">أقل من 10 كيلو (عادي)</option>
+                                <option value="2">من 10 إلى 20 كيلو (x2)</option>
+                                <option value="3">من 20 إلى 30 كيلو (x3)</option>
+                            </select>
+                        </div>
+                        <div class="field-group">
+                            <label>📏 المسافة المقطوعة</label>
+                            <input type="text" id="calculatedDistance" value="10 كم" readonly style="color:var(--accent); font-weight:bold;">
                         </div>
                     </div>
 
@@ -163,8 +184,8 @@
                             <input type="tel" id="customerPhone" required placeholder="06XXXXXXXX">
                         </div>
                         <div class="field-group">
-                            <label>💵 الأجرة المحددة (كاش) *</label>
-                            <input type="number" id="offeredPrice" required placeholder="مثال: 30 درهم">
+                            <label>💵 الأجرة المحسوبة تلقائياً (كاش) *</label>
+                            <input type="number" id="offeredPrice" value="30" required style="color:var(--primary); font-size:16px; font-weight:bold;">
                         </div>
                     </div>
 
@@ -308,6 +329,9 @@
     <script>
         let map;
         let uploadedParcelImgData = "";
+        let pickupMarker, deliveryMarker;
+        let pickupCoords = [33.5731, -7.5898];
+        let deliveryCoords = [33.5850, -7.6100];
 
         window.onload = function() {
             initProfessionalMap();
@@ -315,12 +339,52 @@
 
         function initProfessionalMap() {
             try {
-                map = L.map('map', { zoomControl: true }).setView([33.5731, -7.5898], 13);
+                map = L.map('map', { zoomControl: true }).setView([33.5731, -7.5898], 12);
                 L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
 
-                L.marker([33.5731, -7.5898]).addTo(map).bindPopup('🟢 <b>مكان الجلب</b>').openPopup();
-                L.marker([33.5850, -7.6100]).addTo(map).bindPopup('🔴 <b>عنوان التسليم</b>');
+                pickupMarker = L.marker(pickupCoords, {draggable: true}).addTo(map).bindPopup('🟢 <b>مكان الجلب</b>').openPopup();
+                deliveryMarker = L.marker(deliveryCoords, {draggable: true}).addTo(map).bindPopup('🔴 <b>عنوان التسليم</b>');
+
+                pickupMarker.on('dragend', function() {
+                    pickupCoords = [pickupMarker.getLatLng().lat, pickupMarker.getLatLng().lng];
+                    recalculatePrice();
+                });
+
+                deliveryMarker.on('dragend', function() {
+                    deliveryCoords = [deliveryMarker.getLatLng().lat, deliveryMarker.getLatLng().lng];
+                    recalculatePrice();
+                });
+
+                recalculatePrice();
+
             } catch(e) { console.log(e); }
+        }
+
+        // حساب المسافة والأجرة أوتوماتيكياً (30 درهم لكل 10 كم)
+        function recalculatePrice() {
+            if (!pickupCoords || !deliveryCoords) return;
+
+            // حساب المسافة الإقليدية التقديرية بالـ KM
+            let lat1 = pickupCoords[0], lon1 = pickupCoords[1];
+            let lat2 = deliveryCoords[0], lon2 = deliveryCoords[1];
+            
+            let R = 6371; // radius of earth in km
+            let dLat = (lat2 - lat1) * Math.PI / 180;
+            let dLon = (lon2 - lon1) * Math.PI / 180;
+            let a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                    Math.sin(dLon/2) * Math.sin(dLon/2);
+            let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            let distance = Math.max(1, Math.round(R * c * 1.3)); // تكبير طفيف لتقريب مسافة الطريق
+
+            document.getElementById('calculatedDistance').value = distance + ' كم';
+
+            // قاعدة الاحتساب: 3 دراهم لكل كم (أي 30 درهم لكل 10 كم)، والحد الأدنى هو 20 درهم
+            let weightMultiplier = parseInt(document.getElementById('packageWeight').value) || 1;
+            let basePrice = Math.max(20, Math.round(distance * 3));
+            let finalCalculatedPrice = basePrice * weightMultiplier;
+
+            document.getElementById('offeredPrice').value = finalCalculatedPrice;
         }
 
         function switchTab(tabId) {
@@ -366,11 +430,12 @@
 
         function handleCustomerOrder(e) {
             e.preventDefault();
-            const pickup = document.getElementById('pickupAddress').value;
-            const delivery = document.getElementById('deliveryAddress').value;
+            const pickup = document.getElementById('pickupAddress').value || 'الموقع الأول على الخريطة';
+            const delivery = document.getElementById('deliveryAddress').value || 'الموقع الثاني على الخريطة';
             const desc = document.getElementById('orderDescription').value;
             const phone = document.getElementById('customerPhone').value;
             const price = parseFloat(document.getElementById('offeredPrice').value);
+            const dist = document.getElementById('calculatedDistance').value;
 
             if (!uploadedParcelImgData) {
                 showToast('⚠️ صورة الطرد إلزامية لتأكيد السلامة والأمن!');
@@ -386,7 +451,7 @@
             const orderHTML = `
                 <div class="order-card" id="${orderId}">
                     <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-                        <strong style="color:var(--accent); font-size:13px;">📦 طلبية / تسخيرة جديدة</strong>
+                        <strong style="color:var(--accent); font-size:13px;">📦 طلبية (${dist})</strong>
                         <span style="color:var(--primary); font-weight:bold; font-size:13px;">${price} د.م (كاش)</span>
                     </div>
                     <p style="font-size:11px; color:white; margin-bottom:4px;">🟢 <b>مكان الأخذ:</b> ${pickup}</p>
@@ -404,7 +469,7 @@
             `;
 
             ordersContainer.innerHTML += orderHTML;
-            showToast('✅ تم نشر الطلبية بنجاح على رادار المنفذين!');
+            showToast('✅ تم حساب المسافة والأجرة ونشر الطلبية على الرادار!');
             e.target.reset();
             document.getElementById('parcelPreviewImg').style.display = 'none';
             uploadedParcelImgData = "";
