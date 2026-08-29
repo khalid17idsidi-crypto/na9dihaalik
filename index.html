@@ -35,16 +35,16 @@
             position: relative; overflow: hidden; display: flex; flex-direction: column;
         }
 
-        /* الخريطة */
+        /* إصلاح تداخل الخريطة مع العناصر */
         #map { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; transition: opacity 0.3s; }
-        #map.hide-map { opacity: 0; pointer-events: none; }
+        #map.hide-map { opacity: 0; pointer-events: none; display: none; }
 
         /* شريط التنقل العلوي */
         .main-nav {
-            position: absolute; top: 10px; left: 10px; right: 10px; z-index: 20;
-            background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px);
+            position: absolute; top: 10px; left: 10px; right: 10px; z-index: 100;
+            background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px);
             padding: 6px; border-radius: 20px; display: flex; border: 1px solid var(--border);
-            overflow-x: auto; gap: 4px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            overflow-x: auto; gap: 4px; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
         }
         .nav-btn {
             flex: 1; min-width: 60px; padding: 8px 4px; border: none; border-radius: 14px; color: var(--text-muted);
@@ -55,7 +55,7 @@
 
         /* اللوحة السفلية العامّة */
         .bottom-sheet {
-            position: absolute; bottom: 0; left: 0; right: 0; z-index: 10;
+            position: absolute; bottom: 0; left: 0; right: 0; z-index: 50;
             background: var(--card-bg); border-top-left-radius: 28px; border-top-right-radius: 28px;
             padding: 20px; box-shadow: 0 -10px 40px rgba(0,0,0,0.8); border-top: 1px solid var(--border);
             max-height: 85vh; overflow-y: auto; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -70,95 +70,37 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* الهيدر الاحترافي في الأعلى */
+        /* الهيدر الاحترافي */
         .app-header {
-            text-align: center;
-            margin-bottom: 20px;
-            padding: 16px 14px;
+            text-align: center; margin-bottom: 20px; padding: 16px 14px;
             background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(30, 41, 59, 0.8) 100%);
-            border-radius: 20px;
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            position: relative;
+            border-radius: 20px; border: 1px solid rgba(16, 185, 129, 0.3); position: relative;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
         }
         .lang-switch-btn {
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid var(--border);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 10px;
-            font-size: 10px;
-            font-weight: 800;
-            cursor: pointer;
-            transition: 0.3s;
+            position: absolute; top: 12px; left: 12px; background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border); color: white; padding: 4px 10px; border-radius: 10px;
+            font-size: 10px; font-weight: 800; cursor: pointer; transition: 0.3s;
         }
-        .app-brand {
-            font-size: 20px;
-            font-weight: 900;
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        .app-brand span.highlight {
-            color: var(--primary);
-            text-shadow: 0 0 12px var(--primary-glow);
-        }
-        .app-slogan {
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-top: 6px;
-            font-weight: 600;
-            line-height: 1.5;
-        }
+        .app-brand { font-size: 20px; font-weight: 900; color: #ffffff; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .app-brand span.highlight { color: var(--primary); text-shadow: 0 0 12px var(--primary-glow); }
+        .app-slogan { font-size: 11px; color: var(--text-muted); margin-top: 6px; font-weight: 600; line-height: 1.5; }
 
-        /* ترتيب الأيقونات والخدمات في المنتصف */
-        .home-content-center {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            min-height: 60vh;
-        }
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-top: 15px;
-            align-items: center;
-        }
+        /* الأيقونات والخدمات */
+        .home-content-center { display: flex; flex-direction: column; justify-content: center; min-height: 50vh; }
+        .services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 15px; }
         .service-card {
             background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 20px 8px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+            border: 1px solid var(--border); border-radius: 16px; padding: 20px 8px; text-align: center;
+            cursor: pointer; transition: all 0.3s ease; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 10px; position: relative; z-index: 60;
         }
         .service-card:hover, .service-card:active {
-            transform: translateY(-4px);
-            border-color: var(--primary);
-            background: rgba(16, 185, 129, 0.1);
-            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.2);
+            transform: translateY(-4px); border-color: var(--primary); background: rgba(16, 185, 129, 0.15);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
         }
-        .service-icon {
-            font-size: 36px;
-            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
-        }
-        .service-title {
-            font-size: 12px;
-            font-weight: 800;
-            color: var(--text-main);
-        }
+        .service-icon { font-size: 36px; pointer-events: none; }
+        .service-title { font-size: 12px; font-weight: 800; color: var(--text-main); pointer-events: none; }
 
         /* الحقول والنصوص */
         .field-group { margin-bottom: 12px; }
@@ -171,88 +113,38 @@
         .field-group textarea { resize: none; height: 55px; }
 
         .input-hint { display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--primary); margin-top: 4px; font-weight: 500; }
-
-        .selected-service-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(16, 185, 129, 0.15);
-            border: 1px solid var(--primary);
-            color: var(--primary);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 700;
-            margin-bottom: 15px;
-        }
-
-        .security-box {
-            background: rgba(239, 68, 68, 0.1); border: 1px dashed var(--danger);
-            padding: 12px; border-radius: 12px; font-size: 11px; color: #fca5a5; margin-bottom: 12px; line-height: 1.5;
-        }
+        .selected-service-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(16, 185, 129, 0.15); border: 1px solid var(--primary); color: var(--primary); padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; margin-bottom: 15px; }
+        .security-box { background: rgba(239, 68, 68, 0.1); border: 1px dashed var(--danger); padding: 12px; border-radius: 12px; font-size: 11px; color: #fca5a5; margin-bottom: 12px; line-height: 1.5; }
         .legal-checkbox { display: flex; align-items: flex-start; gap: 8px; margin-top: 8px; cursor: pointer; color: white; font-size: 10px; line-height: 1.4; }
-
-        .file-upload-btn {
-            display: flex; align-items: center; justify-content: center; gap: 6px;
-            padding: 10px; background: rgba(255,255,255,0.03); border: 1px dashed var(--primary);
-            border-radius: 12px; font-size: 11px; color: var(--primary); cursor: pointer; width: 100%;
-        }
+        .file-upload-btn { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; background: rgba(255,255,255,0.03); border: 1px dashed var(--primary); border-radius: 12px; font-size: 11px; color: var(--primary); cursor: pointer; width: 100%; }
         .preview-img { width: 100%; height: 80px; object-fit: cover; border-radius: 8px; margin-top: 6px; display: none; }
-
         .fare-box { background: rgba(16, 185, 129, 0.08); border: 1px solid var(--primary); padding: 12px; border-radius: 14px; margin-bottom: 12px; }
         .fare-input-wrapper { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
         .fare-input-wrapper input { font-size: 16px; font-weight: 800; text-align: center; color: var(--primary); }
         .quick-btn { background: rgba(255,255,255,0.1); border: none; color: white; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 700; }
-
-        .btn-submit {
-            width: 100%; padding: 12px; background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white; border: none; border-radius: 14px; font-size: 14px; font-weight: 800; cursor: pointer;
-            box-shadow: 0 4px 15px var(--primary-glow); transition: 0.3s;
-        }
+        .btn-submit { width: 100%; padding: 12px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border: none; border-radius: 14px; font-size: 14px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 15px var(--primary-glow); transition: 0.3s; }
         .btn-submit:disabled { background: #475569; cursor: not-allowed; box-shadow: none; }
-
         .card { background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 12px; border-radius: 14px; margin-bottom: 10px; text-align: right; }
         .badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; display: inline-block; }
         .badge-warning { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
-        .badge-success { background: rgba(16, 185, 129, 0.2); color: var(--primary); }
-
         .wallet-card { background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid var(--border); border-radius: 16px; padding: 14px; margin-bottom: 12px; }
         .wallet-balance { font-size: 22px; font-weight: 800; color: var(--primary); margin: 4px 0; }
-
-        /* الرادار */
-        .radar-box {
-            position: relative; width: 120px; height: 120px; margin: 10px auto; border-radius: 50%;
-            border: 2px solid var(--primary); background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, rgba(15, 23, 42, 0.8) 80%);
-            display: flex; align-items: center; justify-content: center; overflow: hidden;
-        }
-        .radar-sweep {
-            position: absolute; width: 100%; height: 100%; border-radius: 50%;
-            background: conic-gradient(from 0deg, rgba(16, 185, 129, 0.4) 0deg, transparent 60deg);
-            animation: spin 3s linear infinite;
-        }
+        .radar-box { position: relative; width: 120px; height: 120px; margin: 10px auto; border-radius: 50%; border: 2px solid var(--primary); background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, rgba(15, 23, 42, 0.8) 80%); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .radar-sweep { position: absolute; width: 100%; height: 100%; border-radius: 50%; background: conic-gradient(from 0deg, rgba(16, 185, 129, 0.4) 0deg, transparent 60deg); animation: spin 3s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
         .radar-dot { width: 8px; height: 8px; background: #fff; border-radius: 50%; box-shadow: 0 0 8px var(--primary); z-index: 2; }
-
-        /* الشات */
         .chat-box { background: rgba(0,0,0,0.3); border-radius: 10px; padding: 10px; height: 110px; overflow-y: auto; margin-bottom: 10px; display: flex; flex-direction: column; gap: 6px; }
         .chat-msg { font-size: 11px; padding: 6px 10px; border-radius: 8px; max-width: 80%; }
         .chat-msg.client { background: var(--primary-dark); align-self: flex-end; color: white; }
         .chat-msg.driver { background: rgba(255,255,255,0.1); align-self: flex-start; color: white; }
-
-        .btn-whatsapp {
-            background: var(--whatsapp); color: white; border: none; padding: 10px; border-radius: 10px;
-            font-weight: 700; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; margin-bottom: 8px; text-decoration: none;
-        }
-
-        .star-rating { display: flex; gap: 4px; font-size: 16px; cursor: pointer; color: #475569; margin: 4px 0; }
-        .star-rating .star.active { color: #f59e0b; }
+        .btn-whatsapp { background: var(--whatsapp); color: white; border: none; padding: 10px; border-radius: 10px; font-weight: 700; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; margin-bottom: 8px; text-decoration: none; }
         .secure-link { color: #60a5fa; text-decoration: underline; cursor: pointer; word-break: break-all; font-weight: 700; font-size: 11px; }
     </style>
 </head>
 <body>
 
     <div class="app-container">
-        <div id="map"></div>
+        <div id="map" class="hide-map"></div>
 
         <nav class="main-nav">
             <button class="nav-btn active" id="navHome" onclick="switchMainView('homeView', this)">🏠 الرئيسية</button>
@@ -266,6 +158,7 @@
         <div class="bottom-sheet" id="bottomSheet">
             <div class="sheet-handle"></div>
 
+            <!-- الرئيسية -->
             <div id="homeView" class="view-panel active">
                 <div class="app-header">
                     <button class="lang-switch-btn" onclick="toggleLanguage()">Français 🌐</button>
@@ -296,6 +189,7 @@
                 </div>
             </div>
 
+            <!-- الزبون -->
             <div id="clientView" class="view-panel">
                 <div id="serviceBadgeContainer" class="selected-service-badge">
                     <span>📌 الخدمة المحددة:</span> <span id="selectedServiceName">🛒 مستلزمات وقضاء أغراض</span>
@@ -304,31 +198,26 @@
                 <div class="field-group">
                     <label>👤 الاسم الكامل للزبون</label>
                     <input type="text" id="clientName" placeholder="أدخل اسمك الكامل..." oninput="validateClientForm()">
-                    <div class="input-hint">💡 يساعد المندوب في التعرف عليك وسهولة التواصل عند الوصول</div>
                 </div>
 
                 <div class="field-group">
                     <label>📞 رقم الهاتف الشخصي</label>
                     <input type="tel" id="clientPhone" placeholder="06XXXXXXXX" oninput="validateClientForm()">
-                    <div class="input-hint">💡 سنستخدم هذا الرقم لتأكيد التوصيل والتنسيق المباشر</div>
                 </div>
 
                 <div class="field-group">
                     <label>🟢 نقطة الاستلام / المتجر</label>
                     <input type="text" id="pickupLocation" value="شارع الجيش الملكي - مرجان">
-                    <div class="input-hint">📍 انقر على الخريطة أعلاه لتحديد المتجر أو اكتب العنوان بدقة</div>
                 </div>
 
                 <div class="field-group">
                     <label>🔴 عنوان التسليم الخاص بك</label>
                     <input type="text" id="dropoffLocation" placeholder="حدد مكان التسليم بالضبط...">
-                    <div class="input-hint">🏠 اكتب اسم الحي، الشارع ورقم المنزل لضمان وصول سريع</div>
                 </div>
 
                 <div class="field-group">
                     <label>📝 تفاصيل التسخيرة والطلبات</label>
                     <textarea id="orderDetails" placeholder="أدخل تفاصيل الطلب..."></textarea>
-                    <div class="input-hint">✍️ اكتب المنتجات أو الأغراض بالتفصيل لتفادي أي أخطاء في التسوق</div>
                 </div>
 
                 <div class="field-group">
@@ -337,22 +226,20 @@
                         <span>📷 رفع صورة الطرد (إجباري)</span>
                         <input type="file" accept="image/*" style="display: none;" onchange="handleClientImage(this)">
                     </label>
-                    <div class="input-hint">📌 صورة الطرد أو قائمة المشتريات تضمن توثيق الطلب بأمان</div>
                     <img id="clientImgPreview" class="preview-img">
                 </div>
 
                 <div class="fare-box">
                     <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px;">
-                        <span>📏 المسافة المحسوبة: <b id="calcDistance" style="color: white;">3.5 كم</b></span>
-                        <span>💰 التكلفة التلقائية: <b id="calcFare" style="color: var(--primary);">30.00 د.م</b></span>
+                        <span>📏 المسافة: <b id="calcDistance" style="color: white;">3.5 كم</b></span>
+                        <span>💰 التكلفة: <b id="calcFare" style="color: var(--primary);">30.00 د.م</b></span>
                     </div>
-                    <label style="font-size: 11px; color: var(--text-muted);">الأجرة المقترحة للمندوب (ابتداءً من 30 درهم):</label>
+                    <label style="font-size: 11px; color: var(--text-muted);">الأجرة المقترحة للمندوب:</label>
                     <div class="fare-input-wrapper">
                         <input type="number" id="offeredFare" value="30" min="30" onchange="checkMinFare(this)">
                         <button class="quick-btn" onclick="addFare(5)">+5</button>
                         <button class="quick-btn" onclick="addFare(10)">+10</button>
                     </div>
-                    <div class="input-hint" style="margin-top: 6px;">💡 زيادة الأجرة تحفز المندوبين وقبول طلبك في وقت أسرع</div>
                 </div>
 
                 <div class="security-box">
@@ -365,6 +252,7 @@
                 <button class="btn-submit" id="submitClientBtn" disabled onclick="alert('تم إرسال الطلب بنجاح للرادار!')">إرسال الطلب الآن 🚀</button>
             </div>
 
+            <!-- المندوب -->
             <div id="driverView" class="view-panel">
                 <div class="wallet-card">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -402,6 +290,7 @@
                 </div>
             </div>
 
+            <!-- الرادار -->
             <div id="ordersView" class="view-panel">
                 <div class="radar-box">
                     <div class="radar-sweep"></div>
@@ -410,7 +299,6 @@
                 <p style="text-align: center; font-size: 11px; color: var(--text-muted); margin-bottom: 15px;">جاري البث والتنقيب عن طلبيات قريبة منك عبر الرادار...</p>
 
                 <h4 style="font-size: 13px; margin-bottom: 10px;">📋 القائمة المباشرة للطلبيات المتاحة:</h4>
-
                 <div class="card">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <b>طلب رقم: #4829 (نقل طرد)</b>
@@ -421,6 +309,7 @@
                 </div>
             </div>
 
+            <!-- الانضمام -->
             <div id="registerView" class="view-panel">
                 <h4 style="font-size: 14px; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">📝 طلب الانضمام كـ مندوب توصيل جديد</h4>
                 
@@ -462,26 +351,25 @@
                 </div>
 
                 <div class="security-box">
-                    🚨 <b>تنبيه أمني وإقرار قانوني صارم:</b>
-                    <br>
-                    يتعهد المندوب بعدم ارتكاب أي مخالفة تتضمن <b>السرقة، أو الإتلاف، أو النصب</b>. في حال تسجيل أي شكاية من أي طرف، <b>تتم إحالة الملف تلقائياً ومباشرة ورقمياً بكافة الوثائق المرفوعة ورقم الهاتف والمعطيات الشخصية للشرطة والسلطات المختصة</b> لاتخاذ الإجراءات الزجرية.
+                    🚨 <b>تنبيه أمني وإقرار قانوني صارم:</b><br>
+                    يتعهد المندوب بعدم ارتكاب أي مخالفة تتضمن <b>السرقة، أو الإتلاف، أو النصب</b>. في حال تسجيل أي شكاية من أي طرف، <b>تتم إحالة الملف تلقائياً ومباشرة ورقمياً بكافة الوثائق المرفوعة ورقم الهاتف والمعطيات الشخصية للشرطة والسلطات المختصة</b>.
                     
                     <label class="legal-checkbox">
                         <input type="checkbox" id="regLegalAgree" onchange="validateDriverReg()"> 
-                        <b>أوافق على المنح الفوري لصلاحية إحالة معطياتي للشرطة عند تسجيل أي شكاية، وأتحمل كافة التبعات القانونية.</b>
+                        <b>أوافق على المنح الفوري لصلاحية إحالة معطياتي للشرطة عند تسجيل أي شكاية.</b>
                     </label>
                 </div>
 
                 <button class="btn-submit" id="submitDriverBtn" disabled onclick="alert('تم إرسال طلب الانضمام ووثائقك بنجاح للتدقيق!')">تقديم طلب الانضمام والالتزام 📩</button>
             </div>
 
+            <!-- الأدمن -->
             <div id="adminView" class="view-panel">
                 <h3 style="font-size: 14px; color: var(--danger); margin-bottom: 12px;">⚙️ لوحة تحكم المدير (الأدمن)</h3>
                 <div class="card">
                     <p style="font-size: 11px; color: var(--text-muted);">أهلاً بك في لوحة تحكم التطبيق.</p>
                 </div>
             </div>
-
         </div>
     </div>
 
@@ -497,35 +385,36 @@
             document.querySelectorAll('.view-panel').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
             
-            document.getElementById(viewId).classList.add('active');
+            const targetView = document.getElementById(viewId);
+            if(targetView) targetView.classList.add('active');
             if(btn) btn.classList.add('active');
 
-            // إخفاء الخريطة في الرئيسية والأدمن لزيادة وضوح التصميم
             const mapEl = document.getElementById('map');
             if(viewId === 'homeView' || viewId === 'adminView') {
                 mapEl.classList.add('hide-map');
             } else {
                 mapEl.classList.remove('hide-map');
+                setTimeout(() => map.invalidateSize(), 200);
             }
         }
 
-        // تحويل المستخدم لخانة الزبون مع تحديد الخدمة
+        // اختيار الخدمة والتحويل لصفحة الزبون
         function selectService(serviceName) {
             document.getElementById('selectedServiceName').innerText = serviceName;
             switchMainView('clientView', document.getElementById('navClient'));
         }
 
+        // التحقق من نماذج الزبون والمندوب
         function validateClientForm() {
-            const name = document.getElementById('clientName').value;
-            const phone = document.getElementById('clientPhone').value;
+            const name = document.getElementById('clientName').value.trim();
+            const phone = document.getElementById('clientPhone').value.trim();
             const agree = document.getElementById('clientLegalAgree').checked;
             document.getElementById('submitClientBtn').disabled = !(name && phone && agree);
         }
 
-        // التحقق من استيفاء شروط الانضمام كـ مندوب
         function validateDriverReg() {
-            const name = document.getElementById('regName').value;
-            const phone = document.getElementById('regPhone').value;
+            const name = document.getElementById('regName').value.trim();
+            const phone = document.getElementById('regPhone').value.trim();
             const cinFront = document.getElementById('cinFrontPreview').src;
             const cinBack = document.getElementById('cinBackPreview').src;
             const ownership = document.getElementById('ownershipPreview').src;
@@ -538,6 +427,7 @@
             document.getElementById('submitDriverBtn').disabled = !(name && phone && hasCinFront && hasCinBack && hasOwnership && agree);
         }
 
+        // معالجة رفع الصور
         function handleDriverDoc(input, previewId) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -551,7 +441,65 @@
             }
         }
 
+        function handleClientImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById('clientImgPreview');
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // إدارة الأسعار والعمولات
         function addFare(amount) {
             const fareInput = document.getElementById('offeredFare');
             fareInput.value = parseInt(fareInput.value || 30) + amount;
         }
+
+        function checkMinFare(input) {
+            if(parseInt(input.value) < 30 || !input.value) input.value = 30;
+        }
+
+        // نسخ رقم الحساب
+        function copyRIB(rib) {
+            navigator.clipboard.writeText(rib);
+            alert('تم نسخ رقم الحساب البنكي (RIB) بنجاح:\n' + rib);
+        }
+
+        // وظائف الشات وتأكيد الطلبيات (المضافة للإصلاح)
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if(text) {
+                const chatBox = document.getElementById('chatBox');
+                const msgDiv = document.createElement('div');
+                msgDiv.className = 'chat-msg driver';
+                msgDiv.innerText = 'المندوب: ' + text;
+                chatBox.appendChild(msgDiv);
+                chatBox.scrollTop = chatBox.scrollHeight;
+                input.value = '';
+            }
+        }
+
+        function markComplete(orderId) {
+            alert('تم إنهاء الطلبية رقم #' + orderId + ' وإغلاق الحساب بنجاح!');
+        }
+
+        function toggleLanguage() {
+            alert('سيتم إتاحة اللغة الفرنسية قريباً!');
+        }
+
+        function openAdminPanel(btn) {
+            const pass = prompt("أدخل كلمة سر الأدمن:");
+            if(pass === "1234") {
+                switchMainView('adminView', btn);
+            } else if(pass !== null) {
+                alert("كلمة السر خاطئة!");
+            }
+        }
+    </script>
+</body>
+</html>
