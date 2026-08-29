@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة التسخير والتوصيل الذكي</title>
+    <title>نقضيها عليك ... في كازا | Naqdiha Aalik Casa</title>
     
     <!-- الخطوط والمكتبات الخارجية -->
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -69,6 +69,58 @@
         .view-panel { display: none; }
         .view-panel.active { display: block; }
 
+        /* الهيدر الاحترافي للشعار والعبارة التعريفية والمبدل اللغوي */
+        .app-header {
+            text-align: center;
+            margin-bottom: 16px;
+            padding: 12px 14px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(30, 41, 59, 0.6));
+            border-radius: 16px;
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            position: relative;
+        }
+        .lang-switch-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid var(--border);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        html[dir="ltr"] .lang-switch-btn {
+            left: auto;
+            right: 10px;
+        }
+        .lang-switch-btn:hover {
+            background: var(--primary);
+        }
+        .app-brand {
+            font-size: 18px;
+            font-weight: 900;
+            color: #ffffff;
+            letter-spacing: -0.3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .app-brand span.highlight {
+            color: var(--primary);
+        }
+        .app-slogan {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
         .service-tabs { display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 4px; }
         .tab-btn {
             flex: 1; min-width: 90px; padding: 8px; border: 1px solid var(--border); border-radius: 10px;
@@ -77,13 +129,27 @@
         }
         .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        .field-group { margin-bottom: 10px; }
-        .field-group label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+        .field-group { margin-bottom: 12px; }
+        .field-group label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; }
         .field-group input, .field-group textarea, .field-group select {
             width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border);
-            background: rgba(15, 23, 42, 0.6); color: white; font-size: 12px; outline: none;
+            background: rgba(15, 23, 42, 0.6); color: white; font-size: 12px; outline: none; transition: border-color 0.3s;
         }
-        .field-group textarea { resize: none; height: 45px; }
+        .field-group input:focus, .field-group textarea:focus {
+            border-color: var(--primary);
+        }
+        .field-group textarea { resize: none; height: 48px; }
+
+        /* العبارات الدلالية المساعدة للتوجيه */
+        .input-hint {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10px;
+            color: var(--primary);
+            margin-top: 4px;
+            font-weight: 500;
+        }
 
         .security-box {
             background: rgba(239, 68, 68, 0.1); border: 1px dashed var(--danger);
@@ -114,6 +180,7 @@
             background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 12px;
             border-radius: 12px; margin-bottom: 10px; text-align: right;
         }
+        html[dir="ltr"] .card { text-align: left; }
         .badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; display: inline-block; }
         .badge-warning { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
         .badge-success { background: rgba(16, 185, 129, 0.2); color: var(--primary); }
@@ -162,11 +229,11 @@
 
         <!-- التنقل العلوي -->
         <nav class="main-nav">
-            <button class="nav-btn active" onclick="switchMainView('clientView', this)">🙋‍♂️ الزبون</button>
-            <button class="nav-btn" onclick="switchMainView('driverView', this)">🛵 المندوب</button>
-            <button class="nav-btn" onclick="switchMainView('ordersView', this)">📡 الطلبيات والرادار</button>
-            <button class="nav-btn" onclick="switchMainView('registerView', this)">📝 الانضمام</button>
-            <button class="nav-btn admin-btn" onclick="openAdminPanel(this)">⚙️ الأدمن</button>
+            <button class="nav-btn active" id="navClient" onclick="switchMainView('clientView', this)">🙋‍♂️ الزبون</button>
+            <button class="nav-btn" id="navDriver" onclick="switchMainView('driverView', this)">🛵 المندوب</button>
+            <button class="nav-btn" id="navOrders" onclick="switchMainView('ordersView', this)">📡 الطلبيات والرادار</button>
+            <button class="nav-btn" id="navRegister" onclick="switchMainView('registerView', this)">📝 الانضمام</button>
+            <button class="nav-btn admin-btn" id="navAdmin" onclick="openAdminPanel(this)">⚙️ الأدمن</button>
         </nav>
 
         <!-- اللوحة السفلية -->
@@ -175,112 +242,129 @@
 
             <!-- 1. واجهة الزبون -->
             <div id="clientView" class="view-panel active">
+                
+                <!-- هيدر التطبيق وشعاره والتعريف بالخدمة والزر اللغوي -->
+                <div class="app-header">
+                    <button class="lang-switch-btn" onclick="toggleLanguage()">Français 🌐</button>
+                    <div class="app-brand">
+                        <span>🛵</span> <span class="highlight">نقضيها عليك</span> ... في كازا
+                    </div>
+                    <div class="app-slogan" data-i18n="slogan">
+                        نسخر ليك نقضي ليك اغراضك بطريقة احترافية في جميع أنحاء الدار البيضاء
+                    </div>
+                </div>
+
+                <!-- تبويبات الخدمات -->
                 <div class="service-tabs">
-                    <button class="tab-btn active" onclick="setTab(this)">🛒 مستلزمات</button>
-                    <button class="tab-btn" onclick="setTab(this)">📦 نقل طرد</button>
-                    <button class="tab-btn" onclick="setTab(this)">💊 صيدلية</button>
+                    <button class="tab-btn active" id="tabGroceries" onclick="setTab(this)" data-i18n="tabGroceries">🛒 مستلزمات</button>
+                    <button class="tab-btn" id="tabParcel" onclick="setTab(this)" data-i18n="tabParcel">📦 نقل طرد</button>
+                    <button class="tab-btn" id="tabPharmacy" onclick="setTab(this)" data-i18n="tabPharmacy">💊 صيدلية</button>
                 </div>
 
                 <div class="field-group">
-                    <label>👤 الاسم الكامل للزبون</label>
-                    <input type="text" id="clientName" placeholder="أدخل اسمك الكامل..." oninput="validateClientForm()">
+                    <label data-i18n="lblClientName">👤 الاسم الكامل للزبون</label>
+                    <input type="text" id="clientName" placeholder="أدخل اسمك الكامل..." data-i18n-ph="phClientName" oninput="validateClientForm()">
+                    <div class="input-hint" data-i18n="hintClientName">💡 يساعد المندوب في التعرف عليك وسهولة التواصل عند الوصول</div>
                 </div>
 
                 <div class="field-group">
-                    <label>📞 رقم الهاتف الشخصي</label>
-                    <input type="tel" id="clientPhone" placeholder="06XXXXXXXX" oninput="validateClientForm()">
+                    <label data-i18n="lblClientPhone">📞 رقم الهاتف الشخصي</label>
+                    <input type="tel" id="clientPhone" placeholder="06XXXXXXXX" data-i18n-ph="phClientPhone" oninput="validateClientForm()">
+                    <div class="input-hint" data-i18n="hintClientPhone">💡 سنستخدم هذا الرقم لتأكيد التوصيل والتنسيق المباشر</div>
                 </div>
 
                 <div class="field-group">
-                    <label>🟢 نقطة الاستلام / المتجر</label>
-                    <input type="text" value="شارع الجيش الملكي - مرجان">
+                    <label data-i18n="lblPickup">🟢 نقطة الاستلام / المتجر</label>
+                    <input type="text" id="pickupLocation" value="شارع الجيش الملكي - مرجان" data-i18n-ph="phPickup">
+                    <div class="input-hint" data-i18n="hintPickup">📍 انقر على الخريطة أعلاه لتحديد المتجر أو اكتب العنوان بدقة</div>
                 </div>
 
                 <div class="field-group">
-                    <label>🔴 عنوان التسليم الخاص بك</label>
-                    <input type="text" placeholder="حدد مكان التسليم بالضبط...">
+                    <label data-i18n="lblDropoff">🔴 عنوان التسليم الخاص بك</label>
+                    <input type="text" id="dropoffLocation" placeholder="حدد مكان التسليم بالضبط..." data-i18n-ph="phDropoff">
+                    <div class="input-hint" data-i18n="hintDropoff">🏠 اكتب اسم الحي، الشارع ورقم المنزل لضمان وصول سريع</div>
                 </div>
 
                 <div class="field-group">
-                    <label>📝 تفاصيل التسخيرة والطلبات</label>
-                    <textarea placeholder="أدخل تفاصيل الطلب..."></textarea>
+                    <label data-i18n="lblDetails">📝 تفاصيل التسخيرة والطلبات</label>
+                    <textarea id="orderDetails" placeholder="أدخل تفاصيل الطلب..." data-i18n-ph="phDetails"></textarea>
+                    <div class="input-hint" data-i18n="hintDetails">✍️ اكتب المنتجات أو الأغراض بالتفصيل لتفادي أي أخطاء في التسوق</div>
                 </div>
 
                 <div class="field-group">
-                    <label>📸 صورة الطرد / المشتريات (<span style="color: var(--danger);">إجبارية</span>)</label>
+                    <label data-i18n="lblUploadImg">📸 صورة الطرد / المشتريات (<span style="color: var(--danger);" data-i18n="lblReq">إجبارية</span>)</label>
                     <label class="file-upload-btn">
-                        📷 رفع صورة الطرد (إجباري)
+                        <span data-i18n="btnUploadImg">📷 رفع صورة الطرد (إجباري)</span>
                         <input type="file" accept="image/*" style="display: none;" onchange="handleClientImage(this)">
                     </label>
+                    <div class="input-hint" data-i18n="hintUploadImg">📌 صورة الطرد أو قائمة المشتريات تضمن توثيق الطلب بأمان</div>
                     <img id="clientImgPreview" class="preview-img">
                 </div>
 
                 <div class="fare-box">
                     <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px;">
-                        <span>📏 المسافة المحسوبة: <b id="calcDistance" style="color: white;">3.5 كم</b></span>
-                        <span>💰 التكلفة التلقائية: <b id="calcFare" style="color: var(--primary);">30.00 د.م</b></span>
+                        <span>📏 <span data-i18n="lblCalcDist">المسافة المحسوبة:</span> <b id="calcDistance" style="color: white;">3.5 كم</b></span>
+                        <span>💰 <span data-i18n="lblCalcFare">التكلفة التلقائية:</span> <b id="calcFare" style="color: var(--primary);">30.00 د.م</b></span>
                     </div>
-                    <label style="font-size: 11px; color: var(--text-muted);">الأجرة المقترحة للمندوب (ابتداءً من 30 درهم):</label>
+                    <label style="font-size: 11px; color: var(--text-muted);" data-i18n="lblOfferedFare">الأجرة المقترحة للمندوب (ابتداءً من 30 درهم):</label>
                     <div class="fare-input-wrapper">
                         <input type="number" id="offeredFare" value="30" min="30" onchange="checkMinFare(this)">
                         <button class="quick-btn" onclick="addFare(5)">+5</button>
                         <button class="quick-btn" onclick="addFare(10)">+10</button>
                     </div>
+                    <div class="input-hint" style="margin-top: 6px;" data-i18n="hintFare">💡 زيادة الأجرة تحفز المندوبين وقبول طلبك في وقت أسرع</div>
                 </div>
 
                 <div class="security-box">
-                    ⚠️ <b>تعهد أمني وقانوني:</b> يتحمل الزبون المسؤولية القانونية الكاملة عن المحتويات.
+                    ⚠️ <b data-i18n="lblSecTitle">تعهد أمني وقانوني:</b> <span data-i18n="lblSecText">يتحمل الزبون المسؤولية القانونية الكاملة عن المحتويات.</span>
                     <label class="legal-checkbox">
-                        <input type="checkbox" id="clientLegalAgree" onchange="validateClientForm()"> أوافق على كافة الشروط والمسؤولية القانونية
+                        <input type="checkbox" id="clientLegalAgree" onchange="validateClientForm()"> <span data-i18n="lblLegalAgree">أوافق على كافة الشروط والمسؤولية القانونية</span>
                     </label>
                 </div>
 
-                <button class="btn-submit" id="submitClientBtn" disabled onclick="alert('تم إرسال الطلب بنجاح للرادار!')">إرسال الطلب الآن 🚀</button>
+                <button class="btn-submit" id="submitClientBtn" disabled onclick="alert(currentLang === 'ar' ? 'تم إرسال الطلب بنجاح للرادار!' : 'Commande envoyée avec succès au radar !')" data-i18n="btnSubmitOrder">إرسال الطلب الآن 🚀</button>
             </div>
 
             <!-- 2. واجهة المندوب -->
             <div id="driverView" class="view-panel">
                 <div class="wallet-card">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 11px; color: var(--text-muted);">رصيد المحفظة (العمولة 10%)</span>
-                        <button class="quick-btn" onclick="alert('اتصل بالإدارة لشحن الرصيد عبر التحويل البنكي')">💳 شحن</button>
+                        <span style="font-size: 11px; color: var(--text-muted);" data-i18n="lblWalletBal">رصيد المحفظة (العمولة 10%)</span>
+                        <button class="quick-btn" onclick="alert(currentLang === 'ar' ? 'اتصل بالإدارة لشحن الرصيد عبر التحويل البنكي' : 'Contactez l\'administration pour recharger par virement')" data-i18n="btnRecharge">💳 شحن</button>
                     </div>
                     <div class="wallet-balance">45.00 د.م</div>
                     <p style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">
-                        💳 رقم الحساب البنكي لشحن الرصيد: <br>
-                        <a onclick="copyRIB('MA64 2307 8024 7119 7211 0035 0065')" class="secure-link">🔒 اضغط هنا لإظهار/نسخ رقم الحساب البنكي (RIB)</a>
+                        💳 <span data-i18n="lblRIBTitle">رقم الحساب البنكي لشحن الرصيد:</span> <br>
+                        <a onclick="copyRIB('MA64 2307 8024 7119 7211 0035 0065')" class="secure-link" data-i18n="lblCopyRIB">🔒 اضغط هنا لإظهار/نسخ رقم الحساب البنكي (RIB)</a>
                     </p>
                 </div>
 
-                <!-- خيارات التواصل والتات -->
-                <h4 style="font-size: 12px; margin-bottom: 8px;">💬 التواصل المباشر مع الزبون:</h4>
-                <a href="https://wa.me/212600000000" target="_blank" class="btn-whatsapp">
+                <h4 style="font-size: 12px; margin-bottom: 8px;" data-i18n="lblDirectContact">💬 التواصل المباشر مع الزبون:</h4>
+                <a href="https://wa.me/212600000000" target="_blank" class="btn-whatsapp" data-i18n="btnWhatsapp">
                     📲 التواصل المباشر عبر واتساب (WhatsApp)
                 </a>
 
                 <div class="card">
-                    <h5 style="font-size: 11px; margin-bottom: 6px; color: var(--text-muted);">المحادثة المكتوبة داخل التطبيق:</h5>
+                    <h5 style="font-size: 11px; margin-bottom: 6px; color: var(--text-muted);" data-i18n="lblInAppChat">المحادثة المكتوبة داخل التطبيق:</h5>
                     <div class="chat-box" id="chatBox">
-                        <div class="chat-msg client">الزبون: السلام عليكم، في انتظار استلام الطرد.</div>
-                        <div class="chat-msg driver">المندوب: وعليكم السلام، أنا في الطريق للمتجر الآن.</div>
+                        <div class="chat-msg client" data-i18n="chatMsg1">الزبون: السلام عليكم، في انتظار استلام الطرد.</div>
+                        <div class="chat-msg driver" data-i18n="chatMsg2">المندوب: وعليكم السلام، أنا في الطريق للمتجر الآن.</div>
                     </div>
                     <div style="display: flex; gap: 6px;">
-                        <input type="text" id="chatInput" placeholder="اكتب رسالة..." style="flex:1; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border); background: rgba(0,0,0,0.5); color: white; font-size: 11px;">
-                        <button class="quick-btn" style="background: var(--primary);" onclick="sendMessage()">إرسال 📤</button>
+                        <input type="text" id="chatInput" placeholder="اكتب رسالة..." data-i18n-ph="phChatInput" style="flex:1; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border); background: rgba(0,0,0,0.5); color: white; font-size: 11px;">
+                        <button class="quick-btn" style="background: var(--primary);" onclick="sendMessage()" data-i18n="btnSendMsg">إرسال 📤</button>
                     </div>
                 </div>
 
-                <!-- زر الوصول التام للمندوب -->
                 <div class="card" style="border-color: var(--primary);">
-                    <h4 style="font-size: 12px; margin-bottom: 6px;">🛵 إدارة الطلبية الحالية (#4829)</h4>
-                    <p style="font-size: 10px; color: var(--text-muted); margin-bottom: 8px;">عند تسليم الطرد للزبون بالكامل اضغط على زر التكفل والوصول:</p>
-                    <button class="btn-submit" style="background: var(--primary);" onclick="markComplete('4829')">✅ الوصول التام وإنهاء الطلبية</button>
+                    <h4 style="font-size: 12px; margin-bottom: 6px;" data-i18n="lblManageOrder">🛵 إدارة الطلبية الحالية (#4829)</h4>
+                    <p style="font-size: 10px; color: var(--text-muted); margin-bottom: 8px;" data-i18n="lblCompleteHint">عند تسليم الطرد للزبون بالكامل اضغط على زر التكفل والوصول:</p>
+                    <button class="btn-submit" style="background: var(--primary);" onclick="markComplete('4829')" data-i18n="btnMarkComplete">✅ الوصول التام وإنهاء الطلبية</button>
                 </div>
 
-                <!-- نظام التقييم -->
                 <div class="card">
-                    <h4 style="font-size: 12px; margin-bottom: 4px;">⭐ تقييم الزبون</h4>
-                    <p style="font-size: 10px; color: var(--text-muted);">قيم تجربة التعامل مع الزبون بعد الانتهاء:</p>
+                    <h4 style="font-size: 12px; margin-bottom: 4px;" data-i18n="lblRateClient">⭐ تقييم الزبون</h4>
+                    <p style="font-size: 10px; color: var(--text-muted);" data-i18n="lblRateHint">قيم تجربة التعامل مع الزبون بعد الانتهاء:</p>
                     <div class="star-rating" onclick="rateUser(event)">
                         <span class="star" data-value="1">★</span>
                         <span class="star" data-value="2">★</span>
@@ -297,120 +381,119 @@
                     <div class="radar-sweep"></div>
                     <div class="radar-dot"></div>
                 </div>
-                <p style="text-align: center; font-size: 11px; color: var(--text-muted); margin-bottom: 15px;">جاري البث والتنقيب عن طلبيات قريبة منك عبر الرادار...</p>
+                <p style="text-align: center; font-size: 11px; color: var(--text-muted); margin-bottom: 15px;" data-i18n="radarSearching">جاري البث والتنقيب عن طلبيات قريبة منك عبر الرادار...</p>
 
-                <h4 style="font-size: 13px; margin-bottom: 10px;">📋 القائمة المباشرة للطلبيات المتاحة:</h4>
+                <h4 style="font-size: 13px; margin-bottom: 10px;" data-i18n="lblAvailableOrders">📋 القائمة المباشرة للطلبيات المتاحة:</h4>
 
                 <div class="card">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <b>طلب رقم: #4829 (نقل طرد)</b>
-                        <span class="badge badge-warning" id="status-4829">قيد التوصيل 🛵</span>
+                        <b><span data-i18n="orderNum">طلب رقم</span>: #4829 (<span data-i18n="tabParcel">نقل طرد</span>)</b>
+                        <span class="badge badge-warning" id="status-4829" data-i18n="statusInTransit">قيد التوصيل 🛵</span>
                     </div>
-                    <p style="font-size: 11px; color: var(--text-muted); margin-top: 5px;">الزبون: محمد أمين (0600000000)</p>
-                    <p style="font-size: 11px; color: var(--text-muted);">الرقم التتبعي: <b style="color: var(--info);">TRK-4829-MA</b></p>
-                    <p style="font-size: 11px; color: var(--text-muted);">الأجرة: 35.00 درهم</p>
+                    <p style="font-size: 11px; color: var(--text-muted); margin-top: 5px;"><span data-i18n="clientTag">الزبون:</span> محمد أمين (0600000000)</p>
+                    <p style="font-size: 11px; color: var(--text-muted);"><span data-i18n="trackTag">الرقم التتبعي:</span> <b style="color: var(--info);">TRK-4829-MA</b></p>
+                    <p style="font-size: 11px; color: var(--text-muted);"><span data-i18n="fareTag">الأجرة:</span> 35.00 درهم</p>
                     <div style="background: rgba(255,255,255,0.05); padding: 6px; border-radius: 6px; margin-top: 6px; font-size: 11px;">
-                        رمز أمان الاستلام (OTP): <b style="color: var(--warning);">4921</b>
+                        <span data-i18n="otpTag">رمز أمان الاستلام (OTP):</span> <b style="color: var(--warning);">4921</b>
                     </div>
                 </div>
 
                 <div class="card">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <b>طلب رقم: #4830 (صيدلية)</b>
-                        <span class="badge badge-success">جديد 🟢</span>
+                        <b><span data-i18n="orderNum">طلب رقم</span>: #4830 (<span data-i18n="tabPharmacy">صيدلية</span>)</b>
+                        <span class="badge badge-success" data-i18n="statusNew">جديد 🟢</span>
                     </div>
-                    <p style="font-size: 11px; color: var(--text-muted); margin-top: 5px;">الزبون: ياسين العبدلاوي</p>
-                    <p style="font-size: 11px; color: var(--text-muted);">الرقم التتبعي: <b style="color: var(--info);">TRK-4830-MA</b></p>
-                    <p style="font-size: 11px; color: var(--text-muted);">الأجرة: 30.00 درهم</p>
-                    <button class="quick-btn" style="background: var(--primary); width: 100%; margin-top: 6px;" onclick="alert('تم قبول الطلب بنجاح!')">قبول الطلب الآن ✋</button>
+                    <p style="font-size: 11px; color: var(--text-muted); margin-top: 5px;"><span data-i18n="clientTag">الزبون:</span> ياسين العبدلاوي</p>
+                    <p style="font-size: 11px; color: var(--text-muted);"><span data-i18n="trackTag">الرقم التتبعي:</span> <b style="color: var(--info);">TRK-4830-MA</b></p>
+                    <p style="font-size: 11px; color: var(--text-muted);"><span data-i18n="fareTag">الأجرة:</span> 30.00 درهم</p>
+                    <button class="quick-btn" style="background: var(--primary); width: 100%; margin-top: 6px;" onclick="alert(currentLang === 'ar' ? 'تم قبول الطلب بنجاح!' : 'Commande acceptée avec succès !')" data-i18n="btnAcceptOrder">قبول الطلب الآن ✋</button>
                 </div>
             </div>
 
             <!-- 4. واجهة الانضمام -->
             <div id="registerView" class="view-panel">
-                <h4 style="font-size: 13px; margin-bottom: 8px;">📝 طلب الانضمام كـ مندوب توصيل جديد</h4>
+                <h4 style="font-size: 13px; margin-bottom: 8px;" data-i18n="regTitle">📝 طلب الانضمام كـ مندوب توصيل جديد</h4>
                 
                 <div class="field-group">
-                    <label>الاسم الكامل</label>
-                    <input type="text" id="regName" placeholder="الاسم الشخصي والعائلي" oninput="validateDriverReg()">
+                    <label data-i18n="lblFullName">الاسم الكامل</label>
+                    <input type="text" id="regName" placeholder="الاسم الشخصي والعائلي" data-i18n-ph="phFullName" oninput="validateDriverReg()">
                 </div>
                 <div class="field-group">
-                    <label>رقم الهاتف</label>
-                    <input type="tel" id="regPhone" placeholder="06XXXXXXXX" oninput="validateDriverReg()">
+                    <label data-i18n="lblRegPhone">رقم الهاتف</label>
+                    <input type="tel" id="regPhone" placeholder="06XXXXXXXX" data-i18n-ph="phClientPhone" oninput="validateDriverReg()">
                 </div>
                 <div class="field-group">
-                    <label>رقم البطاقة الوطنية (CIN)</label>
-                    <input type="text" id="regCin" placeholder="مثال: AB123456" oninput="validateDriverReg()">
+                    <label data-i18n="lblCIN">رقم البطاقة الوطنية (CIN)</label>
+                    <input type="text" id="regCin" placeholder="مثال: AB123456" data-i18n-ph="phCIN" oninput="validateDriverReg()">
                 </div>
 
                 <div class="field-group">
-                    <label>📸 صورة البطاقة الوطنية - الوجه الأول (<span style="color: var(--danger);">إجباري</span>)</label>
+                    <label data-i18n="lblCinFront">📸 صورة البطاقة الوطنية - الوجه الأول (<span style="color: var(--danger);" data-i18n="lblReq">إجباري</span>)</label>
                     <input type="file" accept="image/*" id="cinFront" onchange="validateDriverReg()">
                 </div>
 
                 <div class="field-group">
-                    <label>📸 صورة البطاقة الوطنية - الوجه الثاني (<span style="color: var(--danger);">إجباري</span>)</label>
+                    <label data-i18n="lblCinBack">📸 صورة البطاقة الوطنية - الوجه الثاني (<span style="color: var(--danger);" data-i18n="lblReq">إجباري</span>)</label>
                     <input type="file" accept="image/*" id="cinBack" onchange="validateDriverReg()">
                 </div>
 
                 <div class="field-group">
-                    <label>📄 صورة شهادة ملكية الدراجة النارية/العربة (<span style="color: var(--danger);">إجباري</span>)</label>
+                    <label data-i18n="lblBikeDoc">📄 صورة شهادة ملكية الدراجة النارية/العربة (<span style="color: var(--danger);" data-i18n="lblReq">إجباري</span>)</label>
                     <input type="file" accept="image/*" id="bikeDoc" onchange="validateDriverReg()">
                 </div>
 
                 <div class="security-box">
-                    🔒 <b>التنبيهات الأمنية وسياسة نقل البيانات:</b>
-                    <ul style="margin-right: 15px; margin-top: 4px; font-size: 10px;">
-                        <li>يمنع قبول أي طرد مغلق دون التحقق المرئي من المحتوى.</li>
-                        <li><b>تنبيه هام:</b> بالموافقة على هذا الطلب، فإنك تُعطي الصلاحية والموافقة الصريحة للمنصة بنقل وتسليم كافة بياناتك الشخصية والوثائق للشرطة والسلطات المختصة في حالة وجود شكاية سرقة، احتيال أو أي مخالفة قانونية.</li>
+                    🔒 <b data-i18n="lblSecNoticeTitle">التنبيهات الأمنية وسياسة نقل البيانات:</b>
+                    <ul style="margin-right: 15px; margin-top: 4px; font-size: 10px;" id="secList">
+                        <li data-i18n="secNotice1">يمنع قبول أي طرد مغلق دون التحقق المرئي من المحتوى.</li>
+                        <li data-i18n="secNotice2"><b>تنبيه هام:</b> بالموافقة على هذا الطلب، فإنك تُعطي الصلاحية والموافقة الصريحة للمنصة بنقل وتسليم كافة بياناتك الشخصية والوثائق للشرطة والسلطات المختصة في حالة وجود شكاية سرقة، احتيال أو أي مخالفة قانونية.</li>
                     </ul>
                     <label class="legal-checkbox">
-                        <input type="checkbox" id="driverLegalAgree" onchange="validateDriverReg()"> أوافق على الشروط والتنبيهات الأمنية وإعطاء البيانات للشرطة عند الشكاوي.
+                        <input type="checkbox" id="driverLegalAgree" onchange="validateDriverReg()"> <span data-i18n="lblDriverAgree">أوافق على الشروط والتنبيهات الأمنية وإعطاء البيانات للشرطة عند الشكاوي.</span>
                     </label>
                 </div>
 
-                <button class="btn-submit" id="submitDriverBtn" disabled onclick="alert('تم إرسال طلب الانضمام مكللاً بالنجاح! ستتم مراجعته من الإدارة.')">تقديم طلب الانضمام 📩</button>
+                <button class="btn-submit" id="submitDriverBtn" disabled onclick="alert(currentLang === 'ar' ? 'تم إرسال طلب الانضمام مكللاً بالنجاح! ستتم مراجعته من الإدارة.' : 'Candidature envoyée avec succès !')" data-i18n="btnSubmitReg">تقديم طلب الانضمام 📩</button>
             </div>
 
             <!-- 5. لوحة تحكم الأدمن الخاصّة (محمية برمز السر) -->
             <div id="adminView" class="view-panel">
-                <h3 style="font-size: 14px; color: var(--danger); margin-bottom: 12px;">⚙️ لوحة تحكم المدير (الأدمن)</h3>
+                <h3 style="font-size: 14px; color: var(--danger); margin-bottom: 12px;" data-i18n="adminPanelTitle">⚙️ لوحة تحكم المدير (الأدمن)</h3>
 
-                <!-- تتبع الطلبيات الشامل -->
                 <div class="card">
-                    <h4 style="font-size: 12px; margin-bottom: 6px;">🔎 نظام تتبع الطلبيات الشامل</h4>
+                    <h4 style="font-size: 12px; margin-bottom: 6px;" data-i18n="adminTrackingTitle">🔎 نظام تتبع الطلبيات الشامل</h4>
                     <div style="background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; margin-bottom: 6px; font-size: 11px;">
                         <b>الطلب: #4829</b> | التتبع: <span style="color: var(--info);">TRK-4829-MA</span><br>
                         الزبون: محمد أمين | المندوب: خالد السعدي<br>
-                        الحالة: <b id="adminStatus-4829" style="color: var(--warning);">قيد التوصيل 🛵</b>
+                        الحالة: <b id="adminStatus-4829" style="color: var(--warning);" data-i18n="statusInTransit">قيد التوصيل 🛵</b>
                     </div>
                 </div>
 
                 <div class="card">
-                    <h4 style="font-size: 12px; margin-bottom: 6px;">💵 تعديل تسعيرة التطبيق</h4>
+                    <h4 style="font-size: 12px; margin-bottom: 6px;" data-i18n="adminPricingTitle">💵 تعديل تسعيرة التطبيق</h4>
                     <div class="field-group">
-                        <label>الحد الأدنى للأجرة (درهم)</label>
+                        <label data-i18n="lblMinFare">الحد الأدنى للأجرة (درهم)</label>
                         <input type="number" value="30" id="adminMinFare">
                     </div>
                     <div class="field-group">
-                        <label>سعر الكيلومتر الإضافي (درهم)</label>
+                        <label data-i18n="lblKmRate">سعر الكيلومتر الإضافي (درهم)</label>
                         <input type="number" value="3" id="adminKmRate">
                     </div>
-                    <button class="quick-btn" style="background: var(--primary); width: 100%;" onclick="alert('تم تحديث التسعيرة بنجاح!')">حفظ التعديلات 💾</button>
+                    <button class="quick-btn" style="background: var(--primary); width: 100%;" onclick="alert(currentLang === 'ar' ? 'تم تحديث التسعيرة بنجاح!' : 'Tarification mise à jour !')" data-i18n="btnSavePricing">حفظ التعديلات 💾</button>
                 </div>
 
                 <div class="card">
-                    <h4 style="font-size: 12px; margin-bottom: 6px;">🚫 إدارة وحظر المندوبين المخالفين</h4>
+                    <h4 style="font-size: 12px; margin-bottom: 6px;" data-i18n="adminBanTitle">🚫 إدارة وحظر المندوبين المخالفين</h4>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
                         <span style="font-size: 11px;">المندوب: خالد السعدي (CIN: CD9876)</span>
-                        <button class="quick-btn" style="background: var(--danger);" onclick="alert('تم حظر المندوب المخالف بنجاح!')">حظر 🛑</button>
+                        <button class="quick-btn" style="background: var(--danger);" onclick="alert(currentLang === 'ar' ? 'تم حظر المندوب المخالف بنجاح!' : 'Livreur bloqué avec succès !')" data-i18n="btnBan">حظر 🛑</button>
                     </div>
                 </div>
 
                 <div class="card">
-                    <h4 style="font-size: 12px; margin-bottom: 6px;">📢 معاينة ومراقبة الشكايات</h4>
+                    <h4 style="font-size: 12px; margin-bottom: 6px;" data-i18n="adminComplaintsTitle">📢 معاينة ومراقبة الشكايات</h4>
                     <p style="font-size: 10px; color: var(--text-muted);">شكاية #102: تأخر المندوب عن التسليم - الزبون: أحمد</p>
-                    <button class="quick-btn" style="background: var(--info); margin-top: 6px;" onclick="alert('جاري التواصل وتتبع المسار بالتفصيل...')">معاينة الشكاية وتتبع الطلب 🔍</button>
+                    <button class="quick-btn" style="background: var(--info); margin-top: 6px;" onclick="alert(currentLang === 'ar' ? 'جاري التواصل وتتبع المسار بالتفصيل...' : 'Suivi en cours...')" data-i18n="btnViewComplaint">معاينة الشكاية وتتبع الطلب 🔍</button>
                 </div>
             </div>
 
@@ -418,10 +501,218 @@
     </div>
 
     <script>
+        // قاموس الترجمة ثنائي اللغة (العربية / الفرنسية)
+        const i18nData = {
+            ar: {
+                slogan: "نسخر ليك نقضي ليك اغراضك بطريقة احترافية في جميع أنحاء الدار البيضاء",
+                navClient: "🙋‍♂️ الزبون",
+                navDriver: "🛵 المندوب",
+                navOrders: "📡 الطلبيات والرادار",
+                navRegister: "📝 الانضمام",
+                navAdmin: "⚙️ الأدمن",
+                tabGroceries: "🛒 مستلزمات",
+                tabParcel: "📦 نقل طرد",
+                tabPharmacy: "💊 صيدلية",
+                lblClientName: "👤 الاسم الكامل للزبون",
+                phClientName: "أدخل اسمك الكامل...",
+                hintClientName: "💡 يساعد المندوب في التعرف عليك وسهولة التواصل عند الوصول",
+                lblClientPhone: "📞 رقم الهاتف الشخصي",
+                phClientPhone: "06XXXXXXXX",
+                hintClientPhone: "💡 سنستخدم هذا الرقم لتأكيد التوصيل والتنسيق المباشر",
+                lblPickup: "🟢 نقطة الاستلام / المتجر",
+                phPickup: "حدد نقطة الاستلام...",
+                hintPickup: "📍 انقر على الخريطة أعلاه لتحديد المتجر أو اكتب العنوان بدقة",
+                lblDropoff: "🔴 عنوان التسليم الخاص بك",
+                phDropoff: "حدد مكان التسليم بالضبط...",
+                hintDropoff: "🏠 اكتب اسم الحي، الشارع ورقم المنزل لضمان وصول سريع",
+                lblDetails: "📝 تفاصيل التسخيرة والطلبات",
+                phDetails: "أدخل تفاصيل الطلب...",
+                hintDetails: "✍️ اكتب المنتجات أو الأغراض بالتفصيل لتفادي أي أخطاء في التسوق",
+                lblUploadImg: "📸 صورة الطرد / المشتريات (إجبارية)",
+                btnUploadImg: "📷 رفع صورة الطرد (إجباري)",
+                hintUploadImg: "📌 صورة الطرد أو قائمة المشتريات تضمن توثيق الطلب بأمان",
+                lblReq: "إجبارية",
+                lblCalcDist: "المسافة المحسوبة:",
+                lblCalcFare: "التكلفة التلقائية:",
+                lblOfferedFare: "الأجرة المقترحة للمندوب (ابتداءً من 30 درهم):",
+                hintFare: "💡 زيادة الأجرة تحفز المندوبين وقبول طلبك في وقت أسرع",
+                lblSecTitle: "تعهد أمني وقانوني:",
+                lblSecText: "يتحمل الزبون المسؤولية القانونية الكاملة عن المحتويات.",
+                lblLegalAgree: "أوافق على كافة الشروط والمسؤولية القانونية",
+                btnSubmitOrder: "إرسال الطلب الآن 🚀",
+                lblWalletBal: "رصيد المحفظة (العمولة 10%)",
+                btnRecharge: "💳 شحن",
+                lblRIBTitle: "رقم الحساب البنكي لشحن الرصيد:",
+                lblCopyRIB: "🔒 اضغط هنا لإظهار/نسخ رقم الحساب البنكي (RIB)",
+                lblDirectContact: "💬 التواصل المباشر مع الزبون:",
+                btnWhatsapp: "📲 التواصل المباشر عبر واتساب (WhatsApp)",
+                lblInAppChat: "المحادثة المكتوبة داخل التطبيق:",
+                chatMsg1: "الزبون: السلام عليكم، في انتظار استلام الطرد.",
+                chatMsg2: "المندوب: وعليكم السلام، أنا في الطريق للمتجر الآن.",
+                phChatInput: "اكتب رسالة...",
+                btnSendMsg: "إرسال 📤",
+                lblManageOrder: "🛵 إدارة الطلبية الحالية (#4829)",
+                lblCompleteHint: "عند تسليم الطرد للزبون بالكامل اضغط على زر التكفل والوصول:",
+                btnMarkComplete: "✅ الوصول التام وإنهاء الطلبية",
+                lblRateClient: "⭐ تقييم الزبون",
+                lblRateHint: "قيم تجربة التعامل مع الزبون بعد الانتهاء:",
+                radarSearching: "جاري البث والتنقيب عن طلبيات قريبة منك عبر الرادار...",
+                lblAvailableOrders: "📋 القائمة المباشرة للطلبيات المتاحة:",
+                orderNum: "طلب رقم",
+                statusInTransit: "قيد التوصيل 🛵",
+                statusNew: "جديد 🟢",
+                clientTag: "الزبون:",
+                trackTag: "الرقم التتبعي:",
+                fareTag: "الأجرة:",
+                otpTag: "رمز أمان الاستلام (OTP):",
+                btnAcceptOrder: "قبول الطلب الآن ✋",
+                regTitle: "📝 طلب الانضمام كـ مندوب توصيل جديد",
+                lblFullName: "الاسم الكامل",
+                phFullName: "الاسم الشخصي والعائلي",
+                lblRegPhone: "رقم الهاتف",
+                lblCIN: "رقم البطاقة الوطنية (CIN)",
+                phCIN: "مثال: AB123456",
+                lblCinFront: "📸 صورة البطاقة الوطنية - الوجه الأول (إجباري)",
+                lblCinBack: "📸 صورة البطاقة الوطنية - الوجه الثاني (إجباري)",
+                lblBikeDoc: "📄 صورة شهادة ملكية الدراجة النارية/العربة (إجباري)",
+                lblSecNoticeTitle: "التنبيهات الأمنية وسياسة نقل البيانات:",
+                secNotice1: "يمنع قبول أي طرد مغلق دون التحقق المرئي من المحتوى.",
+                secNotice2: "تنبيه هام: بالموافقة على هذا الطلب، فإنك تُعطي الصلاحية والموافقة الصريحة للمنصة بنقل وتسليم كافة بياناتك الشخصية والوثائق للشرطة والسلطات المختصة في حالة وجود شكاية سرقة، احتيال أو أي مخالفة قانونية.",
+                lblDriverAgree: "أوافق على الشروط والتنبيهات الأمنية وإعطاء البيانات للشرطة عند الشكاوي.",
+                btnSubmitReg: "تقديم طلب الانضمام 📩",
+                adminPanelTitle: "⚙️ لوحة تحكم المدير (الأدمن)",
+                adminTrackingTitle: "🔎 نظام تتبع الطلبيات الشامل",
+                adminPricingTitle: "💵 تعديل تسعيرة التطبيق",
+                lblMinFare: "الحد الأدنى للأجرة (درهم)",
+                lblKmRate: "سعر الكيلومتر الإضافي (درهم)",
+                btnSavePricing: "حفظ التعديلات 💾",
+                adminBanTitle: "🚫 إدارة وحظر المندوبين المخالفين",
+                btnBan: "حظر 🛑",
+                adminComplaintsTitle: "📢 معاينة ومراقبة الشكايات",
+                btnViewComplaint: "معاينة الشكاية وتتبع الطلب 🔍"
+            },
+            fr: {
+                slogan: "Vos courses et coursier sur-mesure livrés avec professionnalisme dans tout Casablanca",
+                navClient: "🙋‍♂️ Client",
+                navDriver: "🛵 Livreur",
+                navOrders: "📡 Radar & Ordres",
+                navRegister: "📝 Devenir Livreur",
+                navAdmin: "⚙️ Admin",
+                tabGroceries: "🛒 Courses",
+                tabParcel: "📦 Colis",
+                tabPharmacy: "💊 Pharmacie",
+                lblClientName: "👤 Nom complet du client",
+                phClientName: "Entrez votre nom complet...",
+                hintClientName: "💡 Aide le livreur à vous identifier facilement à son arrivée",
+                lblClientPhone: "📞 Numéro de téléphone",
+                phClientPhone: "06XXXXXXXX",
+                hintClientPhone: "💡 Utilisé pour la confirmation et la coordination directe",
+                lblPickup: "🟢 Point de retrait / Magasin",
+                phPickup: "Définir le lieu de retrait...",
+                hintPickup: "📍 Cliquez sur la carte ci-dessus ou saisissez l'adresse exacte",
+                lblDropoff: "🔴 Adresse de livraison",
+                phDropoff: "Indiquez votre adresse exacte...",
+                hintDropoff: "🏠 Indiquez le quartier, la rue et le numéro pour une livraison rapide",
+                lblDetails: "📝 Détails des achats & instructions",
+                phDetails: "Entrez les détails de la commande...",
+                hintDetails: "✍️ Détaillez vos articles pour éviter toute erreur lors des achats",
+                lblUploadImg: "📸 Photo du colis / Liste (Obligatoire)",
+                btnUploadImg: "📷 Charger la photo du colis (Obligatoire)",
+                hintUploadImg: "📌 La photo du colis ou de la liste garantit le suivi sécurisé",
+                lblReq: "Obligatoire",
+                lblCalcDist: "Distance calculée:",
+                lblCalcFare: "Coût automatique:",
+                lblOfferedFare: "Tarif proposé au livreur (min 30 DH):",
+                hintFare: "💡 Un tarif plus élevé motive les livreurs à accepter rapidement",
+                lblSecTitle: "Engagement légal & Sécurité:",
+                lblSecText: "Le client assume la responsabilité légale complète du contenu.",
+                lblLegalAgree: "J'accepte toutes les conditions et la responsabilité légale",
+                btnSubmitOrder: "Envoyer la commande 🚀",
+                lblWalletBal: "Solde du portefeuille (Com. 10%)",
+                btnRecharge: "💳 Recharger",
+                lblRIBTitle: "RIB Bancaire pour recharge:",
+                lblCopyRIB: "🔒 Cliquez pour afficher/copier le RIB bancaire",
+                lblDirectContact: "💬 Contact direct avec le client:",
+                btnWhatsapp: "📲 Contact direct via WhatsApp",
+                lblInAppChat: "Chat intégré à l'application:",
+                chatMsg1: "Client: Bonjour, j'attends la réception du colis.",
+                chatMsg2: "Livreur: Bonjour, je suis en route vers le magasin.",
+                phChatInput: "Écrivez un message...",
+                btnSendMsg: "Envoyer 📤",
+                lblManageOrder: "🛵 Gestion de la commande (#4829)",
+                lblCompleteHint: "Après remise complète au client, cliquez ci-dessous:",
+                btnMarkComplete: "✅ Confirmer la livraison complète",
+                lblRateClient: "⭐ Évaluation du client",
+                lblRateHint: "Évaluez votre expérience avec le client:",
+                radarSearching: "Recherche de commandes à proximité via le radar...",
+                lblAvailableOrders: "📋 Commandes disponibles en direct:",
+                orderNum: "Commande N°",
+                statusInTransit: "En cours 🛵",
+                statusNew: "Nouveau 🟢",
+                clientTag: "Client:",
+                trackTag: "Code suivi:",
+                fareTag: "Tarif:",
+                otpTag: "Code de sécurité (OTP):",
+                btnAcceptOrder: "Accepter la commande ✋",
+                regTitle: "📝 Inscription comme nouveau livreur",
+                lblFullName: "Nom complet",
+                phFullName: "Prénom et Nom",
+                lblRegPhone: "Téléphone",
+                lblCIN: "Numéro de CIN",
+                phCIN: "Ex: AB123456",
+                lblCinFront: "📸 Photo CIN - Recto (Obligatoire)",
+                lblCinBack: "📸 Photo CIN - Verso (Obligatoire)",
+                lblBikeDoc: "📄 Carte grise / Propriété véhicule (Obligatoire)",
+                lblSecNoticeTitle: "Consignes de sécurité & Données personnelles:",
+                secNotice1: "Interdiction d'accepter des colis fermés sans vérification visuelle.",
+                secNotice2: "Avertissement: En validant, vous autorisez expressément la plateforme à transmettre vos données aux autorités en cas de litige ou vol.",
+                lblDriverAgree: "J'accepte les conditions de sécurité et le transfert de données si nécessaire.",
+                btnSubmitReg: "Soumettre ma candidature 📩",
+                adminPanelTitle: "⚙️ Panneau d'administration (Admin)",
+                adminTrackingTitle: "🔎 Système de suivi global",
+                adminPricingTitle: "💵 Modification de la tarification",
+                lblMinFare: "Tarif minimal (DH)",
+                lblKmRate: "Prix par KM supplémentaire (DH)",
+                btnSavePricing: "Enregistrer 💾",
+                adminBanTitle: "🚫 Gestion et blocage des livreurs",
+                btnBan: "Bloquer 🛑",
+                adminComplaintsTitle: "📢 Centre de réclamations",
+                btnViewComplaint: "Consulter la réclamation 🔍"
+            }
+        };
+
+        let currentLang = 'ar';
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'ar' ? 'fr' : 'ar';
+            const htmlTag = document.documentElement;
+            htmlTag.setAttribute('lang', currentLang);
+            htmlTag.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
+
+            const langBtn = document.querySelector('.lang-switch-btn');
+            langBtn.innerText = currentLang === 'ar' ? 'Français 🌐' : 'العربية 🌐';
+
+            // تحديث النصوص ذات السمة data-i18n
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (i18nData[currentLang][key]) {
+                    el.innerText = i18nData[currentLang][key];
+                }
+            });
+
+            // تحديث النصوص داخل placeholders
+            document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+                const key = el.getAttribute('data-i18n-ph');
+                if (i18nData[currentLang][key]) {
+                    el.placeholder = i18nData[currentLang][key];
+                }
+            });
+        }
+
         // 1. تهيئة الخريطة Leaflet
         const map = L.map('map', { zoomControl: false }).setView([33.5731, -7.5898], 14);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
-        L.marker([33.5731, -7.5898]).addTo(map).bindPopup("🟢 موقعك الحقيقي").openPopup();
+        L.marker([33.5731, -7.5898]).addTo(map).bindPopup("🟢 Casa - Casablanca").openPopup();
 
         const mapElement = document.getElementById('map');
         const bottomSheet = document.getElementById('bottomSheet');
@@ -446,27 +737,28 @@
 
         // 3. فتح لوحة تحكم الأدمن بالكود الخاص (115460)
         function openAdminPanel(btn) {
-            const pass = prompt("🔐 أدخل كود الوصول الخاص بالأدمن:");
+            const msg = currentLang === 'ar' ? "🔐 أدخل كود الوصول الخاص بالأدمن:" : "🔐 Entrez le code d'accès Admin :";
+            const pass = prompt(msg);
             if (pass === "115460") {
                 switchMainView('adminView', btn);
             } else if (pass !== null) {
-                alert("❌ كود الوصول غير صحيح!");
+                alert(currentLang === 'ar' ? "❌ كود الوصول غير صحيح!" : "❌ Code d'accès incorrect !");
             }
         }
 
         // 4. تفعيل الوصول التام وتحديث الحالة لدى الأدمن والمندوب
         function markComplete(orderId) {
-            alert('✅ تم إنهاء الطلبية بنجاح وتوثيق الوصول التام!');
+            alert(currentLang === 'ar' ? '✅ تم إنهاء الطلبية بنجاح وتوثيق الوصول التام!' : '✅ Commande livrée avec succès !');
             const statusBadge = document.getElementById('status-' + orderId);
             const adminStatus = document.getElementById('adminStatus-' + orderId);
             
             if (statusBadge) {
                 statusBadge.className = "badge badge-success";
-                statusBadge.innerText = "الوصول التام ✅";
+                statusBadge.innerText = currentLang === 'ar' ? "الوصول التام ✅" : "Livré ✅";
             }
             if (adminStatus) {
                 adminStatus.style.color = "var(--primary)";
-                adminStatus.innerText = "الوصول التام مكتمل ✅";
+                adminStatus.innerText = currentLang === 'ar' ? "الوصول التام مكتمل ✅" : "Livraison complète ✅";
             }
         }
 
@@ -482,7 +774,7 @@
                         star.classList.remove('active');
                     }
                 });
-                alert('تم تسجيل التقييم بـ ' + val + ' نجوم بنجاح! ⭐');
+                alert((currentLang === 'ar' ? 'تم تسجيل التقييم بـ ' : 'Note enregistrée : ') + val + (currentLang === 'ar' ? ' نجوم بنجاح! ⭐' : ' étoiles ! ⭐'));
             }
         }
 
@@ -540,7 +832,10 @@
         // 9. نسخ رقم الحساب البنكي
         function copyRIB(rib) {
             navigator.clipboard.writeText(rib.replace(/\s+/g, ''));
-            alert("رقم الحساب البنكي للتطبيق:\n" + rib + "\n\nتم النسخ بنجاح!");
+            const msg = currentLang === 'ar' 
+                ? "رقم الحساب البنكي للتطبيق:\n" + rib + "\n\nتم النسخ بنجاح!"
+                : "RIB de l'application :\n" + rib + "\n\nCopié avec succès !";
+            alert(msg);
         }
 
         // 10. المحادثة الكتابية
@@ -551,7 +846,7 @@
                 const chatBox = document.getElementById('chatBox');
                 const msgDiv = document.createElement('div');
                 msgDiv.className = 'chat-msg driver';
-                msgDiv.innerText = "أنت: " + msg;
+                msgDiv.innerText = (currentLang === 'ar' ? "أنت: " : "Vous: ") + msg;
                 chatBox.appendChild(msgDiv);
                 chatBox.scrollTop = chatBox.scrollHeight;
                 input.value = '';
