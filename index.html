@@ -709,26 +709,42 @@
             document.getElementById(id).classList.add('active');
             if (btn) btn.classList.add('active');
             if (id === 'customer-tab' && map) setTimeout(() => map.invalidateSize(), 200);
-        }<!-- نافذة الشروط القانونية وسياسة الخصوصية -->
-<div class="legal-modal-overlay" id="legalModal">
-    <div class="legal-box">
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border); padding-bottom: 10px; margin-bottom: 12px;">
-            <h3 style="color: var(--accent); font-size: 15px;">⚖️ الشروط القانونية وسياسة الخصوصية</h3>
-            <button onclick="closeLegalModal()" style="background:none; border:none; color:white; font-size:16px; cursor:pointer;">✕</button>
-        </div>
-        <div class="legal-content">
-            <h4>1. سياسة الخصوصية وحماية البيانات</h4>
-            <p>نحن في منصة "نقضيها عليك" نحترم خصوصيتك ونلتزم بحماية بياناتك الشخصية (الاسم، الهاتف، العنوان، وصور وثائق السائقين). تُستخدم هذه البيانات حصرياً لتسهيل وتأمين عمليات التوصيل والتحقق من الهوية، ولا يتم مشاركتها أو بيعها لأي جهة تجارية خارجية.</p>
-            
-            <h4>2. شروط الخدمة والمسؤولية</h4>
-            <p>المنصة تعتبر وسيطاً تقنياً يربط بين الزبون والسائق المنفذ. نحن لا تتحمل أي مسؤولية قانونية عن محتويات الطرود المرسلة أو أي نزاعات تنشأ مباشرة بين الطرفين خارج نطاق الضوابط التقنية للمنصة.</p>
+        }
+            <!-- نافذة الشروط القانونية وسياسة الخصوصية -->
+    <div class="legal-modal-overlay" id="legalModal" style="display: none;">
+        <div class="legal-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border); padding-bottom: 10px; margin-bottom: 12px;">
+                <h3 style="color: var(--accent); font-size: 15px;">⚖️ الشروط القانونية وسياسة الخصوصية</h3>
+                <button onclick="closeLegalModal()" style="background:none; border:none; color:white; font-size:16px; cursor:pointer;">✕</button>
+            </div>
+            <div class="legal-content">
+                <h4>1. سياسة الخصوصية وحماية البيانات</h4>
+                <p>نحن في منصة "نقضيها عليك" نحترم خصوصيتك ونلتزم بحماية بياناتك الشخصية (الاسم، الهاتف، العنوان، وصور وثائق السائقين). تُستخدم هذه البيانات حصرياً لتسهيل وتأمين عمليات التوصيل والتحقق من الهوية، ولا يتم مشاركتها أو بيعها لأي جهة تجارية خارجية.</p>
+                
+                <h4>2. شروط الخدمة والمسؤولية</h4>
+                <p>المنصة تعتبر وسيطاً تقنياً يربط بين الزبون والسائق المنفذ. نحن لا نتحمل أي مسؤولية قانونية عن محتويات الطرود المرسلة أو أي نزاعات تنشأ مباشرة بين الطرفين خارج نطاق الضوابط التقنية للمنصة.</p>
 
-            <h4>3. التنبيهات الأمنية والتعاون مع السلطات</h4>
-            <p>جميع العمليات، أرقام الهواتف، وبيانات البطاقات الوطنية (CIN) مسجلة ومؤمنة سحابياً. تنص قوانين المنصة صراحة على **التعاون التام والمشاركت الفورية للبيانات مع السلطات الأمنية والشرطة** في حال تلقي أي بلاغ أو الاشتباه في أي نشاط غير قانوني، احتيالي، أو مخالف للقوانين الجاري بها العمل.</p>
+                <h4>3. التنبيهات الأمنية والتعاون مع السلطات</h4>
+                <p>جميع العمليات، أرقام الهواتف، وبيانات البطاقات الوطنية (CIN) مسجلة ومؤمنة سحابياً. تنص قوانين المنصة صراحة على <strong>التعاون التام والمشاركة الفورية للبيانات مع السلطات الأمنية والشرطة</strong> في حال تلقي أي بلاغ أو الاشتباه في أي نشاط غير قانوني، احتيالي، أو مخالف للقوانين الجاري بها العمل.</p>
+            </div>
+            <button onclick="closeLegalModal()" class="btn btn-primary" style="margin-top: 14px; padding: 10px; font-size: 12px;">فهمت ووافقـت ✓</button>
         </div>
-        <button onclick="closeLegalModal()" class="btn btn-primary" style="margin-top: 14px; padding: 10px; font-size: 12px;">فهمت ووافقـت ✓</button>
     </div>
-</div>
+
+    <!-- زر عرض الشروط القانونية في أسفل التطبيق -->
+    <div style="text-align: center; margin: 15px 0;">
+        <button onclick="openLegalModal()" style="background: none; border: none; color: var(--text-muted); font-size: 10px; text-decoration: underline; cursor: pointer;">سياسة الخصوصية والشروط الأمنية والقانونية</button>
+    </div>
+
+    <script>
+        function openLegalModal() {
+            document.getElementById('legalModal').style.display = 'flex';
+        }
+        function closeLegalModal() {
+            document.getElementById('legalModal').style.display = 'none';
+        }
+    </script>
+
 
     </script>
 </body>
