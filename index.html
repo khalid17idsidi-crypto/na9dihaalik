@@ -130,7 +130,6 @@
         <div class="bottom-sheet" id="bottomSheet">
             <div class="sheet-handle"></div>
 
-            <!-- 1. الشاشة الرئيسية -->
             <div id="homeView" class="view-panel active">
                 <div style="text-align: center; padding: 20px 0;">
                     <h2 style="color: var(--primary); font-weight: 900;">🛵 نقضيها عليك ... في كازا</h2>
@@ -139,7 +138,6 @@
                 </div>
             </div>
 
-            <!-- 2. واجهة إنشاء حساب جديد -->
             <div id="signupAuthView" class="view-panel">
                 <h4 style="font-size: 14px; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">✨ إنشاء حساب جديد</h4>
 
@@ -185,7 +183,6 @@
                 <span class="link-action" onclick="switchMainView('loginAuthView', null)">لديك حساب بالفعل؟ تسجيل الدخول</span>
             </div>
 
-            <!-- 3. واجهة تسجيل الدخول -->
             <div id="loginAuthView" class="view-panel">
                 <h4 style="font-size: 14px; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">🔐 تسجيل الدخول</h4>
                 
@@ -203,7 +200,6 @@
                 <span class="link-action" onclick="switchMainView('signupAuthView', document.getElementById('navAuth'))">ليس لديك حساب؟ إنشاء حساب جديد</span>
             </div>
 
-            <!-- 4. البروفايل الشخصي -->
             <div id="profileView" class="view-panel">
                 <h4 style="font-size: 14px; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">👤 البروفايل الشخصي</h4>
                 
@@ -223,7 +219,6 @@
                 <button class="btn-submit btn-logout" onclick="logoutUser()">تسجيل الخروج 🚪</button>
             </div>
 
-            <!-- 5. لوحة الأدمن -->
             <div id="adminView" class="view-panel">
                 <h3 style="font-size: 14px; color: var(--danger); margin-bottom: 12px;">⚙️ لوحة تحكم الأدمن</h3>
                 <p style="font-size: 11px; color: var(--text-muted);">مرحباً بك يا مدير التطبيق.</p>
@@ -238,11 +233,9 @@
 
         const ADMIN_SECRET = "115460ja";
 
-        // إعداد الخريطة
         const map = L.map('map').setView([33.5731, -7.5898], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map);
 
-        // تحميل بيانات المستخدم المحفوظة عند فتح الصفحة
         window.onload = function() {
             const savedUser = localStorage.getItem('app_currentUser');
             if(savedUser) {
@@ -250,7 +243,6 @@
             }
         };
 
-        // دالة التنقل بين الواجهات
         function switchMainView(viewId, btn) {
             document.querySelectorAll('.view-panel').forEach(panel => panel.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -268,7 +260,6 @@
             }
         }
 
-        // اختيار نوع الحساب
         function selectRole(role) {
             selectedRole = role;
             document.getElementById('roleClient').classList.remove('selected');
@@ -281,7 +272,6 @@
             }
         }
 
-        // معالجة رفع الصورة الشخصية
         function handleUserPhoto(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -296,7 +286,6 @@
             }
         }
 
-        // التحقق من اكتمال الشروط
         function validateSignupForm() {
             const name = document.getElementById('signName').value.trim();
             const phone = document.getElementById('signPhone').value.trim();
@@ -310,7 +299,6 @@
             }
         }
 
-        // تنفيذ إنشاء الحساب
         function submitSignup() {
             const name = document.getElementById('signName').value.trim();
             const phone = document.getElementById('signPhone').value.trim();
@@ -324,14 +312,12 @@
                 photo: uploadedPhotoData
             };
 
-            // حفظ بيانات الحساب في المتصفح
             localStorage.setItem('app_currentUser', JSON.stringify(currentUser));
 
             alert("✅ تم إنشاء حسابك بنجاح وحفظ صورتك الشخصية بملفك!");
             openProfileView(document.getElementById('navProfile'));
         }
 
-        // تسجيل الدخول
         function submitLogin() {
             const phone = document.getElementById('loginPhone').value.trim();
             const pass = document.getElementById('loginPass').value.trim();
@@ -349,7 +335,6 @@
             }
         }
 
-        // إظهار البروفايل
         function openProfileView(btn) {
             if(!currentUser) {
                 alert("يرجى تسجيل الدخول أو إنشاء حساب جديد أولاً لمشاهدة البروفايل!");
@@ -365,13 +350,11 @@
             switchMainView('profileView', btn);
         }
 
-        // تسجيل الخروج
         function logoutUser() {
             if(confirm("هل أنت تأكد من تسجيل الخروج؟")) {
                 currentUser = null;
                 localStorage.removeItem('app_currentUser');
                 
-                // إعادة إعادة إعطاء القيم الافتراضية
                 document.getElementById('signName').value = '';
                 document.getElementById('signPhone').value = '';
                 document.getElementById('signPass').value = '';
