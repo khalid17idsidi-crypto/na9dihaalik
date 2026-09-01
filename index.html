@@ -59,7 +59,6 @@
 
         .sheet-handle { width: 40px; height: 4px; background: var(--text-muted); border-radius: 10px; margin: 0 auto 15px auto; opacity: 0.4; }
         
-        /* إصلاح إظهار وإخفاء الشاشات */
         .view-panel { display: none !important; }
         .view-panel.active { display: block !important; animation: fadeIn 0.3s ease-in-out; }
 
@@ -100,9 +99,13 @@
         .service-icon { font-size: 36px; }
         .service-title { font-size: 12px; font-weight: 800; color: var(--text-main); }
 
+        .role-selector { display: flex; gap: 10px; margin-bottom: 15px; }
+        .role-btn { flex: 1; padding: 10px; border: 1px solid var(--border); background: rgba(255,255,255,0.03); color: var(--text-muted); border-radius: 12px; font-weight: bold; font-size: 12px; cursor: pointer; text-align: center; }
+        .role-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
         .field-group { margin-bottom: 12px; }
         .field-group label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; }
-        .field-group input, .field-group textarea {
+        .field-group input, .field-group textarea, .field-group select {
             width: 100%; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--border);
             background: rgba(15, 23, 42, 0.6); color: white; font-size: 12px; outline: none;
         }
@@ -124,7 +127,6 @@
         .wallet-balance { font-size: 22px; font-weight: 800; color: var(--primary); margin: 4px 0; }
         .link-action { color: var(--primary); font-size: 11px; text-decoration: underline; cursor: pointer; text-align: center; display: block; margin-top: 10px; }
 
-        /* شبكة الإحصائيات الخاصة بالمنفذ */
         .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 10px; }
         .stat-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 8px 10px; border-radius: 10px; text-align: center; }
         .stat-title { font-size: 10px; color: var(--text-muted); margin-bottom: 2px; }
@@ -138,17 +140,17 @@
 
         <nav class="main-nav">
             <button class="nav-btn active" id="navHome" onclick="switchMainView('homeView', this)">🏠 الرئيسية</button>
+            <button class="nav-btn" id="navAuth" onclick="switchMainView('loginAuthView', this)">🔑 الحساب/التسجيل</button>
             <button class="nav-btn" id="navClient" onclick="switchMainView('clientView', this)">🙋‍♂️ الزبون</button>
             <button class="nav-btn" id="navDriver" onclick="switchMainView('driverView', this)">🛵 المندوب</button>
             <button class="nav-btn" id="navOrders" onclick="switchMainView('ordersView', this)">📡 الرادار</button>
-            <button class="nav-btn" id="navRegister" onclick="handleRegisterAccess(this)">📝 الانضمام</button>
             <button class="nav-btn admin-btn" id="navAdmin" onclick="openAdminPanel(this)">⚙️ الأدمن</button>
         </nav>
 
         <div class="bottom-sheet" id="bottomSheet">
             <div class="sheet-handle"></div>
 
-            <!-- 1. الشاشة الرئيسية -->
+            <!-- 1. الشاشة الرئيسية (متاحة للزوار) -->
             <div id="homeView" class="view-panel active">
                 <div class="app-header">
                     <div class="top-language-bar">
@@ -184,7 +186,87 @@
                 </div>
             </div>
 
-            <!-- 2. الزبون -->
+            <!-- 2. شاشة الدخول والتسجيل المميكنة -->
+            <div id="loginAuthView" class="view-panel">
+                <h4 style="font-size: 14px; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">🔐 تسجيل الدخول للتطبيق</h4>
+                
+                <div class="field-group">
+                    <label for="loginPhone">📞 رقم الهاتف</label>
+                    <input type="tel" id="loginPhone" placeholder="06XXXXXXXX">
+                </div>
+
+                <div class="field-group">
+                    <label for="loginPass">🔑 الرقم السري (Password)</label>
+                    <input type="password" id="loginPass" placeholder="أدخل الرقم السري">
+                </div>
+
+                <button class="btn-submit" onclick="submitLogin()">تسجيل الدخول 🔓</button>
+                
+                <span class="link-action" onclick="showAuthSubView('forgotPassView')">نسيت الرقم السري؟ استرجاع الكود</span>
+                <span class="link-action" style="color: white; margin-top: 15px;" onclick="showAuthSubView('signupAuthView')">ليس لديك حساب؟ إنشاء حساب جديد</span>
+            </div>
+
+            <!-- 3. إنشاء حساب جديد مع خيار (زبون / مندوب) + صورة شمسية إجبارية -->
+            <div id="signupAuthView" class="view-panel">
+                <h4 style="font-size: 14px; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">✨ إنشاء حساب جديد</h4>
+
+                <!-- اختيار صفة الحساب -->
+                <div class="field-group">
+                    <label>نوع الحساب المطلوب:</label>
+                    <div class="role-selector">
+                        <button type="button" class="role-btn active" id="roleClientBtn" onclick="setAccountRole('client')">🙋‍♂️ زبون (وضع طلبيات)</button>
+                        <button type="button" class="role-btn" id="roleDriverBtn" onclick="setAccountRole('driver')">🛵 مندوب (تنفيذ مهمات)</button>
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <label for="signPhone">📞 رقم الهاتف</label>
+                    <input type="tel" id="signPhone" placeholder="06XXXXXXXX">
+                </div>
+
+                <div class="field-group">
+                    <label for="signEmail">📧 البريد الإلكتروني (Gmail)</label>
+                    <input type="email" id="signEmail" placeholder="example@gmail.com">
+                </div>
+
+                <div class="field-group">
+                    <label for="signPass">🔑 إنشاء الرقم السري</label>
+                    <input type="password" id="signPass" placeholder="أدخل كلمة سر قوية">
+                </div>
+
+                <!-- الصورة الشمسية إلزامية للجميع -->
+                <div class="field-group">
+                    <label>📸 صورة شمسية شخصية للبروفايل (<span style="color: var(--danger);">إجبارية لكل الحسابات</span>)</label>
+                    <label class="file-upload-btn">
+                        <span>📷 رفع الصورة الشخصية الشمسية</span>
+                        <input type="file" accept="image/*" style="display: none;" onchange="handleUserPhoto(this)">
+                    </label>
+                    <img id="userPhotoPreview" class="preview-img" alt="الصورة الشخصية">
+                </div>
+
+                <button class="btn-submit" onclick="submitSignup()">تأكيد وإنشاء الحساب 📝</button>
+                <span class="link-action" onclick="showAuthSubView('loginAuthView')">لديك حساب بالفعل؟ تسجيل الدخول</span>
+            </div>
+
+            <!-- 4. استرجاع كلمة السر -->
+            <div id="forgotPassView" class="view-panel">
+                <h4 style="font-size: 14px; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">🔑 استرجاع الرقم السري</h4>
+                
+                <div class="field-group">
+                    <label for="resetPhone">📞 رقم الهاتف المسجل</label>
+                    <input type="tel" id="resetPhone" placeholder="06XXXXXXXX">
+                </div>
+
+                <div class="field-group">
+                    <label for="resetEmail">📧 البريد الإلكتروني (Gmail)</label>
+                    <input type="email" id="resetEmail" placeholder="example@gmail.com">
+                </div>
+
+                <button class="btn-submit" style="background: var(--info);" onclick="submitResetPassword()">إرسال رمز الاسترجاع 📩</button>
+                <span class="link-action" onclick="showAuthSubView('loginAuthView')">الرجوع لصفحة الدخول</span>
+            </div>
+
+            <!-- 5. الزبون (لوحة الطلبات) -->
             <div id="clientView" class="view-panel">
                 <div id="serviceBadgeContainer" class="selected-service-badge">
                     <span>📌 الخدمة المحددة:</span> <span id="selectedServiceName">🛒 مستلزمات وقضاء أغراض</span>
@@ -247,7 +329,7 @@
                 <button class="btn-submit" id="submitClientBtn" disabled onclick="alert('تم إرسال الطلب بنجاح للرادار!')">إرسال الطلب الآن 🚀</button>
             </div>
 
-            <!-- 3. المندوب -->
+            <!-- 6. المندوب (لوحة العمل والمهمات) -->
             <div id="driverView" class="view-panel">
                 <div class="wallet-card">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -264,7 +346,7 @@
                 </div>
             </div>
 
-            <!-- 4. الرادار -->
+            <!-- 7. الرادار (عرض المهمات) -->
             <div id="ordersView" class="view-panel">
                 <p style="text-align: center; font-size: 11px; color: var(--text-muted); margin-bottom: 15px;">جاري البث والتنقيب عن طلبيات قريبة منك عبر الرادار...</p>
 
@@ -278,118 +360,9 @@
                 </div>
             </div>
 
-            <!-- 5. تسجيل الدخول -->
-            <div id="loginAuthView" class="view-panel">
-                <h4 style="font-size: 14px; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">🔐 تسجيل الدخول للوصول لخانة الانضمام</h4>
-                
-                <div class="field-group">
-                    <label for="loginPhone">📞 رقم الهاتف</label>
-                    <input type="tel" id="loginPhone" placeholder="06XXXXXXXX">
-                </div>
-
-                <div class="field-group">
-                    <label for="loginPass">🔑 الرقم السري (Password)</label>
-                    <input type="password" id="loginPass" placeholder="أدخل الرقم السري">
-                </div>
-
-                <button class="btn-submit" onclick="submitLogin()">تسجيل الدخول 🔓</button>
-                
-                <span class="link-action" onclick="showAuthSubView('forgotPassView')">نسيت الرقم السري؟ استرجاع الكود</span>
-                <span class="link-action" style="color: white; margin-top: 15px;" onclick="showAuthSubView('signupAuthView')">ليس لديك حساب؟ إنشاء حساب جديد</span>
-            </div>
-
-            <!-- 6. إنشاء حساب جديد مع شرط الصورة الشمسية الإلزامي -->
-            <div id="signupAuthView" class="view-panel">
-                <h4 style="font-size: 14px; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">✨ إنشاء حساب جديد</h4>
-
-                <div class="field-group">
-                    <label for="signPhone">📞 رقم الهاتف</label>
-                    <input type="tel" id="signPhone" placeholder="06XXXXXXXX">
-                </div>
-
-                <div class="field-group">
-                    <label for="signEmail">📧 البريد الإلكتروني (Gmail)</label>
-                    <input type="email" id="signEmail" placeholder="example@gmail.com">
-                </div>
-
-                <div class="field-group">
-                    <label for="signPass">🔑 إنشاء الرقم السري</label>
-                    <input type="password" id="signPass" placeholder="أدخل كلمة سر قوية">
-                </div>
-
-                <!-- الصورة الشمسية إلزامية -->
-                <div class="field-group">
-                    <label>📸 صورة شمسية شخصية واضحة (<span style="color: var(--danger);">إجبارية للتسجيل</span>)</label>
-                    <label class="file-upload-btn">
-                        <span>📷 رفع الصورة الشخصية الشمسية (إجباري)</span>
-                        <input type="file" accept="image/*" style="display: none;" onchange="handleUserPhoto(this)">
-                    </label>
-                    <img id="userPhotoPreview" class="preview-img" alt="الصورة الشخصية">
-                </div>
-
-                <button class="btn-submit" onclick="submitSignup()">إنشاء الحساب والتسجيل 📝</button>
-                <span class="link-action" onclick="showAuthSubView('loginAuthView')">لديك حساب بالفعل؟ تسجيل الدخول</span>
-            </div>
-
-            <!-- 7. استرجاع كلمة السر -->
-            <div id="forgotPassView" class="view-panel">
-                <h4 style="font-size: 14px; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">🔑 استرجاع الرقم السري</h4>
-                
-                <div class="field-group">
-                    <label for="resetPhone">📞 رقم الهاتف المسجل</label>
-                    <input type="tel" id="resetPhone" placeholder="06XXXXXXXX">
-                </div>
-
-                <div class="field-group">
-                    <label for="resetEmail">📧 البريد الإلكتروني (Gmail)</label>
-                    <input type="email" id="resetEmail" placeholder="example@gmail.com">
-                </div>
-
-                <button class="btn-submit" style="background: var(--info);" onclick="submitResetPassword()">إرسال رمز الاسترجاع 📩</button>
-                <span class="link-action" onclick="showAuthSubView('loginAuthView')">الرجوع لصفحة الدخول</span>
-            </div>
-
-            <!-- 8. خانة الانضمام مع كارت أرباح المنفذ والإحصائيات الكاملة -->
-            <div id="registerView" class="view-panel">
-                <h4 style="font-size: 14px; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">📝 طلب الانضمام كـ مندوب توصيل جديد</h4>
-                
-                <!-- كارت المحفظة وإحصائيات المنفذ -->
-                <div class="wallet-card">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 11px; color: var(--text-muted);">💰 محفظة أرباح المنفذ (الصافي)</span>
-                        <span style="background: rgba(16, 185, 129, 0.2); color: var(--primary); padding: 2px 6px; border-radius: 4px; font-size: 10px;">حساب نشط</span>
-                    </div>
-                    <div class="wallet-balance" id="driverNetEarnings">0.00 د.م</div>
-                    
-                    <div class="stats-grid">
-                        <div class="stat-item">
-                            <div class="stat-title">خصومات التطبيق (10%)</div>
-                            <div class="stat-value" style="color: var(--danger);" id="driverAppDeductions">0.00 د.م</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-title">عدد المهمات</div>
-                            <div class="stat-value" style="color: var(--info);" id="driverTasksCount">0</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-title">التقييم العام</div>
-                            <div class="stat-value" style="color: var(--warning);" id="driverRating">⭐ 5.0</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-title">عدد الإلغاءات</div>
-                            <div class="stat-value" style="color: var(--danger);" id="driverCancellations">0</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="field-group">
-                    <label for="regName">👤 الاسم الكامل</label>
-                    <input type="text" id="regName" placeholder="الاسم الشخصي والعائلي الكامل" oninput="validateDriverReg()">
-                </div>
-
-                <div class="field-group">
-                    <label for="regPhone">📞 رقم الهاتف</label>
-                    <input type="tel" id="regPhone" placeholder="06XXXXXXXX" oninput="validateDriverReg()">
-                </div>
+            <!-- 8. وثائق الانضمام الخاصة بالمندوب فقط -->
+            <div id="registerDriverDocView" class="view-panel">
+                <h4 style="font-size: 14px; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">📄 استكمال وثائق المندوب</h4>
 
                 <div class="field-group">
                     <label>🪪 صورة البطاقة الوطنية - الوجه الأمامي (<span style="color: var(--danger);">إجبارية</span>)</label>
@@ -428,14 +401,14 @@
                     </label>
                 </div>
 
-                <button class="btn-submit" id="submitDriverBtn" disabled onclick="alert('تم إرسال طلب الانضمام بنجاح!')">تقديم طلب الانضمام 📩</button>
+                <button class="btn-submit" id="submitDriverBtn" disabled onclick="alert('تم إرسال كافة الوثائق بنجاح! سيتم مراجعة حسابك وتفعيله.')">تقديم طلب الاعتماد 📩</button>
             </div>
 
-            <!-- 9. لوحة الأدمن (مباشرة بكلمة السر 115460ja) -->
+            <!-- 9. لوحة الأدمن (رمز الدخول: 115460ja) -->
             <div id="adminView" class="view-panel">
                 <h3 style="font-size: 14px; color: var(--danger); margin-bottom: 12px;">⚙️ لوحة تحكم المدير (الأدمن)</h3>
                 <div class="card">
-                    <p style="font-size: 11px; color: var(--text-muted);">مرحباً بك يا مدير التطبيق. لديك الصلاحية الكاملة لتجاوز الحسابات ومراجعة الوثائق المرفوعة.</p>
+                    <p style="font-size: 11px; color: var(--text-muted);">مرحباً بك يا مدير التطبيق. لديك الصلاحية الكاملة لتجاوز الحسابات ومراجعة الوثائق والصور الشمسية المرفوعة.</p>
                 </div>
             </div>
         </div>
@@ -445,6 +418,7 @@
         let isLoggedIn = false;
         let isAdminLoggedIn = false;
         let uploadedUserPhoto = false;
+        let selectedRole = 'client';
 
         const ADMIN_SECRET = "115460ja";
 
@@ -460,31 +434,20 @@
             attribution: '&copy; OpenStreetMap'
         }).addTo(map);
 
-        // الدالة المسؤولة عن التنقل الصحيح بين الشاشات
         function switchMainView(viewId, btn) {
-            // إخفاء كل الواجهات
             const allPanels = document.querySelectorAll('.view-panel');
-            allPanels.forEach(panel => {
-                panel.classList.remove('active');
-            });
+            allPanels.forEach(panel => panel.classList.remove('active'));
 
-            // إلغاء التحديد عن كافة الأزرار
             const allBtns = document.querySelectorAll('.nav-btn');
             allBtns.forEach(b => b.classList.remove('active'));
 
-            // إظهار الواجهة المطلوبة وتفعيل زرها
             const targetView = document.getElementById(viewId);
-            if(targetView) {
-                targetView.classList.add('active');
-            }
+            if(targetView) targetView.classList.add('active');
 
-            if(btn) {
-                btn.classList.add('active');
-            }
+            if(btn) btn.classList.add('active');
 
-            // إخفاء أو إظهار الخريطة
             const mapEl = document.getElementById('map');
-            if(viewId === 'homeView' || viewId === 'adminView' || viewId === 'loginAuthView' || viewId === 'signupAuthView' || viewId === 'forgotPassView') {
+            if(['homeView', 'adminView', 'loginAuthView', 'signupAuthView', 'forgotPassView', 'registerDriverDocView'].includes(viewId)) {
                 mapEl.classList.add('hide-map');
             } else {
                 mapEl.classList.remove('hide-map');
@@ -498,16 +461,17 @@
             if(target) target.classList.add('active');
         }
 
-        function handleRegisterAccess(btn) {
-            if(isLoggedIn || isAdminLoggedIn) {
-                switchMainView('registerView', btn);
+        function setAccountRole(role) {
+            selectedRole = role;
+            if(role === 'client') {
+                document.getElementById('roleClientBtn').classList.add('active');
+                document.getElementById('roleDriverBtn').classList.remove('active');
             } else {
-                alert("يجب تسجيل الدخول أو إنشاء حساب بالصورة الشخصية أولاً للوصول لخانة الانضمام.");
-                switchMainView('loginAuthView', btn);
+                document.getElementById('roleDriverBtn').classList.add('active');
+                document.getElementById('roleClientBtn').classList.remove('active');
             }
         }
 
-        // رفع الصورة الشخصية الشمسية
         function handleUserPhoto(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -521,7 +485,6 @@
             }
         }
 
-        // التحقق عند إنشاء حساب جديد (الصورة شرط أساسي)
         function submitSignup() {
             const phone = document.getElementById('signPhone').value.trim();
             const email = document.getElementById('signEmail').value.trim();
@@ -538,8 +501,14 @@
             }
 
             isLoggedIn = true;
-            alert("✅ تم إنشاء الحساب بنجاح! تم توجيهك لصفحة الانضمام.");
-            switchMainView('registerView', document.getElementById('navRegister'));
+            
+            if(selectedRole === 'client') {
+                alert("✅ تم إنشاء حسابك كزبون بنجاح!");
+                switchMainView('clientView', document.getElementById('navClient'));
+            } else {
+                alert("✅ تم إنشاء حسابك كـ مندوب! يرجى رفع وثائق الاعتماد القانونية لتأكيد الحساب.");
+                showAuthSubView('registerDriverDocView');
+            }
         }
 
         function submitLogin() {
@@ -549,7 +518,7 @@
             if(phone && pass) {
                 isLoggedIn = true;
                 alert("✅ تم تسجيل الدخول بنجاح!");
-                switchMainView('registerView', document.getElementById('navRegister'));
+                switchMainView('homeView', document.getElementById('navHome'));
             } else {
                 alert("يرجى كتابة رقم الهاتف وكلمة السر.");
             }
@@ -567,15 +536,13 @@
             }
         }
 
-        // الدخول المباشر للوحة التحكم بالرمز 115460ja
         function openAdminPanel(btn) {
             const pass = prompt("أدخل كلمة المرور الخاصة بالأدمن:");
             if(pass === ADMIN_SECRET) {
                 isAdminLoggedIn = true;
-                alert("مرحباً بك يا مدير التطبيق!");
                 switchMainView('adminView', btn);
-            } else if(pass !== null) {
-                alert("كلمة السر خاطئة!");
+            } else if (pass !== null) {
+                alert("❌ كلمة المرور غير صحيحة!");
             }
         }
 
@@ -597,20 +564,6 @@
             }
         }
 
-        function validateClientForm() {
-            const name = document.getElementById('clientName').value.trim();
-            const phone = document.getElementById('clientPhone').value.trim();
-            const img = document.getElementById('clientImgPreview').src;
-            const agree = document.getElementById('clientLegalAgree').checked;
-
-            const btn = document.getElementById('submitClientBtn');
-            if(name && phone && img && agree) {
-                btn.disabled = false;
-            } else {
-                btn.disabled = true;
-            }
-        }
-
         function handleDriverDoc(input, previewId) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -618,39 +571,39 @@
                     const img = document.getElementById(previewId);
                     img.src = e.target.result;
                     img.style.display = 'block';
-
                     if(previewId === 'cinFrontPreview') driverDocs.cinFront = true;
                     if(previewId === 'cinBackPreview') driverDocs.cinBack = true;
                     if(previewId === 'ownershipPreview') driverDocs.ownership = true;
-
                     validateDriverReg();
                 }
                 reader.readAsDataURL(input.files[0]);
             }
         }
 
-        function validateDriverReg() {
-            const name = document.getElementById('regName').value.trim();
-            const phone = document.getElementById('regPhone').value.trim();
-            const agree = document.getElementById('regLegalAgree').checked;
+        function validateClientForm() {
+            const name = document.getElementById('clientName').value.trim();
+            const phone = document.getElementById('clientPhone').value.trim();
+            const agree = document.getElementById('clientLegalAgree').checked;
+            const imgPreview = document.getElementById('clientImgPreview').style.display;
 
+            const btn = document.getElementById('submitClientBtn');
+            btn.disabled = !(name && phone && agree && imgPreview === 'block');
+        }
+
+        function validateDriverReg() {
+            const agree = document.getElementById('regLegalAgree').checked;
             const btn = document.getElementById('submitDriverBtn');
-            if(name && phone && driverDocs.cinFront && driverDocs.cinBack && driverDocs.ownership && agree) {
-                btn.disabled = false;
-            } else {
-                btn.disabled = true;
-            }
+            btn.disabled = !(driverDocs.cinFront && driverDocs.cinBack && driverDocs.ownership && agree);
         }
 
         function addFare(val) {
-            const input = document.getElementById('offeredFare');
-            input.value = parseInt(input.value || 30) + val;
+            const inp = document.getElementById('offeredFare');
+            inp.value = parseInt(inp.value || 0) + val;
         }
 
         function setLanguage(lang, btn) {
-            document.querySelectorAll('.lang-btn').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            if(lang === 'fr') alert("La version française sera bientôt disponible!");
         }
     </script>
 </body>
