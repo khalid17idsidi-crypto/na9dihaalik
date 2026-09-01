@@ -65,7 +65,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* تنسيقات واجهة خيارات التسجيل الاحترافية */
         .role-selection-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 15px 0; }
         .role-card {
             background: rgba(255, 255, 255, 0.03); border: 2px solid var(--border);
@@ -80,7 +79,6 @@
         .role-title { font-size: 13px; font-weight: 800; color: white; }
         .role-desc { font-size: 10px; color: var(--text-muted); margin-top: 4px; }
 
-        /* البروفايل الشخصي للمستخدم */
         .profile-card {
             background: linear-gradient(135deg, #1e293b, #0f172a);
             border: 1px solid var(--border); border-radius: 18px; padding: 15px;
@@ -113,6 +111,7 @@
 
         .btn-submit { width: 100%; padding: 12px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border: none; border-radius: 14px; font-size: 14px; font-weight: 800; cursor: pointer; margin-top: 5px; }
         .btn-submit:disabled { background: #475569; cursor: not-allowed; }
+        .btn-logout { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); margin-top: 10px; }
         .link-action { color: var(--primary); font-size: 11px; text-decoration: underline; cursor: pointer; text-align: center; display: block; margin-top: 10px; }
     </style>
 </head>
@@ -140,11 +139,10 @@
                 </div>
             </div>
 
-            <!-- 2. واجهة إنشاء حساب جديد (احترافية ومخصصة زبون / مندوب) -->
+            <!-- 2. واجهة إنشاء حساب جديد -->
             <div id="signupAuthView" class="view-panel">
                 <h4 style="font-size: 14px; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">✨ إنشاء حساب جديد</h4>
 
-                <!-- اختيار نوع الحساب -->
                 <label style="font-size: 11px; color: var(--text-muted); font-weight: 700;">اختر نوع الحساب (إجباري):</label>
                 <div class="role-selection-grid">
                     <div class="role-card selected" id="roleClient" onclick="selectRole('client')">
@@ -174,12 +172,11 @@
                     <input type="password" id="signPass" placeholder="أدخل كلمة سر قوية" oninput="validateSignupForm()">
                 </div>
 
-                <!-- رفع الصورة الشخصية إلزامية للتعرف عليه داخل البروفايل -->
                 <div class="field-group">
-                    <label>📸 الصورة الشخصية للتعرف عليك (<span style="color: var(--danger);">إجبارية للبروفايل</span>)</label>
+                    <label>📸 الصورة الشخصية (<span style="color: var(--danger);">إجبارية للبروفايل</span>)</label>
                     <label class="file-upload-btn">
-                        <span>📷 رفع الصورة الشخصية (إجباري)</span>
-                        <input type="file" accept="image/*" style="display: none;" onchange="handleUserPhoto(this)">
+                        <span>📷 رفع الصورة الشخصية</span>
+                        <input type="file" id="userPhotoInput" accept="image/*" style="display: none;" onchange="handleUserPhoto(this)">
                     </label>
                     <img id="userPhotoPreview" class="preview-img" alt="الصورة الشخصية">
                 </div>
@@ -206,7 +203,7 @@
                 <span class="link-action" onclick="switchMainView('signupAuthView', document.getElementById('navAuth'))">ليس لديك حساب؟ إنشاء حساب جديد</span>
             </div>
 
-            <!-- 4. البروفايل الشخصي (يستعرض الصورة والبيانات بعد التسجيل) -->
+            <!-- 4. البروفايل الشخصي -->
             <div id="profileView" class="view-panel">
                 <h4 style="font-size: 14px; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">👤 البروفايل الشخصي</h4>
                 
@@ -219,9 +216,11 @@
                     </div>
                 </div>
 
-                <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 14px; padding: 12px; font-size: 11px; color: var(--text-muted);">
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 14px; padding: 12px; font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">
                     <p>✅ تم إثبات الهوية بالصورة الشخصية للتعرف عليك في النظام.</p>
                 </div>
+
+                <button class="btn-submit btn-logout" onclick="logoutUser()">تسجيل الخروج 🚪</button>
             </div>
 
             <!-- 5. لوحة الأدمن -->
@@ -234,7 +233,7 @@
 
     <script>
         let currentUser = null;
-        let selectedRole = 'client'; // الخيار الافتراضي: زبون
+        let selectedRole = 'client';
         let uploadedPhotoData = null;
 
         const ADMIN_SECRET = "115460ja";
@@ -242,6 +241,14 @@
         // إعداد الخريطة
         const map = L.map('map').setView([33.5731, -7.5898], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map);
+
+        // تحميل بيانات المستخدم المحفوظة عند فتح الصفحة
+        window.onload = function() {
+            const savedUser = localStorage.getItem('app_currentUser');
+            if(savedUser) {
+                currentUser = JSON.parse(savedUser);
+            }
+        };
 
         // دالة التنقل بين الواجهات
         function switchMainView(viewId, btn) {
@@ -261,7 +268,7 @@
             }
         }
 
-        // اختيار نوع الحساب (زبون / مندوب)
+        // اختيار نوع الحساب
         function selectRole(role) {
             selectedRole = role;
             document.getElementById('roleClient').classList.remove('selected');
@@ -274,7 +281,7 @@
             }
         }
 
-        // معالجة رفع الصورة الشخصية وتخزينها
+        // معالجة رفع الصورة الشخصية
         function handleUserPhoto(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -289,7 +296,7 @@
             }
         }
 
-        // التحقق من اكتمال الشروط قبل تفعيل زر التسجيل
+        // التحقق من اكتمال الشروط
         function validateSignupForm() {
             const name = document.getElementById('signName').value.trim();
             const phone = document.getElementById('signPhone').value.trim();
@@ -303,23 +310,46 @@
             }
         }
 
-        // تنفيذ إنشاء الحساب وتحديث بيانات البروفايل
+        // تنفيذ إنشاء الحساب
         function submitSignup() {
             const name = document.getElementById('signName').value.trim();
             const phone = document.getElementById('signPhone').value.trim();
+            const pass = document.getElementById('signPass').value.trim();
 
             currentUser = {
                 name: name,
                 phone: phone,
+                pass: pass,
                 role: selectedRole === 'client' ? 'زبون' : 'مندوب توصيل',
                 photo: uploadedPhotoData
             };
+
+            // حفظ بيانات الحساب في المتصفح
+            localStorage.setItem('app_currentUser', JSON.stringify(currentUser));
 
             alert("✅ تم إنشاء حسابك بنجاح وحفظ صورتك الشخصية بملفك!");
             openProfileView(document.getElementById('navProfile'));
         }
 
-        // إظهار وتحديث شاشة البروفايل الشخصي
+        // تسجيل الدخول
+        function submitLogin() {
+            const phone = document.getElementById('loginPhone').value.trim();
+            const pass = document.getElementById('loginPass').value.trim();
+
+            if(!phone || !pass) {
+                alert("يرجى إدخال جميع البيانات المطلوبة!");
+                return;
+            }
+
+            if(currentUser && currentUser.phone === phone && currentUser.pass === pass) {
+                alert("✅ تم تسجيل الدخول بنجاح!");
+                openProfileView(document.getElementById('navProfile'));
+            } else {
+                alert("❌ رقم الهاتف أو كلمة السر غير صحيحة، أو الحساب غير موجود!");
+            }
+        }
+
+        // إظهار البروفايل
         function openProfileView(btn) {
             if(!currentUser) {
                 alert("يرجى تسجيل الدخول أو إنشاء حساب جديد أولاً لمشاهدة البروفايل!");
@@ -335,14 +365,22 @@
             switchMainView('profileView', btn);
         }
 
-        function submitLogin() {
-            const phone = document.getElementById('loginPhone').value.trim();
-            const pass = document.getElementById('loginPass').value.trim();
+        // تسجيل الخروج
+        function logoutUser() {
+            if(confirm("هل أنت تأكد من تسجيل الخروج؟")) {
+                currentUser = null;
+                localStorage.removeItem('app_currentUser');
+                
+                // إعادة إعادة إعطاء القيم الافتراضية
+                document.getElementById('signName').value = '';
+                document.getElementById('signPhone').value = '';
+                document.getElementById('signPass').value = '';
+                document.getElementById('userPhotoPreview').style.display = 'none';
+                uploadedPhotoData = null;
+                validateSignupForm();
 
-            if(phone && pass) {
-                alert("✅ تم تسجيل الدخول بنجاح!");
-            } else {
-                alert("يرجى إدخال البيانات المطلوبة.");
+                alert("تم تسجيل الخروج بنجاح.");
+                switchMainView('homeView', document.getElementById('navHome'));
             }
         }
 
