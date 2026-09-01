@@ -70,7 +70,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* الهيدر الاحترافي مع أزرار اللغة الواضحة */
+        /* الهيدر الاحترافي مع أزرار اللغة */
         .app-header {
             text-align: center; margin-bottom: 20px; padding: 16px 14px;
             background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(30, 41, 59, 0.8) 100%);
@@ -147,7 +147,7 @@
         .secure-link { color: #60a5fa; text-decoration: underline; cursor: pointer; word-break: break-all; font-weight: 700; font-size: 11px; }
         .link-action { color: var(--primary); font-size: 11px; text-decoration: underline; cursor: pointer; text-align: center; display: block; margin-top: 10px; }
 
-        /* تنسيقات شبكة الإحصائيات للمنفذ داخل الانضمام */
+        /* شبكة الإحصائيات الخاصة بالمنفذ في خانة الانضمام */
         .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 10px; }
         .stat-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 8px 10px; border-radius: 10px; text-align: center; }
         .stat-title { font-size: 10px; color: var(--text-muted); margin-bottom: 2px; }
@@ -174,7 +174,6 @@
             <!-- الرئيسية -->
             <div id="homeView" class="view-panel active">
                 <div class="app-header">
-                    <!-- ايقونة اختيار اللغة واضحة في الأعلى -->
                     <div class="top-language-bar">
                         <span style="font-size: 12px; color: var(--text-muted);">🌐 اختر اللغة / Langue:</span>
                         <button class="lang-btn active" onclick="setLanguage('ar', this)">العربية</button>
@@ -328,7 +327,7 @@
                 </div>
             </div>
 
-            <!-- شاشة تسجيل الدخول (قبل الوصول للانضمام) -->
+            <!-- تسجيل الدخول -->
             <div id="loginAuthView" class="view-panel">
                 <h4 style="font-size: 14px; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">🔐 تسجيل الدخول للوصول لخانة الانضمام</h4>
                 
@@ -348,7 +347,7 @@
                 <span class="link-action" style="color: white; margin-top: 15px;" onclick="showAuthSubView('signupAuthView')">ليس لديك حساب؟ إنشاء حساب جديد</span>
             </div>
 
-            <!-- شاشة إنشاء حساب جديد -->
+            <!-- إنشاء حساب جديد مع الصورة الشخصية الإلزامية -->
             <div id="signupAuthView" class="view-panel">
                 <h4 style="font-size: 14px; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">✨ إنشاء حساب جديد</h4>
 
@@ -367,6 +366,7 @@
                     <input type="password" id="signPass" placeholder="أدخل كلمة سر قوية">
                 </div>
 
+                <!-- التعديل المطلوب: إلزامية الصورة الشخصية -->
                 <div class="field-group">
                     <label>📸 صورة شمسية شخصية واضحة (<span style="color: var(--danger);">إجبارية للتسجيل</span>)</label>
                     <label class="file-upload-btn">
@@ -380,7 +380,7 @@
                 <span class="link-action" onclick="showAuthSubView('loginAuthView')">لديك حساب بالفعل؟ تسجيل الدخول</span>
             </div>
 
-            <!-- شاشة استرجاع الكود عبر الهاتف والجميل -->
+            <!-- استرجاع الرقم السري -->
             <div id="forgotPassView" class="view-panel">
                 <h4 style="font-size: 14px; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">🔑 استرجاع الرقم السري</h4>
                 
@@ -398,14 +398,14 @@
                 <span class="link-action" onclick="showAuthSubView('loginAuthView')">الرجوع لصفحة الدخول</span>
             </div>
 
-            <!-- الانضمام (مفتوح فقط للمسجلين أو الأدمن) -->
+            <!-- الانضمام مع المحفظة وإحصائيات المنفذ -->
             <div id="registerView" class="view-panel">
                 <h4 style="font-size: 14px; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">📝 طلب الانضمام كـ مندوب توصيل جديد</h4>
                 
-                <!-- كارت المحفظة وإحصائيات المنفذ المطلوبة -->
+                <!-- التعديل المطلوب: كارت المحفظة وإحصائيات المنفذ -->
                 <div class="wallet-card">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 11px; color: var(--text-muted);">💰 محفظة أرباح المنفذ</span>
+                        <span style="font-size: 11px; color: var(--text-muted);">💰 محفظة أرباح المنفذ (الصافي)</span>
                         <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: var(--primary);">حساب نشط</span>
                     </div>
                     <div class="wallet-balance" id="driverNetEarnings">0.00 د.م</div>
@@ -491,7 +491,6 @@
     </div>
 
     <script>
-        // متغيرة لتتبع حالة الدخول وصلاحيات الأدمن والصورة الإلزامية
         let isLoggedIn = false;
         let isAdminLoggedIn = false;
         let uploadedUserPhoto = false;
@@ -504,13 +503,11 @@
             ownership: false
         };
 
-        // إعداد الخريطة
         const map = L.map('map').setView([33.5731, -7.5898], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap'
         }).addTo(map);
 
-        // التبديل بين الواجهات
         function switchMainView(viewId, btn) {
             document.querySelectorAll('.view-panel').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
@@ -528,7 +525,6 @@
             }
         }
 
-        // التحكم في الوصول لخانة الانضمام
         function handleRegisterAccess(btn) {
             if(isLoggedIn || isAdminLoggedIn) {
                 switchMainView('registerView', btn);
@@ -558,14 +554,14 @@
             }
         }
 
-        // التسجيل وإنشاء الحساب مع التثبت الصارم من الصورة الشخصية
+        // إنشاء الحساب والتحقق من الصورة الشخصية
         function submitSignup() {
             const phone = document.getElementById('signPhone').value.trim();
             const email = document.getElementById('signEmail').value.trim();
             const pass = document.getElementById('signPass').value.trim();
 
             if(!phone || !email || !pass) {
-                alert("يرجى ملء جميع الحقول المطلوب للتسجيل.");
+                alert("يرجى ملء جميع الحقول المطلوبة للتسجيل.");
                 return;
             }
 
