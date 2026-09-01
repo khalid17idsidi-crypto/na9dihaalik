@@ -408,6 +408,15 @@
                 </div>
 
                 <div class="field-group">
+                    <label>📸 صورة شمسية شخصية واضحة (<span style="color: var(--danger);">إجبارية تظهر للزبون الذي ينفذ له المهمة</span>)</label>
+                    <label class="file-upload-btn">
+                        <span>📷 رفع الصورة الشمسية الشخصية</span>
+                        <input type="file" accept="image/*" style="display: none;" onchange="handleDriverDoc(this, 'driverPhotoPreview')">
+                    </label>
+                    <img id="driverPhotoPreview" class="preview-img" alt="الصورة الشمسية للمندوب">
+                </div>
+
+                <div class="field-group">
                     <label>🪪 صورة البطاقة الوطنية - الوجه الأمامي (<span style="color: var(--danger);">إجبارية</span>)</label>
                     <label class="file-upload-btn">
                         <span>📷 رفع الوجه الأمامي للبطاقة</span>
@@ -463,6 +472,15 @@
         let isAdminLoggedIn = false;
         let uploadedUserPhoto = false;
 
+        const ADMIN_SECRET = "115460ja";
+
+        let driverDocs = {
+            photo: false,
+            cinFront: false,
+            cinBack: false,
+            ownership: false
+        };
+
         // إعداد الخريطة
         const map = L.map('map').setView([33.5731, -7.5898], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -497,13 +515,24 @@
             }
         }
 
+        function openAdminPanel(btn) {
+            const pass = prompt("أدخل الرمز السري للأدمن للوصول اللوجستي:");
+            if(pass === ADMIN_SECRET) {
+                isAdminLoggedIn = true;
+                alert("تم الدخول بصلاحية الأدمن الكاملة!");
+                switchMainView('adminView', btn);
+            } else if(pass !== null) {
+                alert("الرمز السري خاطئ!");
+            }
+        }
+
         function showAuthSubView(viewId) {
             document.querySelectorAll('.view-panel').forEach(el => el.classList.remove('active'));
             const target = document.getElementById(viewId);
             if(target) target.classList.add('active');
         }
 
-        // التعامل مع تسجبل الحساب والإنشاء والنسيان
+        // التعامل مع تحميل الصور
         function handleUserPhoto(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -517,81 +546,6 @@
             }
         }
 
-        function submitSignup() {
-            const phone = document.getElementById('signPhone').value.trim();
-            const email = document.getElementById('signEmail').value.trim();
-            const pass = document.getElementById('signPass').value.trim();
-
-            if(!phone || !email || !pass) {
-                alert("المرجو ملء جميع الحقول المطلوبة!");
-                return;
-            }
-
-            if(!uploadedUserPhoto) {
-                alert("الصورة الشمسية الشخصية إلزامية ليتعرف عليك الزبون أو الإدارة عند قبول المهام!");
-                return;
-            }
-
-            isLoggedIn = true;
-            alert("تم إنشاء حسابك بنجاح! يمكنك الان التوجه لخانة الانضمام.");
-            switchMainView('registerView', document.getElementById('navRegister'));
-        }
-
-        function submitLogin() {
-            const phone = document.getElementById('loginPhone').value.trim();
-            const pass = document.getElementById('loginPass').value.trim();
-
-            if(phone && pass) {
-                isLoggedIn = true;
-                alert("تم تسجيل الدخول بنجاح!");
-                switchMainView('registerView', document.getElementById('navRegister'));
-            } else {
-                alert("يرجى إدخال رقم الهاتف والرمز السري بشكل صحيح!");
-            }
-        }
-
-        function submitResetPassword() {
-            const phone = document.getElementById('resetPhone').value.trim();
-            const email = document.getElementById('resetEmail').value.trim();
-
-            if(phone && email) {
-                alert("تم إرسال رابط/رمز استرجاع الرمز السري بنجاح إلى البريد الإلكتروني (Gmail) ورقم الهاتف!");
-                showAuthSubView('loginAuthView');
-            } else {
-                alert("المرجو إدخال رقم الهاتف والبريد الإلكتروني للتحقق!");
-            }
-        }
-
-        // اختيار الخدمة والتحويل لصفحة الزبون
-        function selectService(serviceName) {
-            document.getElementById('selectedServiceName').innerText = serviceName;
-            switchMainView('clientView', document.getElementById('navClient'));
-        }
-
-        // التحقق من نماذج الزبون والمندوب
-        function validateClientForm() {
-            const name = document.getElementById('clientName').value.trim();
-            const phone = document.getElementById('clientPhone').value.trim();
-            const agree = document.getElementById('clientLegalAgree').checked;
-            document.getElementById('submitClientBtn').disabled = !(name && phone && agree);
-        }
-
-        function validateDriverReg() {
-            const name = document.getElementById('regName').value.trim();
-            const phone = document.getElementById('regPhone').value.trim();
-            const cinFront = document.getElementById('cinFrontPreview').src;
-            const cinBack = document.getElementById('cinBackPreview').src;
-            const ownership = document.getElementById('ownershipPreview').src;
-            const agree = document.getElementById('regLegalAgree').checked;
-
-            const hasCinFront = cinFront && cinFront.startsWith('data:image');
-            const hasCinBack = cinBack && cinBack.startsWith('data:image');
-            const hasOwnership = ownership && ownership.startsWith('data:image');
-
-            document.getElementById('submitDriverBtn').disabled = !(name && phone && hasCinFront && hasCinBack && hasOwnership && agree);
-        }
-
-        // معالجة رفع الصور
         function handleDriverDoc(input, previewId) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -599,11 +553,77 @@
                     const img = document.getElementById(previewId);
                     img.src = e.target.result;
                     img.style.display = 'block';
+                    
+                    if (previewId === 'driverPhotoPreview') driverDocs.photo = true;
+                    if (previewId === 'cinFrontPreview') driverDocs.cinFront = true;
+                    if (previewId === 'cinBackPreview') driverDocs.cinBack = true;
+                    if (previewId === 'ownershipPreview') driverDocs.ownership = true;
+                    
                     validateDriverReg();
                 }
                 reader.readAsDataURL(input.files[0]);
             }
         }
+
+        function validateDriverReg() {
+            const name = document.getElementById('regName').value.trim();
+            const phone = document.getElementById('regPhone').value.trim();
+            const agree = document.getElementById('regLegalAgree').checked;
+            const btn = document.getElementById('submitDriverBtn');
+
+            if (name !== "" && phone !== "" && agree && driverDocs.photo && driverDocs.cinFront && driverDocs.cinBack && driverDocs.ownership) {
+                btn.disabled = false;
+            } else {
+                btn.disabled = true;
+            }
+        }
+
+        function submitSignup() {
+            const phone = document.getElementById('signPhone').value.trim();
+            const email = document.getElementById('signEmail').value.trim();
+            const pass = document.getElementById('signPass').value.trim();
+
+            if(!phone || !email || !pass) {
+                alert("يرجى ملء جميع الحقول الإلزامية.");
+                return;
+            }
+
+            if(!uploadedUserPhoto) {
+                alert("يرجى رفع الصورة الشمسية الشخصية الواضحة لإتمام إنشاء الحساب.");
+                return;
+            }
+
+            isLoggedIn = true;
+            alert("تم إنشاء الحساب بنجاح! يمكنك الآن التنقل والوصول لخانة الانضمام.");
+            switchMainView('registerView', document.getElementById('navRegister'));
+        }
+
+        function submitLogin() {
+            const phone = document.getElementById('loginPhone').value.trim();
+            const pass = document.getElementById('loginPass').value.trim();
+
+            if(phone !== "" && pass !== "") {
+                isLoggedIn = true;
+                alert("تم تسجيل الدخول بنجاح!");
+                switchMainView('registerView', document.getElementById('navRegister'));
+            } else {
+                alert("يرجى أدخال رقم الهاتف والرقم السري.");
+            }
+        }
+
+        function submitResetPassword() {
+            const phone = document.getElementById('resetPhone').value.trim();
+            const email = document.getElementById('resetEmail').value.trim();
+
+            if(phone !== "" && email !== "") {
+                alert("تم إرسال رابط إعادة تعيين كلمة السر إلى بريدك الإلكتروني وهاتفك بنجاح.");
+                showAuthSubView('loginAuthView');
+            } else {
+                alert("يرجى كتابة رقم الهاتف والبريد الإلكتروني المربوط بالحساب.");
+            }
+        }
+
+        let uploadedClientImage = false;
 
         function handleClientImage(input) {
             if (input.files && input.files[0]) {
@@ -612,64 +632,69 @@
                     const img = document.getElementById('clientImgPreview');
                     img.src = e.target.result;
                     img.style.display = 'block';
+                    uploadedClientImage = true;
+                    validateClientForm();
                 }
                 reader.readAsDataURL(input.files[0]);
             }
         }
 
-        // إدارة الأسعار والعمولات
-        function addFare(amount) {
-            const fareInput = document.getElementById('offeredFare');
-            fareInput.value = parseInt(fareInput.value || 30) + amount;
-        }
+        function validateClientForm() {
+            const name = document.getElementById('clientName').value.trim();
+            const phone = document.getElementById('clientPhone').value.trim();
+            const agree = document.getElementById('clientLegalAgree').checked;
+            const btn = document.getElementById('submitClientBtn');
 
-        function checkMinFare(input) {
-            if(parseInt(input.value) < 30 || !input.value) input.value = 30;
-        }
-
-        // نسخ رقم الحساب
-        function copyRIB(rib) {
-            navigator.clipboard.writeText(rib);
-            alert('تم نسخ رقم الحساب البنكي (RIB) بنجاح:\n' + rib);
-        }
-
-        // وظائف الشات وتأكيد الطلبيات
-        function sendMessage() {
-            const input = document.getElementById('chatInput');
-            const text = input.value.trim();
-            if(text) {
-                const chatBox = document.getElementById('chatBox');
-                const msgDiv = document.createElement('div');
-                msgDiv.className = 'chat-msg driver';
-                msgDiv.textContent = 'المندوب: ' + text;
-                chatBox.appendChild(msgDiv);
-                chatBox.scrollTop = chatBox.scrollHeight;
-                input.value = '';
+            if(name !== "" && phone !== "" && agree && uploadedClientImage) {
+                btn.disabled = false;
+            } else {
+                btn.disabled = true;
             }
         }
 
-        function markComplete(orderId) {
-            alert('تم إنهاء الطلبية رقم #' + orderId + ' وإغلاق الحساب بنجاح!');
+        function selectService(name) {
+            document.getElementById('selectedServiceName').innerText = name;
+            switchMainView('clientView', document.getElementById('navClient'));
+        }
+
+        function checkMinFare(input) {
+            if(input.value < 30) input.value = 30;
+        }
+
+        function addFare(val) {
+            const input = document.getElementById('offeredFare');
+            input.value = parseInt(input.value || 30) + val;
+        }
+
+        function copyRIB(text) {
+            navigator.clipboard.writeText(text);
+            alert("تم نسخ رقم الحساب البنكي (RIB) بنجاح: " + text);
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            if(input.value.trim() !== "") {
+                const box = document.getElementById('chatBox');
+                const msg = document.createElement('div');
+                msg.className = 'chat-msg driver';
+                msg.innerText = "المندوب: " + input.value;
+                box.appendChild(msg);
+                input.value = "";
+                box.scrollTop = box.scrollHeight;
+            }
+        }
+
+        function markComplete(id) {
+            alert("تم إنهاء وتأكيد وصول الطلبية #" + id + " بنجاح!");
         }
 
         function setLanguage(lang, btn) {
             document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-            if(btn) btn.classList.add('active');
-            
+            btn.classList.add('active');
             if(lang === 'fr') {
-                alert('La langue française sera disponible bientôt!');
+                alert("Mode Français activé.");
             } else {
-                alert('تم اختيار اللغة العربية');
-            }
-        }
-
-        function openAdminPanel(btn) {
-            const pass = prompt("أدخل كلمة سر الأدمن:");
-            if(pass === "1234") {
-                isAdminLoggedIn = true;
-                switchMainView('adminView', btn);
-            } else if(pass !== null) {
-                alert("كلمة السر خاطئة!");
+                alert("تم تفعيل اللغة العربية.");
             }
         }
     </script>
