@@ -187,7 +187,7 @@
                 </div>
             </div>
 
-            <!-- 2. خيار اختيار نوع الدخول (في الأيقونة العلوية) -->
+            <!-- 2. خيار اختيار نوع الدخول -->
             <div id="authChoiceView" class="view-panel">
                 <h4 style="font-size: 14px; text-align: center; margin-bottom: 15px;">اختر طريقة الدخول للتطبيق:</h4>
                 <div class="role-selector-grid">
@@ -320,7 +320,7 @@
                 <span class="link-action" style="color: white; margin-top: 15px;" onclick="showAuthSubView('signupAuthView')">ليس لديك حساب؟ إنشاء حساب جديد</span>
             </div>
 
-            <!-- 7. إنشاء حساب جديد مع شرط الصورة الشمسية الإلزامي للمندوب والبروفايل -->
+            <!-- 7. إنشاء حساب جديد مع صورة شخصية -->
             <div id="signupAuthView" class="view-panel">
                 <h4 style="font-size: 14px; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">✨ إنشاء حساب جديد (مندوب/زبون)</h4>
 
@@ -339,7 +339,6 @@
                     <input type="password" id="signPass" placeholder="أدخل كلمة سر قوية">
                 </div>
 
-                <!-- الصورة الشمسية إلزامية للبروفايل -->
                 <div class="field-group">
                     <label>📸 صورة شمسية شخصية للبروفايل (<span style="color: var(--danger);">إجبارية</span>)</label>
                     <label class="file-upload-btn">
@@ -371,7 +370,7 @@
                 <span class="link-action" onclick="showAuthSubView('loginAuthView')">الرجوع لصفحة الدخول</span>
             </div>
 
-            <!-- 9. خانة الانضمام واستكمال معلومات المندوب -->
+            <!-- 9. طلب الانضمام كمندوب -->
             <div id="registerView" class="view-panel">
                 <h4 style="font-size: 14px; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">📝 طلب الانضمام كـ مندوب توصيل جديد</h4>
                 
@@ -416,7 +415,7 @@
                     <label>🪪 صورة البطاقة الوطنية - الوجه الأمامي (<span style="color: var(--danger);">إجبارية</span>)</label>
                     <label class="file-upload-btn">
                         <span>📷 رفع الوجه الأمامي للبطاقة</span>
-                        <input type="file" accept="image/*" style="display: none;" onchange="handleDriverDoc(this, 'cinFrontPreview')">
+                        <input type="file" accept="image/*" style="display: none;" onchange="handleDriverDoc(this, 'cinFrontPreview', 'cinFront')">
                     </label>
                     <img id="cinFrontPreview" class="preview-img" alt="البطاقة الوطنية الأمامية">
                 </div>
@@ -425,7 +424,7 @@
                     <label>🪪 صورة البطاقة الوطنية - الوجه الخلفي (<span style="color: var(--danger);">إجبارية</span>)</label>
                     <label class="file-upload-btn">
                         <span>📷 رفع الوجه الخلفي للبطاقة</span>
-                        <input type="file" accept="image/*" style="display: none;" onchange="handleDriverDoc(this, 'cinBackPreview')">
+                        <input type="file" accept="image/*" style="display: none;" onchange="handleDriverDoc(this, 'cinBackPreview', 'cinBack')">
                     </label>
                     <img id="cinBackPreview" class="preview-img" alt="البطاقة الوطنية الخلفية">
                 </div>
@@ -434,7 +433,7 @@
                     <label>📜 صورة شهادة الملكية / الورقة الرمادية (<span style="color: var(--danger);">إجبارية</span>)</label>
                     <label class="file-upload-btn">
                         <span>📷 رفع صورة شهادة الملكية</span>
-                        <input type="file" accept="image/*" style="display: none;" onchange="handleDriverDoc(this, 'ownershipPreview')">
+                        <input type="file" accept="image/*" style="display: none;" onchange="handleDriverDoc(this, 'ownershipPreview', 'ownership')">
                     </label>
                     <img id="ownershipPreview" class="preview-img" alt="شهادة الملكية">
                 </div>
@@ -552,32 +551,36 @@
             }
         }
 
-        function handleDriverDoc(input, previewId) {
+        function handleDriverDoc(input, previewId, docKey) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const img = document.getElementById(previewId);
                     img.src = e.target.result;
                     img.style.display = 'block';
-                    if(previewId === 'cinFrontPreview') driverDocs.cinFront = true;
-                    if(previewId === 'cinBackPreview') driverDocs.cinBack = true;
-                    if(previewId === 'ownershipPreview') driverDocs.ownership = true;
+                    driverDocs[docKey] = true;
                     validateDriverReg();
                 }
                 reader.readAsDataURL(input.files[0]);
             }
         }
 
+        function addFare(amount) {
+            const input = document.getElementById('offeredFare');
+            let current = parseInt(input.value) || 30;
+            input.value = current + amount;
+        }
+
         function validateClientForm() {
             const name = document.getElementById('clientName').value.trim();
             const phone = document.getElementById('clientPhone').value.trim();
             const agree = document.getElementById('clientLegalAgree').checked;
-            const btn = document.getElementById('submitClientBtn');
+            const submitBtn = document.getElementById('submitClientBtn');
 
-            if(name && phone && agree && uploadedClientImg) {
-                btn.disabled = false;
+            if (name !== '' && phone !== '' && uploadedClientImg && agree) {
+                submitBtn.disabled = false;
             } else {
-                btn.disabled = true;
+                submitBtn.disabled = true;
             }
         }
 
@@ -585,73 +588,60 @@
             const name = document.getElementById('regName').value.trim();
             const phone = document.getElementById('regPhone').value.trim();
             const agree = document.getElementById('regLegalAgree').checked;
-            const btn = document.getElementById('submitDriverBtn');
+            const submitBtn = document.getElementById('submitDriverBtn');
 
-            if(name && phone && agree && driverDocs.cinFront && driverDocs.cinBack && driverDocs.ownership) {
-                btn.disabled = false;
+            const allDocsUploaded = driverDocs.cinFront && driverDocs.cinBack && driverDocs.ownership;
+
+            if (name !== '' && phone !== '' && allDocsUploaded && agree) {
+                submitBtn.disabled = false;
             } else {
-                btn.disabled = true;
+                submitBtn.disabled = true;
             }
-        }
-
-        function addFare(amount) {
-            const input = document.getElementById('offeredFare');
-            let val = parseInt(input.value) || 30;
-            input.value = val + amount;
-        }
-
-        function submitSignup() {
-            const phone = document.getElementById('signPhone').value.trim();
-            const email = document.getElementById('signEmail').value.trim();
-            const pass = document.getElementById('signPass').value.trim();
-
-            if(!phone || !email || !pass) {
-                alert("يرجى ملء جميع البيانات المطلوبة.");
-                return;
-            }
-
-            if(!uploadedUserPhoto) {
-                alert("❌ الصورة الشخصية الشمسية إلزامية لإنشاء الحساب والتسجيل!");
-                return;
-            }
-
-            isLoggedIn = true;
-            alert("✅ تم إنشاء الحساب بنجاح! تم توجيهك لصفحة الانضمام.");
-            switchMainView('registerView', document.getElementById('navRegister'));
         }
 
         function submitLogin() {
-            const phone = document.getElementById('loginPhone').value.trim();
-            const pass = document.getElementById('loginPass').value.trim();
-
-            if(phone && pass) {
-                isLoggedIn = true;
-                alert("✅ تم تسجيل الدخول بنجاح!");
-                switchMainView('registerView', document.getElementById('navRegister'));
+            const pass = document.getElementById('loginPass').value;
+            if (pass === ADMIN_SECRET) {
+                isAdminLoggedIn = true;
+                alert('تم تسجيل الدخول كـ أدمن بنجاح!');
+                switchMainView('adminView', document.getElementById('navAdmin'));
             } else {
-                alert("يرجى كتابة رقم الهاتف وكلمة السر.");
+                isLoggedIn = true;
+                alert('تم تسجيل الدخول بنجاح!');
+                switchMainView('homeView', document.getElementById('navHome'));
             }
+        }
+
+        function submitSignup() {
+            if (!uploadedUserPhoto) {
+                alert('يرجى رفع الصورة الشخصية الشمسية للبروفايل أولاً!');
+                return;
+            }
+            alert('تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول.');
+            showAuthSubView('loginAuthView');
         }
 
         function submitResetPassword() {
-            const phone = document.getElementById('resetPhone').value.trim();
-            const email = document.getElementById('resetEmail').value.trim();
-
-            if(phone && email) {
-                alert("📩 تم إرسال رابط إعادة التعين إلى حسابك.");
-                showAuthSubView('loginAuthView');
-            } else {
-                alert("يرجى إدخال الهاتف والبريد الإلكتروني.");
+            const phone = document.getElementById('resetPhone').value;
+            if (phone.trim() === '') {
+                alert('يرجى إدخال رقم الهاتف المسجل!');
+                return;
             }
+            alert('تم إرسال رمز استرجاع كلمة السر إلى البريد/الهاتف بنجاح.');
+            showAuthSubView('loginAuthView');
         }
 
         function openAdminPanel(btn) {
-            const pwd = prompt("أدخل كلمة سر المدير (الأدمن):");
-            if(pwd === ADMIN_SECRET) {
-                isAdminLoggedIn = true;
+            if (isAdminLoggedIn) {
                 switchMainView('adminView', btn);
-            } else if(pwd !== null) {
-                alert("❌ كلمة السر غير صحيحة!");
+            } else {
+                const pass = prompt("أدخل كلمة سر الأدمن الخاصة:");
+                if (pass === ADMIN_SECRET) {
+                    isAdminLoggedIn = true;
+                    switchMainView('adminView', btn);
+                } else if (pass !== null) {
+                    alert("كلمة السر غير صحيحة!");
+                }
             }
         }
     </script>
