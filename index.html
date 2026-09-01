@@ -146,6 +146,12 @@
         .btn-whatsapp { background: var(--whatsapp); color: white; border: none; padding: 10px; border-radius: 10px; font-weight: 700; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; margin-bottom: 8px; text-decoration: none; }
         .secure-link { color: #60a5fa; text-decoration: underline; cursor: pointer; word-break: break-all; font-weight: 700; font-size: 11px; }
         .link-action { color: var(--primary); font-size: 11px; text-decoration: underline; cursor: pointer; text-align: center; display: block; margin-top: 10px; }
+
+        /* تنسيقات شبكة الإحصائيات للمنفذ داخل الانضمام */
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 10px; }
+        .stat-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 8px 10px; border-radius: 10px; text-align: center; }
+        .stat-title { font-size: 10px; color: var(--text-muted); margin-bottom: 2px; }
+        .stat-value { font-size: 13px; font-weight: 800; color: white; }
     </style>
 </head>
 <body>
@@ -362,9 +368,9 @@
                 </div>
 
                 <div class="field-group">
-                    <label>📸 صورة شمسية شخصية واضحة (<span style="color: var(--danger);">إجبارية</span>)</label>
+                    <label>📸 صورة شمسية شخصية واضحة (<span style="color: var(--danger);">إجبارية للتسجيل</span>)</label>
                     <label class="file-upload-btn">
-                        <span>📷 رفع الصورة الشخصية الشمسية</span>
+                        <span>📷 رفع الصورة الشخصية الشمسية (إجباري)</span>
                         <input type="file" accept="image/*" style="display: none;" onchange="handleUserPhoto(this)">
                     </label>
                     <img id="userPhotoPreview" class="preview-img" alt="الصورة الشخصية">
@@ -396,6 +402,34 @@
             <div id="registerView" class="view-panel">
                 <h4 style="font-size: 14px; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">📝 طلب الانضمام كـ مندوب توصيل جديد</h4>
                 
+                <!-- كارت المحفظة وإحصائيات المنفذ المطلوبة -->
+                <div class="wallet-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 11px; color: var(--text-muted);">💰 محفظة أرباح المنفذ</span>
+                        <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: var(--primary);">حساب نشط</span>
+                    </div>
+                    <div class="wallet-balance" id="driverNetEarnings">0.00 د.م</div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-title">خصومات التطبيق (10%)</div>
+                            <div class="stat-value" style="color: var(--danger);" id="driverAppDeductions">0.00 د.م</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-title">عدد المهمات</div>
+                            <div class="stat-value" style="color: var(--info);" id="driverTasksCount">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-title">التقييم العام</div>
+                            <div class="stat-value" style="color: var(--warning);" id="driverRating">⭐ 5.0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-title">عدد الإلغاءات</div>
+                            <div class="stat-value" style="color: var(--danger);" id="driverCancellations">0</div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="field-group">
                     <label for="regName">👤 الاسم الكامل</label>
                     <input type="text" id="regName" placeholder="الاسم الشخصي والعائلي الكامل" oninput="validateDriverReg()">
@@ -457,7 +491,7 @@
     </div>
 
     <script>
-        // متغيرة لتتبع حالة الدخول وصلاحيات الأدمن
+        // متغيرة لتتبع حالة الدخول وصلاحيات الأدمن والصورة الإلزامية
         let isLoggedIn = false;
         let isAdminLoggedIn = false;
         let uploadedUserPhoto = false;
@@ -510,6 +544,7 @@
             if(target) target.classList.add('active');
         }
 
+        // التعامل مع رفع الصورة الشخصية الإلزامية
         function handleUserPhoto(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -523,50 +558,93 @@
             }
         }
 
+        // التسجيل وإنشاء الحساب مع التثبت الصارم من الصورة الشخصية
         function submitSignup() {
-            const phone = document.getElementById('signPhone').value;
-            const email = document.getElementById('signEmail').value;
-            const pass = document.getElementById('signPass').value;
+            const phone = document.getElementById('signPhone').value.trim();
+            const email = document.getElementById('signEmail').value.trim();
+            const pass = document.getElementById('signPass').value.trim();
 
             if(!phone || !email || !pass) {
-                alert("يرجى ملء كافة البيانات المطلوب.");
+                alert("يرجى ملء جميع الحقول المطلوب للتسجيل.");
                 return;
             }
+
             if(!uploadedUserPhoto) {
-                alert("الصورة الشخصية الشمسية إجبارية لإتمام إنشاء الحساب!");
+                alert("❌ الصورة الشخصية الشمسية إلزامية لإنشاء الحساب والتسجيل!");
                 return;
             }
 
             isLoggedIn = true;
-            alert("تم إنشاء حسابك بنجاح! يمكنك الآن الانضمام.");
+            alert("✅ تم إنشاء الحساب بنجاح! يمكنك الآن الدخول لخانة الانضمام.");
             switchMainView('registerView', document.getElementById('navRegister'));
         }
 
         function submitLogin() {
-            const phone = document.getElementById('loginPhone').value;
-            const pass = document.getElementById('loginPass').value;
+            const phone = document.getElementById('loginPhone').value.trim();
+            const pass = document.getElementById('loginPass').value.trim();
 
-            if(!phone || !pass) {
-                alert("يرجى إدخال رقم الهاتف وكلمة السر.");
-                return;
+            if(phone && pass) {
+                isLoggedIn = true;
+                alert("✅ تم تسجيل الدخول بنجاح!");
+                switchMainView('registerView', document.getElementById('navRegister'));
+            } else {
+                alert("يرجى أدخال رقم الهاتف وكلمة السر.");
             }
-
-            isLoggedIn = true;
-            alert("تم تسجيل الدخول بنجاح!");
-            switchMainView('registerView', document.getElementById('navRegister'));
         }
 
         function submitResetPassword() {
-            const phone = document.getElementById('resetPhone').value;
-            const email = document.getElementById('resetEmail').value;
+            const phone = document.getElementById('resetPhone').value.trim();
+            const email = document.getElementById('resetEmail').value.trim();
 
-            if(!phone || !email) {
-                alert("يرجى إدخال رقم الهاتف والبريد الإلكتروني استرجاع الكود.");
-                return;
+            if(phone && email) {
+                alert("📩 تم إرسال رابط إعادة تعيين كلمة السر إلى بريدك الإلكتروني ورسالة SMS.");
+                showAuthSubView('loginAuthView');
+            } else {
+                alert("يرجى كتابة رقم الهاتف والبريد الإلكتروني للتحقق.");
             }
+        }
 
-            alert("تم إرسال رمز استرجاع كلمة السر إلى بريدك الإلكتروني وهاتفك بنجاح.");
-            showAuthSubView('loginAuthView');
+        function openAdminPanel(btn) {
+            const pass = prompt("أدخل كلمة المرور الخاصة بالأدمن:");
+            if(pass === ADMIN_SECRET) {
+                isAdminLoggedIn = true;
+                alert("مرحباً بك يا مدير التطبيق!");
+                switchMainView('adminView', btn);
+            } else if(pass !== null) {
+                alert("كلمة السر خاطئة!");
+            }
+        }
+
+        function selectService(name) {
+            document.getElementById('selectedServiceName').innerText = name;
+            switchMainView('clientView', document.getElementById('navClient'));
+        }
+
+        function handleClientImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById('clientImgPreview');
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                    validateClientForm();
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function validateClientForm() {
+            const name = document.getElementById('clientName').value.trim();
+            const phone = document.getElementById('clientPhone').value.trim();
+            const img = document.getElementById('clientImgPreview').src;
+            const agree = document.getElementById('clientLegalAgree').checked;
+
+            const btn = document.getElementById('submitClientBtn');
+            if(name && phone && img && agree) {
+                btn.disabled = false;
+            } else {
+                btn.disabled = true;
+            }
         }
 
         function handleDriverDoc(input, previewId) {
@@ -588,86 +666,54 @@
         }
 
         function validateDriverReg() {
-            const name = document.getElementById('regName').value;
-            const phone = document.getElementById('regPhone').value;
+            const name = document.getElementById('regName').value.trim();
+            const phone = document.getElementById('regPhone').value.trim();
             const agree = document.getElementById('regLegalAgree').checked;
 
-            const isValid = name && phone && agree && driverDocs.cinFront && driverDocs.cinBack && driverDocs.ownership;
-            document.getElementById('submitDriverBtn').disabled = !isValid;
-        }
-
-        function selectService(serviceName) {
-            document.getElementById('selectedServiceName').innerText = serviceName;
-            switchMainView('clientView', document.getElementById('navClient'));
-        }
-
-        function handleClientImage(input) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = document.getElementById('clientImgPreview');
-                    img.src = e.target.result;
-                    img.style.display = 'block';
-                    validateClientForm();
-                }
-                reader.readAsDataURL(input.files[0]);
+            const btn = document.getElementById('submitDriverBtn');
+            if(name && phone && driverDocs.cinFront && driverDocs.cinBack && driverDocs.ownership && agree) {
+                btn.disabled = false;
+            } else {
+                btn.disabled = true;
             }
         }
 
-        function validateClientForm() {
-            const name = document.getElementById('clientName').value;
-            const phone = document.getElementById('clientPhone').value;
-            const agree = document.getElementById('clientLegalAgree').checked;
-            const imgDisplayed = document.getElementById('clientImgPreview').style.display === 'block';
-
-            document.getElementById('submitClientBtn').disabled = !(name && phone && agree && imgDisplayed);
+        function addFare(val) {
+            const input = document.getElementById('offeredFare');
+            input.value = parseInt(input.value || 30) + val;
         }
 
         function checkMinFare(input) {
-            if(input.value < 30) input.value = 30;
+            if(parseInt(input.value) < 30 || !input.value) input.value = 30;
         }
 
-        function addFare(amount) {
-            const input = document.getElementById('offeredFare');
-            input.value = parseInt(input.value || 30) + amount;
-        }
-
-        function copyRIB(ribText) {
-            navigator.clipboard.writeText(ribText);
-            alert("تم نسخ رقم الحساب البنكي (RIB) بنجاح: " + ribText);
+        function copyRIB(rib) {
+            navigator.clipboard.writeText(rib);
+            alert("تم نسخ رقم الحساب البنكي (RIB) بنجاح: \n" + rib);
         }
 
         function sendMessage() {
             const input = document.getElementById('chatInput');
-            if(!input.value.trim()) return;
-            const chatBox = document.getElementById('chatBox');
-            const msg = document.createElement('div');
-            msg.className = 'chat-msg driver';
-            msg.innerText = 'المندوب: ' + input.value;
-            chatBox.appendChild(msg);
-            input.value = '';
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        function markComplete(orderId) {
-            alert('تم إنهاء الطلب #' + orderId + ' بنجاح وتحديث الحالة.');
-        }
-
-        function openAdminPanel(btn) {
-            const pass = prompt("أدخل كلمة سر المدير (الأدمن):");
-            if(pass === ADMIN_SECRET) {
-                isAdminLoggedIn = true;
-                switchMainView('adminView', btn);
-            } else {
-                alert("كلمة السر خاطئة!");
+            if(input.value.trim()) {
+                const box = document.getElementById('chatBox');
+                const msg = document.createElement('div');
+                msg.className = 'chat-msg driver';
+                msg.innerText = 'المندوب: ' + input.value;
+                box.appendChild(msg);
+                box.scrollTop = box.scrollHeight;
+                input.value = '';
             }
         }
 
+        function markComplete(orderId) {
+            alert('تهانينا! تم إنهاء الطلبية #' + orderId + ' وتسليمها بنجاح.');
+        }
+
         function setLanguage(lang, btn) {
-            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.lang-btn').forEach(el => el.classList.remove('active'));
             btn.classList.add('active');
             if(lang === 'fr') {
-                alert("La langue française sera bientôt disponible!");
+                alert("La version française sera bientôt disponible!");
             }
         }
     </script>
