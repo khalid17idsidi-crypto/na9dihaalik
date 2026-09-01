@@ -339,7 +339,7 @@
                 <button class="btn-submit" onclick="submitLogin()">تسجيل الدخول 🔓</button>
                 
                 <span class="link-action" onclick="showAuthSubView('forgotPassView')">نسيت الرقم السري؟ استرجاع الكود</span>
-                <span class="link-action" style="color: white; margin-top: 15px;" onclick="showAuthSubView('signupAuthView')">ليس لديك حساب؟ **إنشاء حساب جديد**</span>
+                <span class="link-action" style="color: white; margin-top: 15px;" onclick="showAuthSubView('signupAuthView')">ليس لديك حساب؟ إنشاء حساب جديد</span>
             </div>
 
             <!-- شاشة إنشاء حساب جديد -->
@@ -361,9 +361,8 @@
                     <input type="password" id="signPass" placeholder="أدخل كلمة سر قوية">
                 </div>
 
-                <!-- الصورة الشمسية الواضحة والضرورية لتشخيص الزبون -->
                 <div class="field-group">
-                    <label>📸 صورة شمسية شخصية واضحة (<span style="color: var(--danger);">إجبارية ليتعرف عليك الزبون</span>)</label>
+                    <label>📸 صورة شمسية شخصية واضحة (<span style="color: var(--danger);">إجبارية</span>)</label>
                     <label class="file-upload-btn">
                         <span>📷 رفع الصورة الشخصية الشمسية</span>
                         <input type="file" accept="image/*" style="display: none;" onchange="handleUserPhoto(this)">
@@ -405,15 +404,6 @@
                 <div class="field-group">
                     <label for="regPhone">📞 رقم الهاتف</label>
                     <input type="tel" id="regPhone" placeholder="06XXXXXXXX" oninput="validateDriverReg()">
-                </div>
-
-                <div class="field-group">
-                    <label>📸 صورة شمسية شخصية واضحة (<span style="color: var(--danger);">إجبارية تظهر للزبون الذي ينفذ له المهمة</span>)</label>
-                    <label class="file-upload-btn">
-                        <span>📷 رفع الصورة الشمسية الشخصية</span>
-                        <input type="file" accept="image/*" style="display: none;" onchange="handleDriverDoc(this, 'driverPhotoPreview')">
-                    </label>
-                    <img id="driverPhotoPreview" class="preview-img" alt="الصورة الشمسية للمندوب">
                 </div>
 
                 <div class="field-group">
@@ -475,7 +465,6 @@
         const ADMIN_SECRET = "115460ja";
 
         let driverDocs = {
-            photo: false,
             cinFront: false,
             cinBack: false,
             ownership: false
@@ -515,24 +504,12 @@
             }
         }
 
-        function openAdminPanel(btn) {
-            const pass = prompt("أدخل الرمز السري للأدمن للوصول اللوجستي:");
-            if(pass === ADMIN_SECRET) {
-                isAdminLoggedIn = true;
-                alert("تم الدخول بصلاحية الأدمن الكاملة!");
-                switchMainView('adminView', btn);
-            } else if(pass !== null) {
-                alert("الرمز السري خاطئ!");
-            }
-        }
-
-        function showAuthSubView(viewId) {
+        function showAuthSubView(subViewId) {
             document.querySelectorAll('.view-panel').forEach(el => el.classList.remove('active'));
-            const target = document.getElementById(viewId);
+            const target = document.getElementById(subViewId);
             if(target) target.classList.add('active');
         }
 
-        // التعامل مع تحميل الصور
         function handleUserPhoto(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -546,6 +523,52 @@
             }
         }
 
+        function submitSignup() {
+            const phone = document.getElementById('signPhone').value;
+            const email = document.getElementById('signEmail').value;
+            const pass = document.getElementById('signPass').value;
+
+            if(!phone || !email || !pass) {
+                alert("يرجى ملء كافة البيانات المطلوب.");
+                return;
+            }
+            if(!uploadedUserPhoto) {
+                alert("الصورة الشخصية الشمسية إجبارية لإتمام إنشاء الحساب!");
+                return;
+            }
+
+            isLoggedIn = true;
+            alert("تم إنشاء حسابك بنجاح! يمكنك الآن الانضمام.");
+            switchMainView('registerView', document.getElementById('navRegister'));
+        }
+
+        function submitLogin() {
+            const phone = document.getElementById('loginPhone').value;
+            const pass = document.getElementById('loginPass').value;
+
+            if(!phone || !pass) {
+                alert("يرجى إدخال رقم الهاتف وكلمة السر.");
+                return;
+            }
+
+            isLoggedIn = true;
+            alert("تم تسجيل الدخول بنجاح!");
+            switchMainView('registerView', document.getElementById('navRegister'));
+        }
+
+        function submitResetPassword() {
+            const phone = document.getElementById('resetPhone').value;
+            const email = document.getElementById('resetEmail').value;
+
+            if(!phone || !email) {
+                alert("يرجى إدخال رقم الهاتف والبريد الإلكتروني استرجاع الكود.");
+                return;
+            }
+
+            alert("تم إرسال رمز استرجاع كلمة السر إلى بريدك الإلكتروني وهاتفك بنجاح.");
+            showAuthSubView('loginAuthView');
+        }
+
         function handleDriverDoc(input, previewId) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -553,12 +576,11 @@
                     const img = document.getElementById(previewId);
                     img.src = e.target.result;
                     img.style.display = 'block';
-                    
-                    if (previewId === 'driverPhotoPreview') driverDocs.photo = true;
-                    if (previewId === 'cinFrontPreview') driverDocs.cinFront = true;
-                    if (previewId === 'cinBackPreview') driverDocs.cinBack = true;
-                    if (previewId === 'ownershipPreview') driverDocs.ownership = true;
-                    
+
+                    if(previewId === 'cinFrontPreview') driverDocs.cinFront = true;
+                    if(previewId === 'cinBackPreview') driverDocs.cinBack = true;
+                    if(previewId === 'ownershipPreview') driverDocs.ownership = true;
+
                     validateDriverReg();
                 }
                 reader.readAsDataURL(input.files[0]);
@@ -566,64 +588,18 @@
         }
 
         function validateDriverReg() {
-            const name = document.getElementById('regName').value.trim();
-            const phone = document.getElementById('regPhone').value.trim();
+            const name = document.getElementById('regName').value;
+            const phone = document.getElementById('regPhone').value;
             const agree = document.getElementById('regLegalAgree').checked;
-            const btn = document.getElementById('submitDriverBtn');
 
-            if (name !== "" && phone !== "" && agree && driverDocs.photo && driverDocs.cinFront && driverDocs.cinBack && driverDocs.ownership) {
-                btn.disabled = false;
-            } else {
-                btn.disabled = true;
-            }
+            const isValid = name && phone && agree && driverDocs.cinFront && driverDocs.cinBack && driverDocs.ownership;
+            document.getElementById('submitDriverBtn').disabled = !isValid;
         }
 
-        function submitSignup() {
-            const phone = document.getElementById('signPhone').value.trim();
-            const email = document.getElementById('signEmail').value.trim();
-            const pass = document.getElementById('signPass').value.trim();
-
-            if(!phone || !email || !pass) {
-                alert("يرجى ملء جميع الحقول الإلزامية.");
-                return;
-            }
-
-            if(!uploadedUserPhoto) {
-                alert("يرجى رفع الصورة الشمسية الشخصية الواضحة لإتمام إنشاء الحساب.");
-                return;
-            }
-
-            isLoggedIn = true;
-            alert("تم إنشاء الحساب بنجاح! يمكنك الآن التنقل والوصول لخانة الانضمام.");
-            switchMainView('registerView', document.getElementById('navRegister'));
+        function selectService(serviceName) {
+            document.getElementById('selectedServiceName').innerText = serviceName;
+            switchMainView('clientView', document.getElementById('navClient'));
         }
-
-        function submitLogin() {
-            const phone = document.getElementById('loginPhone').value.trim();
-            const pass = document.getElementById('loginPass').value.trim();
-
-            if(phone !== "" && pass !== "") {
-                isLoggedIn = true;
-                alert("تم تسجيل الدخول بنجاح!");
-                switchMainView('registerView', document.getElementById('navRegister'));
-            } else {
-                alert("يرجى أدخال رقم الهاتف والرقم السري.");
-            }
-        }
-
-        function submitResetPassword() {
-            const phone = document.getElementById('resetPhone').value.trim();
-            const email = document.getElementById('resetEmail').value.trim();
-
-            if(phone !== "" && email !== "") {
-                alert("تم إرسال رابط إعادة تعيين كلمة السر إلى بريدك الإلكتروني وهاتفك بنجاح.");
-                showAuthSubView('loginAuthView');
-            } else {
-                alert("يرجى كتابة رقم الهاتف والبريد الإلكتروني المربوط بالحساب.");
-            }
-        }
-
-        let uploadedClientImage = false;
 
         function handleClientImage(input) {
             if (input.files && input.files[0]) {
@@ -632,7 +608,6 @@
                     const img = document.getElementById('clientImgPreview');
                     img.src = e.target.result;
                     img.style.display = 'block';
-                    uploadedClientImage = true;
                     validateClientForm();
                 }
                 reader.readAsDataURL(input.files[0]);
@@ -640,61 +615,59 @@
         }
 
         function validateClientForm() {
-            const name = document.getElementById('clientName').value.trim();
-            const phone = document.getElementById('clientPhone').value.trim();
+            const name = document.getElementById('clientName').value;
+            const phone = document.getElementById('clientPhone').value;
             const agree = document.getElementById('clientLegalAgree').checked;
-            const btn = document.getElementById('submitClientBtn');
+            const imgDisplayed = document.getElementById('clientImgPreview').style.display === 'block';
 
-            if(name !== "" && phone !== "" && agree && uploadedClientImage) {
-                btn.disabled = false;
-            } else {
-                btn.disabled = true;
-            }
-        }
-
-        function selectService(name) {
-            document.getElementById('selectedServiceName').innerText = name;
-            switchMainView('clientView', document.getElementById('navClient'));
+            document.getElementById('submitClientBtn').disabled = !(name && phone && agree && imgDisplayed);
         }
 
         function checkMinFare(input) {
             if(input.value < 30) input.value = 30;
         }
 
-        function addFare(val) {
+        function addFare(amount) {
             const input = document.getElementById('offeredFare');
-            input.value = parseInt(input.value || 30) + val;
+            input.value = parseInt(input.value || 30) + amount;
         }
 
-        function copyRIB(text) {
-            navigator.clipboard.writeText(text);
-            alert("تم نسخ رقم الحساب البنكي (RIB) بنجاح: " + text);
+        function copyRIB(ribText) {
+            navigator.clipboard.writeText(ribText);
+            alert("تم نسخ رقم الحساب البنكي (RIB) بنجاح: " + ribText);
         }
 
         function sendMessage() {
             const input = document.getElementById('chatInput');
-            if(input.value.trim() !== "") {
-                const box = document.getElementById('chatBox');
-                const msg = document.createElement('div');
-                msg.className = 'chat-msg driver';
-                msg.innerText = "المندوب: " + input.value;
-                box.appendChild(msg);
-                input.value = "";
-                box.scrollTop = box.scrollHeight;
-            }
+            if(!input.value.trim()) return;
+            const chatBox = document.getElementById('chatBox');
+            const msg = document.createElement('div');
+            msg.className = 'chat-msg driver';
+            msg.innerText = 'المندوب: ' + input.value;
+            chatBox.appendChild(msg);
+            input.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        function markComplete(id) {
-            alert("تم إنهاء وتأكيد وصول الطلبية #" + id + " بنجاح!");
+        function markComplete(orderId) {
+            alert('تم إنهاء الطلب #' + orderId + ' بنجاح وتحديث الحالة.');
+        }
+
+        function openAdminPanel(btn) {
+            const pass = prompt("أدخل كلمة سر المدير (الأدمن):");
+            if(pass === ADMIN_SECRET) {
+                isAdminLoggedIn = true;
+                switchMainView('adminView', btn);
+            } else {
+                alert("كلمة السر خاطئة!");
+            }
         }
 
         function setLanguage(lang, btn) {
             document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             if(lang === 'fr') {
-                alert("Mode Français activé.");
-            } else {
-                alert("تم تفعيل اللغة العربية.");
+                alert("La langue française sera bientôt disponible!");
             }
         }
     </script>
