@@ -206,6 +206,16 @@
                     <input type="file" id="courierPhotoFile" accept="image/*">
                 </div>
 
+                <!-- التعهد الأمني للموصل -->
+                <div class="security-warning-box">
+                    <p id="txt-courier-security-warn">⚠️ <strong>تعهد أمني وإقرار قانوني:</strong> أتعهد بالالتزام التام بالقوانين الجاري بها العمل. وفي حالة حدوث أي سرقة، ضياع، أو تقديم شكاية ضد أي طلبية، أوافق وأقر بإلزامية تقديم جميع بياناتي الشخصية وموقعي للجهات الأمنية والمختصة فوراً.</p>
+                </div>
+
+                <label class="checkbox-label">
+                    <input type="checkbox" id="courierLegalTerms">
+                    <span id="txt-courier-legal-terms">أوافق على التعهد الأمني وإلزامية تقديم بياناتي للجهات المختصة عند الشكاية أو السرقة.</span>
+                </label>
+
                 <button class="btn-submit" id="btn-register-courier" onclick="registerCourierStep()">إكمال التسجيل وتفعيل الحساب 📝</button>
 
                 <div class="card" style="margin-top: 15px;">
@@ -306,6 +316,8 @@
                 vehicle: "نوع المركبة المعتمد:",
                 vehicleVal: "دراجة نارية (Moto)",
                 photo: "📸 الصورة الشخصية الشمسية للوجه (إلزامية للتأكد من الهوية):",
+                courierSecurityWarn: "⚠️ <strong>تعهد أمني وإقرار قانوني:</strong> أتعهد بالالتزام التام بالقوانين الجاري بها العمل. وفي حالة حدوث أي سرقة، ضياع، أو تقديم شكاية ضد أي طلبية، أوافق وأقر بإلزامية تقديم جميع بياناتي الشخصية وموقعي للجهات الأمنية والمختصة فوراً.",
+                courierLegalTerms: "أوافق على التعهد الأمني وإلزامية تقديم بياناتي للجهات المختصة عند الشكاية أو السرقة.",
                 btnRegisterCourier: "إكمال التسجيل وتفعيل الحساب 📝",
                 badgeStatus: "حالة الحساب",
                 statusPendingText: "في انتظار استكمال البيانات كـ (Pending)...",
@@ -349,6 +361,8 @@
                 vehicle: "Type de véhicule approuvé:",
                 vehicleVal: "Moto",
                 photo: "📸 Photo de profil (Obligatoire pour vérification):",
+                courierSecurityWarn: "⚠️ <strong>Engagement de sécurité:</strong> Je m'engage à respecter les lois en vigueur. En cas de vol, perte ou plainte concernant une commande, j'accepte la communication obligatoire de mes données personnelles aux autorités compétentes.",
+                courierLegalTerms: "J'accepte l'engagement de sécurité et la transmission de mes données aux autorités en cas de plainte ou de vol.",
                 btnRegisterCourier: "Finaliser l'inscription 📝",
                 badgeStatus: "Statut du compte",
                 statusPendingText: "En attente de finalisation (Pending)...",
@@ -359,7 +373,7 @@
                 deliveryPh: "Ex: Sidi Maarouf - Near Solar Park",
                 packagePhoto: "📷 Photo du colis (Obligatoire):",
                 price: "Prix proposé (DH):",
-                securityWarn: "⚠️ <strong>Avertissement de sécurité:</strong> Il est strictement interdit de transporter des drogues, de l'alcool, des armes ou tout produit illégal. Toute infraction sera immédiatement signalée aux autorités.",
+                securityWarn: "⚠️ <strong>Avertissement de sécurité:</strong> Il est strictly interdit de transporter des drogues, de l'alcool, des armes ou tout produit illégal. Toute infraction sera immédiatement signalée aux autorités.",
                 legalTerms: "Je certifie que le colis ne contient aucun produit illégal.",
                 btnCreateOrder: "Envoyer la commande 🚀",
                 radarTitle: "📡 Commandes disponibles sur le radar",
@@ -413,6 +427,8 @@
             document.getElementById('lbl-vehicle').innerText = t.vehicle;
             document.getElementById('val-vehicle').value = t.vehicleVal;
             document.getElementById('lbl-photo').innerText = t.photo;
+            document.getElementById('txt-courier-security-warn').innerHTML = t.courierSecurityWarn;
+            document.getElementById('txt-courier-legal-terms').innerText = t.courierLegalTerms;
             document.getElementById('btn-register-courier').innerText = t.btnRegisterCourier;
             document.getElementById('badge-account-status').innerText = t.badgeStatus;
 
@@ -518,8 +534,15 @@
             }
 
             const photoInput = document.getElementById('courierPhotoFile');
+            const legalAccepted = document.getElementById('courierLegalTerms').checked;
+
             if (!photoInput.files || photoInput.files.length === 0) {
                 alert(currentLang === 'fr' ? '❌ La photo est obligatoire!' : '❌ الصورة الشخصية الشمسية للوجه إلزامية لتأكيد الهوية للزبائن!');
+                return;
+            }
+
+            if (!legalAccepted) {
+                alert(currentLang === 'fr' ? '⛔ Vous devez accepter l engagement de sécurité.' : '⛔ يلزم الموافقة والتأشير على التعهد الأمني بإلزامية تقديم بياناتك للجهات المختصة عند وجود شكاية أو سرقة.');
                 return;
             }
 
@@ -537,6 +560,7 @@
                     user_id: currentUserId,
                     vehicle_type: 'moto',
                     profile_photo: photoUrl,
+                    security_terms_accepted: true,
                     status: 'pending'
                 });
 
@@ -545,8 +569,8 @@
 
             document.getElementById('courierStatusText').innerHTML = currentLang === 'fr' 
                 ? '✅ Photo envoyée. Statut: <strong>Pending</strong>.' 
-                : '✅ تم رفع الصورة الشمسية وتحديث الطلب إلى <strong>Pending</strong> (قيد التفعيل).';
-            alert(currentLang === 'fr' ? 'Profil mis à jour.' : 'تم استكمال الملف وحفظ الحساب بنجاح.');
+                : '✅ تم رفع الصورة والتأشير على التعهد الأمني وتحديث الطلب إلى <strong>Pending</strong> (قيد التفعيل).';
+            alert(currentLang === 'fr' ? 'Profil mis à jour.' : 'تم استكمال الملف والتوقيع على التعهد الأمني وحفظ الحساب بنجاح.');
         }
 
         // --- الخطوة 3: إنشاء طلب توصيل من الزبون ---
@@ -627,18 +651,15 @@
             }
 
             let html = '';
-            orders.forEach(o => {
+            orders.forEach(order => {
                 html += `
                     <div class="card">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                            <span class="badge">${o.offered_price || 25} DH</span>
-                            <span style="font-size: 10px; color: var(--text-muted);">${o.id || '#ORDER'}</span>
+                            <span class="badge">${order.id || '#ORD'}</span>
+                            <strong style="color: var(--primary); font-size: 13px;">${order.offered_price} DH</strong>
                         </div>
-                        <p style="font-size: 11px; margin-bottom: 2px;"><strong>${t.from}</strong> ${o.pickup_address}</p>
-                        <p style="font-size: 11px; margin-bottom: 6px;"><strong>${t.to}</strong> ${o.delivery_address}</p>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
-                            <span style="font-size: 10px; color: var(--primary);">● ${o.status || 'pending'}</span>
-                        </div>
+                        <p style="font-size: 11px; margin-bottom: 2px;"><strong>${t.from}</strong> ${order.pickup_address}</p>
+                        <p style="font-size: 11px;"><strong>${t.to}</strong> ${order.delivery_address}</p>
                     </div>
                 `;
             });
