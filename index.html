@@ -38,7 +38,7 @@
             position: relative; overflow: hidden; display: flex; flex-direction: column;
         }
 
-        #map { width: 100%; height: 180px; border-radius: 16px; margin-bottom: 15px; border: 1px solid var(--border); }
+        #map { width: 100%; height: 200px; border-radius: 16px; margin-bottom: 15px; border: 1px solid var(--border); z-index: 1; }
 
         .main-nav {
             position: absolute; top: 10px; left: 10px; right: 10px; z-index: 1000;
@@ -84,7 +84,7 @@
         .service-card {
             background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border);
             border-radius: 16px; padding: 20px 8px; text-align: center; cursor: pointer;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; transition: 0.2s;
         }
         .service-card:hover { border-color: var(--primary); background: rgba(16, 185, 129, 0.15); }
         .service-icon { font-size: 36px; }
@@ -97,12 +97,17 @@
             background: rgba(15, 23, 42, 0.6); color: white; font-size: 12px; outline: none;
         }
 
+        .checkbox-group { display: flex; align-items: center; gap: 8px; margin-bottom: 15px; font-size: 11px; color: var(--text-muted); }
+        .checkbox-group input { width: auto; cursor: pointer; }
+
         .selected-service-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(16, 185, 129, 0.15); border: 1px solid var(--primary); color: var(--primary); padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; margin-bottom: 15px; }
         .fare-box { background: rgba(16, 185, 129, 0.08); border: 1px solid var(--primary); padding: 12px; border-radius: 14px; margin-bottom: 12px; }
         .fare-input-wrapper { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
         .fare-input-wrapper input { font-size: 16px; font-weight: 800; text-align: center; color: var(--primary); }
         .quick-btn { background: rgba(255,255,255,0.1); border: none; color: white; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 700; }
-        .btn-submit { width: 100%; padding: 12px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border: none; border-radius: 14px; font-size: 14px; font-weight: 800; cursor: pointer; margin-top: 5px; }
+        .quick-btn:hover { background: var(--primary); }
+        .btn-submit { width: 100%; padding: 12px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border: none; border-radius: 14px; font-size: 14px; font-weight: 800; cursor: pointer; margin-top: 5px; transition: 0.2s; }
+        .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
         .card { background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 12px; border-radius: 14px; margin-bottom: 10px; }
         .badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; background: var(--primary); color: white; margin-bottom: 6px; }
     </style>
@@ -152,18 +157,19 @@
                 </div>
             </div>
 
-            <!-- 2. واجهة الزبون (إرسال الطلب) -->
+            <!-- 2. واجهة الزبون (إنشاء طلب جديد) -->
             <div id="clientView" class="view-panel">
                 <div id="serviceBadgeContainer" class="selected-service-badge">
                     <span>📌 الخدمة المحددة:</span> <span id="selectedServiceName">🛒 مستلزمات وقضاء أغراض</span>
                 </div>
 
                 <!-- الخريطة لتحديد المكان -->
+                <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">📍 انقر على الخريطة لتحديد عنوان الانطلاق:</p>
                 <div id="map"></div>
 
                 <div class="field-group">
-                    <label for="custName">👤 الاسم الكامل</label>
-                    <input type="text" id="custName" value="أحمد">
+                    <label for="clientId">🔑 معرف الزبون (Client ID)</label>
+                    <input type="text" id="clientId" value="client_12345">
                 </div>
 
                 <div class="field-group">
@@ -176,16 +182,26 @@
                     <input type="text" id="deliveryAddr" placeholder="مثال: الحي المحمدي عمارة 4">
                 </div>
 
+                <div class="field-group">
+                    <label for="packagePhoto">📷 صورة الطرد / الأغراض (إلزامية)</label>
+                    <input type="file" id="packagePhoto" accept="image/*">
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="legalTerms">
+                    <label for="legalTerms">أوافق صراحة على عدم نقل مواد مخالفة للقانون (مخدرات، أسلحة، مواد ممنوعة).</label>
+                </div>
+
                 <div class="fare-box">
                     <label for="offeredPrice" style="font-size: 11px; color: var(--text-muted);">الأجرة المقترحة للمندوب (درهم):</label>
                     <div class="fare-input-wrapper">
-                        <input type="number" id="offeredPrice" value="25">
-                        <button class="quick-btn" onclick="addFare(5)">+5</button>
-                        <button class="quick-btn" onclick="addFare(10)">+10</button>
+                        <input type="number" id="offeredPrice" value="25" min="10">
+                        <button class="quick-btn" type="button" onclick="addFare(5)">+5</button>
+                        <button class="quick-btn" type="button" onclick="addFare(10)">+10</button>
                     </div>
                 </div>
 
-                <button class="btn-submit" onclick="createOrder()">إرسال الطلب الآن 🚀</button>
+                <button class="btn-submit" id="btnSubmitOrder" onclick="handleCreateDeliveryOrder()">إرسال الطلب الآن 🚀</button>
 
                 <hr style="margin: 20px 0; border: 0; border-top: 1px solid var(--border);">
                 <h4 style="font-size: 13px; color: var(--primary); margin-bottom: 10px;">العروض المقدمة على طلبك:</h4>
@@ -198,16 +214,23 @@
                 <div id="driverOrdersContainer" style="font-size: 12px; color: var(--text-muted);">في انتظار طلبات جديدة...</div>
             </div>
 
-            <!-- 4. واجهة الموصل -->
+            <!-- 4. واجهة تسجيل الموصل -->
             <div id="driverView" class="view-panel">
-                <h3 style="font-size: 14px; margin-bottom: 12px;">🛵 معلومات السائق / الموصل</h3>
+                <h3 style="font-size: 14px; margin-bottom: 12px;">🛵 تسجيل موصل جديد (Courier)</h3>
                 
                 <div class="field-group">
-                    <label for="driverName">اسم السائق/الموصل:</label>
-                    <input type="text" id="driverName" value="ياسين">
+                    <label for="courierUserId">🔑 معرف المستخدم (User ID):</label>
+                    <input type="text" id="courierUserId" value="courier_99">
                 </div>
 
-                <div class="card" style="border-color: var(--primary); margin-top: 15px;">
+                <div class="field-group">
+                    <label for="courierPhoto">📸 الصورة الشخصية الشمسية (إلزامية):</label>
+                    <input type="file" id="courierPhoto" accept="image/*">
+                </div>
+
+                <button class="btn-submit" onclick="handleRegisterCourier()">تسجيل الموصل 📝</button>
+
+                <div class="card" style="border-color: var(--primary); margin-top: 20px;">
                     <h4 style="font-size: 12px; margin-bottom: 6px;">حالة الاتصال بالرادار</h4>
                     <p style="font-size: 11px; color: var(--text-muted);">أنت الآن متصل وتستقبل الطلبات بشكل مباشر وحي عبر Supabase Realtime.</p>
                 </div>
@@ -217,29 +240,154 @@
     </div>
 
     <script>
-        // --- 1. إعدادات Supabase ---
-        const SUPABASE_URL = "YOUR_SUPABASE_URL";
-        const SUPABASE_KEY = "YOUR_SUPABASE_ANON_KEY";
-        
+        // ==========================================
+        // 1. تهيئة Supabase
+        // ==========================================
+        const SUPABASE_URL = 'https://your-project.supabase.co'; // ضع رابط مشروعك هنا
+        const SUPABASE_ANON_KEY = 'your-anon-key';             // ضع مفتاح الـ Anon الخاص بك هنا
+
         let _supabase = null;
-        if (SUPABASE_URL !== "YOUR_SUPABASE_URL") {
-            _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        if (SUPABASE_URL !== 'https://your-project.supabase.co' && window.supabase) {
+            _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
 
         let activeOrderId = null;
         let map = null;
+        let selectedMarker = null;
 
-        // --- 2. إعداد الخريطة ---
+        // ==========================================
+        // 2. الدوال البرمجية الرئيسية (Backend Core Logic)
+        // ==========================================
+
+        /** تسجيل حساب الموصل (Courier) */
+        async function registerCourier(userId, photoFile) {
+            try {
+                if (!_supabase) throw new Error('مفاتيح Supabase غير مضبوطة بشكل صحيح.');
+                if (!photoFile) return { success: false, message: 'الصورة الشخصية الشمسية إلزامية للتحقق من الهوية.' };
+
+                const fileExt = photoFile.name ? photoFile.name.split('.').pop() : 'jpg';
+                const filePath = `avatars/${userId}_${Date.now()}.${fileExt}`;
+
+                const { error: storageError } = await _supabase.storage
+                    .from('courier-avatars')
+                    .upload(filePath, photoFile, { upsert: true });
+
+                if (storageError) throw new Error(`فشل رفع الصورة الشخصية: ${storageError.message}`);
+
+                const { data: publicUrlData } = _supabase.storage
+                    .from('courier-avatars')
+                    .getPublicUrl(filePath);
+
+                const { data: courierData, error: dbError } = await _supabase
+                    .from('courier_profiles')
+                    .insert([
+                        {
+                            user_id: userId,
+                            vehicle_type: 'moto',
+                            profile_photo: publicUrlData.publicUrl,
+                            status: 'pending'
+                        }
+                    ])
+                    .select()
+                    .single();
+
+                if (dbError) throw new Error(`فشل حفظ بيانات الموصل: ${dbError.message}`);
+
+                return {
+                    success: true,
+                    message: 'تم تسجيل بياناتك بنجاح. حسابك قيد المراجعة والتفعيل من الطرف الإداري.',
+                    data: courierData
+                };
+
+            } catch (error) {
+                console.error('Core Error in registerCourier:', error.message);
+                return { success: false, message: error.message };
+            }
+        }
+
+        /** إنشاء طلب توصيل جديد من الزبون (Client Order) */
+        async function createDeliveryOrder({ clientId, serviceType, pickupAddress, deliveryAddress, packagePhotoFile, legalTermsAccepted, offeredPrice }) {
+            try {
+                if (!_supabase) throw new Error('مفاتيح Supabase غير مضبوطة بشكل صحيح.');
+                if (!pickupAddress || !pickupAddress.trim()) return { success: false, message: 'نقطة الانطلاق (البداية) إلزامية.' };
+                if (!deliveryAddress || !deliveryAddress.trim()) return { success: false, message: 'نقطة الوصول (النهاية) إلزامية.' };
+                if (!packagePhotoFile) return { success: false, message: 'صورة الطرد إلزامية لتأكيد الطلب.' };
+                if (!legalTermsAccepted) {
+                    return {
+                        success: false,
+                        message: 'تنبيه أمني: يجب الموافقة الصريحة على عدم نقل مواد مخالفة للقانون (مخدرات، أسلحة، مواد ممنوعة).'
+                    };
+                }
+
+                const fileExt = packagePhotoFile.name ? packagePhotoFile.name.split('.').pop() : 'jpg';
+                const packagePath = `packages/${clientId}_${Date.now()}.${fileExt}`;
+
+                const { error: uploadError } = await _supabase.storage
+                    .from('package-photos')
+                    .upload(packagePath, packagePhotoFile);
+
+                if (uploadError) throw new Error(`فشل رفع صورة الطرد: ${uploadError.message}`);
+
+                const { data: packageUrlData } = _supabase.storage
+                    .from('package-photos')
+                    .getPublicUrl(packagePath);
+
+                const { data: orderData, error: orderError } = await _supabase
+                    .from('delivery_orders')
+                    .insert([
+                        {
+                            client_id: clientId,
+                            service_type: serviceType,
+                            pickup_address: pickupAddress,
+                            delivery_address: deliveryAddress,
+                            package_photo: packageUrlData.publicUrl,
+                            legal_terms_accepted: true,
+                            offered_price: parseFloat(offeredPrice) || 25,
+                            status: 'pending'
+                        }
+                    ])
+                    .select()
+                    .single();
+
+                if (orderError) throw new Error(`فشل إرسال الطلب: ${orderError.message}`);
+
+                return {
+                    success: true,
+                    message: 'تم إنشاء الطلب بنجاح وهو متاح حالياً للموصلين القريبين.',
+                    data: orderData
+                };
+
+            } catch (error) {
+                console.error('Core Error in createDeliveryOrder:', error.message);
+                return { success: false, message: error.message };
+            }
+        }
+
+        // ==========================================
+        // 3. ربط الواجهات والبيانات (UI Handlers)
+        // ==========================================
+
         function initMap() {
             if (!map) {
                 map = L.map('map').setView([33.5731, -7.5898], 12); // الدار البيضاء
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '© OpenStreetMap'
                 }).addTo(map);
+
+                // إضافة إمكانية النقر على الخريطة لتحديد عنوان الانطلاق
+                map.on('click', function(e) {
+                    const lat = e.latlng.lat.toFixed(5);
+                    const lng = e.latlng.lng.toFixed(5);
+                    
+                    if (selectedMarker) map.removeLayer(selectedMarker);
+                    selectedMarker = L.marker([lat, lng]).addTo(map)
+                        .bindPopup("موقع الانطلاق المحدد").openPopup();
+
+                    document.getElementById('pickupAddr').value = `موقع محدد (${lat}, ${lng})`;
+                });
             }
         }
 
-        // --- 3. التبديل بين الواجهات ---
         function switchMainView(viewId, btn) {
             document.querySelectorAll('.view-panel').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
@@ -250,8 +398,10 @@
             if (viewId === 'clientView') {
                 setTimeout(() => {
                     initMap();
-                    map.invalidateSize();
+                    if (map) map.invalidateSize();
                 }, 200);
+            } else if (viewId === 'ordersView') {
+                fetchPendingOrders();
             }
         }
 
@@ -262,90 +412,145 @@
 
         function addFare(amount) {
             const input = document.getElementById('offeredPrice');
-            input.value = parseInt(input.value || 0) + amount;
+            input.value = (parseInt(input.value) || 0) + amount;
         }
 
-        // --- 4. إنشاء طلب جديد (الزبون) ---
-        async function createOrder() {
+        async function handleCreateDeliveryOrder() {
             if (!_supabase) {
-                alert("يرجى ربط المفاتيح الخاصة بـ Supabase أولاً.");
+                alert("يرجى إدخال مفاتيح Supabase الخاصة بك في الكود أولاً.");
                 return;
             }
 
-            const rider_name = document.getElementById('custName').value;
-            const pickup_address = document.getElementById('pickupAddr').value;
-            const destination_address = document.getElementById('deliveryAddr').value;
-            const offered_price = document.getElementById('offeredPrice').value;
+            const btn = document.getElementById('btnSubmitOrder');
+            btn.disabled = true;
+            btn.innerText = 'جاري الإرسال... ⏳';
 
-            if(!pickup_address || !destination_address) {
-                alert("يرجى إدخال عناوين الاستلام والتسليم");
-                return;
-            }
+            const clientId = document.getElementById('clientId').value;
+            const serviceType = document.getElementById('selectedServiceName').innerText;
+            const pickupAddress = document.getElementById('pickupAddr').value;
+            const deliveryAddress = document.getElementById('deliveryAddr').value;
+            const packagePhotoFile = document.getElementById('packagePhoto').files[0];
+            const legalTermsAccepted = document.getElementById('legalTerms').checked;
+            const offeredPrice = document.getElementById('offeredPrice').value;
 
-            const { data, error } = await _supabase
-                .from('ride_requests')
-                .insert([{ rider_name, pickup_address, destination_address, offered_price }])
-                .select();
+            const res = await createDeliveryOrder({
+                clientId,
+                serviceType,
+                pickupAddress,
+                deliveryAddress,
+                packagePhotoFile,
+                legalTermsAccepted,
+                offeredPrice
+            });
 
-            if (error) {
-                alert('حدث خطأ أثناء إنشاء الطلب');
-                console.error(error);
-            } else {
-                activeOrderId = data[0].id;
-                alert('تم نشر طلبك بنجاح على الرادار!');
+            alert(res.message);
+            btn.disabled = false;
+            btn.innerText = 'إرسال الطلب الآن 🚀';
+
+            if (res.success) {
+                activeOrderId = res.data.id;
                 listenToBids(activeOrderId);
             }
         }
 
-        // --- 5. تقديم عرض (الموصل) ---
+        async function handleRegisterCourier() {
+            if (!_supabase) {
+                alert("يرجى إدخال مفاتيح Supabase الخاصة بك في الكود أولاً.");
+                return;
+            }
+
+            const userId = document.getElementById('courierUserId').value;
+            const photoFile = document.getElementById('courierPhoto').files[0];
+
+            const res = await registerCourier(userId, photoFile);
+            alert(res.message);
+        }
+
         async function sendBid(orderId) {
             if (!_supabase) return;
 
-            const driver_name = document.getElementById('driverName').value;
-            const counter_price = document.getElementById(`bid-input-${orderId}`).value;
+            const driver_name = document.getElementById('courierUserId').value;
+            const counter_price = parseFloat(document.getElementById(`bid-input-${orderId}`).value);
+
+            if (!counter_price || counter_price <= 0) {
+                alert('يرجى تحديد سعر valid');
+                return;
+            }
 
             const { error } = await _supabase
                 .from('bids')
-                .insert([{ ride_id: orderId, driver_name, counter_price }]);
+                .insert([{ ride_id: orderId, driver_name, counter_price, status: 'pending' }]);
 
             if (error) {
                 console.error(error);
-                alert('حدث خطأ أثناء إرسال العرض');
+                alert('حدث خطأ أثناء إرسال العرض: ' + error.message);
             } else {
                 alert('تم إرسال عرضك بنجاح إلى الزبون!');
             }
         }
 
-        // --- 6. الاستماع الفوري للطلبات الجديدة (Realtime) ---
+        // ==========================================
+        // 4. جلب واستماع البيانات الفورية (Realtime)
+        // ==========================================
+
+        async function fetchPendingOrders() {
+            if (!_supabase) return;
+
+            const container = document.getElementById('driverOrdersContainer');
+            
+            const { data: orders, error } = await _supabase
+                .from('delivery_orders')
+                .select('*')
+                .eq('status', 'pending')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error('Error fetching orders:', error);
+                return;
+            }
+
+            if (orders && orders.length > 0) {
+                container.innerHTML = '';
+                orders.forEach(order => renderOrderCard(order));
+            } else {
+                container.innerHTML = 'لا توجد طلبات معلقة حالياً...';
+            }
+        }
+
+        function renderOrderCard(order) {
+            const container = document.getElementById('driverOrdersContainer');
+            if (container.innerText.includes('في انتظار') || container.innerText.includes('لا توجد')) {
+                container.innerHTML = '';
+            }
+
+            if (document.getElementById(`order-${order.id}`)) return;
+
+            const item = document.createElement('div');
+            item.className = 'card';
+            item.id = `order-${order.id}`;
+            item.innerHTML = `
+                <div><span class="badge">${order.service_type || 'طلب جديد 🔥'}</span></div>
+                <p style="font-size:12px;"><strong>الزبون:</strong> ${order.client_id}</p>
+                <p style="font-size:11px; color:var(--text-muted);"><strong>من:</strong> ${order.pickup_address}</p>
+                <p style="font-size:11px; color:var(--text-muted);"><strong>إلى:</strong> ${order.delivery_address}</p>
+                <p style="font-size:12px; margin-top:5px;"><strong>السعر المقترح:</strong> ${order.offered_price || 0} درهم</p>
+                <div style="margin-top:10px; display:flex; gap:8px;">
+                    <input type="number" id="bid-input-${order.id}" value="${order.offered_price || 25}" style="width:50%; padding:6px; border-radius:8px; border:1px solid var(--border); background:#0f172a; color:white;">
+                    <button class="btn-submit" style="margin:0; width:50%; font-size:12px; padding:6px;" onclick="sendBid('${order.id}')">تقديم عرض</button>
+                </div>
+            `;
+            container.prepend(item);
+        }
+
         if (_supabase) {
             _supabase
                 .channel('realtime_orders')
-                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ride_requests' }, payload => {
-                    const order = payload.new;
-                    const container = document.getElementById('driverOrdersContainer');
-
-                    if (container.innerText.includes('في انتظار')) container.innerHTML = '';
-
-                    const item = document.createElement('div');
-                    item.className = 'card';
-                    item.id = `order-${order.id}`;
-                    item.innerHTML = `
-                        <div><span class="badge">طلب جديد 🔥</span></div>
-                        <p style="font-size:12px;"><strong>الزبون:</strong> ${order.rider_name}</p>
-                        <p style="font-size:11px; color:var(--text-muted);"><strong>من:</strong> ${order.pickup_address}</p>
-                        <p style="font-size:11px; color:var(--text-muted);"><strong>إلى:</strong> ${order.destination_address}</p>
-                        <p style="font-size:12px; margin-top:5px;"><strong>السعر المقترح:</strong> ${order.offered_price} درهم</p>
-                        <div style="margin-top:10px; display:flex; gap:8px;">
-                            <input type="number" id="bid-input-${order.id}" value="${order.offered_price}" style="width:50%; padding:6px; border-radius:8px; border:1px solid var(--border); background:#0f172a; color:white;">
-                            <button class="btn-submit" style="margin:0; width:50%; font-size:12px; padding:6px;" onclick="sendBid('${order.id}')">تقديم عرض</button>
-                        </div>
-                    `;
-                    container.prepend(item);
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'delivery_orders' }, payload => {
+                    renderOrderCard(payload.new);
                 })
                 .subscribe();
         }
 
-        // --- 7. الاستماع الفوري لعروض الموصلين (Realtime) ---
         function listenToBids(orderId) {
             if (!_supabase) return;
 
@@ -359,6 +564,7 @@
 
                     const item = document.createElement('div');
                     item.className = 'card';
+                    item.id = `bid-card-${bid.id}`;
                     item.style.borderColor = 'var(--primary)';
                     item.innerHTML = `
                         <p style="font-size:12px;"><strong>الموصل:</strong> ${bid.driver_name}</p>
@@ -370,7 +576,6 @@
                 .subscribe();
         }
 
-        // --- 8. قبول العرض ---
         async function acceptBid(bidId) {
             if (!_supabase) return;
 
@@ -379,7 +584,11 @@
                 .update({ status: 'accepted' })
                 .eq('id', bidId);
 
-            if (!error) alert('تم قبول العرض بنجاح! الموصل في طريقه إليك.');
+            if (!error) {
+                alert('تم قبول العرض بنجاح! الموصل في طريقه إليك.');
+            } else {
+                alert('حدث خطأ أثناء قبول العرض: ' + error.message);
+            }
         }
     </script>
 </body>
