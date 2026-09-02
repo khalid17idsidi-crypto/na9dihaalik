@@ -33,10 +33,49 @@
             position: relative; overflow: hidden; display: flex; flex-direction: column;
         }
 
+        /* الخانة الرئيسية العليا: اسم التطبيق + طبيعة عمله + اختيار اللغة */
+        .app-header {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.98), rgba(15, 23, 42, 0.98));
+            padding: 10px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            z-index: 1001;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+        .app-info { display: flex; flex-direction: column; gap: 2px; }
+        .app-title { font-size: 15px; font-weight: 900; color: var(--primary); display: flex; align-items: center; gap: 6px; }
+        .app-subtitle { font-size: 10px; color: var(--text-muted); font-weight: 500; }
+        
+        .lang-switch {
+            display: flex;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2px;
+        }
+        .lang-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 3px 8px;
+            font-size: 10px;
+            font-weight: 700;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .lang-btn.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 2px 6px var(--primary-glow);
+        }
+
         #map { width: 100%; height: 160px; border-radius: 16px; margin-bottom: 12px; border: 1px solid var(--border); }
 
         .main-nav {
-            position: absolute; top: 10px; left: 10px; right: 10px; z-index: 1000;
+            position: absolute; top: 62px; left: 10px; right: 10px; z-index: 1000;
             background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px);
             padding: 6px; border-radius: 20px; display: flex; border: 1px solid var(--border);
             overflow-x: auto; gap: 4px; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
@@ -48,7 +87,7 @@
         .nav-btn.active { background: var(--primary); color: white; box-shadow: 0 2px 10px var(--primary-glow); }
 
         .bottom-sheet {
-            position: absolute; top: 60px; bottom: 0; left: 0; right: 0; z-index: 50;
+            position: absolute; top: 115px; bottom: 0; left: 0; right: 0; z-index: 50;
             background: var(--card-bg); border-top-left-radius: 28px; border-top-right-radius: 28px;
             padding: 20px; box-shadow: 0 -10px 40px rgba(0,0,0,0.8); border-top: 1px solid var(--border);
             overflow-y: auto;
@@ -92,12 +131,24 @@
 
     <div class="app-container">
 
+        <!-- الخانة الرئيسية: اسم التطبيق وعمله وزر اختيار اللغة -->
+        <header class="app-header">
+            <div class="app-info">
+                <div class="app-title">🚀 <span id="txt-app-title">تطبيق التوصيل - كازا</span></div>
+                <div class="app-subtitle" id="txt-app-desc">منصة التوصيل السريع للمحليات والطرود والطلبيات</div>
+            </div>
+            <div class="lang-switch">
+                <button class="lang-btn active" id="btn-ar" onclick="setLanguage('ar')">عربية</button>
+                <button class="lang-btn" id="btn-fr" onclick="setLanguage('fr')">Français</button>
+            </div>
+        </header>
+
         <!-- شريط التنقل الرئيسي -->
         <nav class="main-nav">
-            <button class="nav-btn active" onclick="switchMainView('authView', this)">🔑 التسجيل (OTP)</button>
-            <button class="nav-btn" onclick="switchMainView('clientView', this)">🙋‍♂️ الزبون</button>
-            <button class="nav-btn" onclick="switchMainView('ordersView', this)">📡 الرادار</button>
-            <button class="nav-btn" onclick="switchMainView('courierView', this)">🛵 الموصل</button>
+            <button class="nav-btn active" id="nav-auth" onclick="switchMainView('authView', this)">🔑 التسجيل (OTP)</button>
+            <button class="nav-btn" id="nav-client" onclick="switchMainView('clientView', this)">🙋‍♂️ الزبون</button>
+            <button class="nav-btn" id="nav-orders" onclick="switchMainView('ordersView', this)">📡 الرادار</button>
+            <button class="nav-btn" id="nav-courier" onclick="switchMainView('courierView', this)">🛵 الموصل</button>
         </nav>
 
         <div class="bottom-sheet">
@@ -105,108 +156,108 @@
 
             <!-- شريط معلومات الجلسة الحالية -->
             <div id="userInfoBar" class="user-status" style="display: none;">
-                حساب مسجل: <strong id="sessionUserName">-</strong> (<span id="sessionUserRole">-</span>)
+                <span id="lbl-registered-account">حساب مسجل:</span> <strong id="sessionUserName">-</strong> (<span id="sessionUserRole">-</span>)
             </div>
 
             <!-- الخطوة 1: التسجيل ورمز الهاتف OTP -->
             <div id="authView" class="view-panel active">
-                <h3 style="font-size: 15px; margin-bottom: 12px; color: var(--primary);">📲 الخطوة 1: التسجيل عبر رقم الهاتف (SMS OTP)</h3>
+                <h3 style="font-size: 15px; margin-bottom: 12px; color: var(--primary);" id="title-step1">📲 الخطوة 1: التسجيل عبر رقم الهاتف (SMS OTP)</h3>
                 
                 <div class="field-group">
-                    <label>الاسم الكامل:</label>
+                    <label id="lbl-fullname">الاسم الكامل:</label>
                     <input type="text" id="authFullName" placeholder="مثال: محمد العمراوي">
                 </div>
 
                 <div class="field-group">
-                    <label>رقم الهاتف:</label>
+                    <label id="lbl-phone">رقم الهاتف:</label>
                     <input type="tel" id="authPhone" placeholder="+212600000000">
                 </div>
 
                 <div class="field-group">
-                    <label>نوع الحساب:</label>
+                    <label id="lbl-role">نوع الحساب:</label>
                     <select id="authRole">
-                        <option value="client">زبون (Client)</option>
-                        <option value="courier">موصل / سائق (Courier)</option>
+                        <option value="client" id="opt-client">زبون (Client)</option>
+                        <option value="courier" id="opt-courier">موصل / سائق (Courier)</option>
                     </select>
                 </div>
 
-                <button class="btn-submit" onclick="sendOtpStep()">إرسال رمز التحقق OTP 📩</button>
+                <button class="btn-submit" id="btn-send-otp" onclick="sendOtpStep()">إرسال رمز التحقق OTP 📩</button>
 
                 <div id="otpSection" style="display: none; margin-top: 15px; border-top: 1px solid var(--border); padding-top: 12px;">
                     <div class="field-group">
-                        <label>أدخل رمز التحقق (OTP) المرسل:</label>
+                        <label id="lbl-enter-otp">أدخل رمز التحقق (OTP) المرسل:</label>
                         <input type="text" id="otpCode" placeholder="123456">
                     </div>
-                    <button class="btn-submit" style="background: var(--primary-dark);" onclick="verifyOtpStep()">تأكيد الرمز والتسجيل ✅</button>
+                    <button class="btn-submit" id="btn-verify-otp" style="background: var(--primary-dark);" onclick="verifyOtpStep()">تأكيد الرمز والتسجيل ✅</button>
                 </div>
             </div>
 
             <!-- الخطوة 2: حساب الموصل (Couriers) -->
             <div id="courierView" class="view-panel">
-                <h3 style="font-size: 15px; margin-bottom: 12px; color: var(--primary);">🛵 الخطوة 2: استكمال حساب الموصل</h3>
+                <h3 style="font-size: 15px; margin-bottom: 12px; color: var(--primary);" id="title-step2">🛵 الخطوة 2: استكمال حساب الموصل</h3>
                 
                 <div class="field-group">
-                    <label>نوع المركبة المعتمد:</label>
-                    <input type="text" value="دراجة نارية (Moto)" disabled style="opacity: 0.7;">
+                    <label id="lbl-vehicle">نوع المركبة المعتمد:</label>
+                    <input type="text" value="دراجة نارية (Moto)" disabled style="opacity: 0.7;" id="val-vehicle">
                 </div>
 
                 <div class="field-group">
-                    <label>📸 الصورة الشخصية الشمسية للوجه (إلزامية للتأكد من الهوية):</label>
+                    <label id="lbl-photo">📸 الصورة الشخصية الشمسية للوجه (إلزامية للتأكد من الهوية):</label>
                     <input type="file" id="courierPhotoFile" accept="image/*">
                 </div>
 
-                <button class="btn-submit" onclick="registerCourierStep()">إكمال التسجيل وتفعيل الحساب 📝</button>
+                <button class="btn-submit" id="btn-register-courier" onclick="registerCourierStep()">إكمال التسجيل وتفعيل الحساب 📝</button>
 
                 <div class="card" style="margin-top: 15px;">
-                    <span class="badge" style="background: var(--warning);">حالة الحساب</span>
+                    <span class="badge" style="background: var(--warning);" id="badge-account-status">حالة الحساب</span>
                     <p id="courierStatusText" style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">في انتظار استكمال البيانات كـ (Pending)...</p>
                 </div>
             </div>
 
             <!-- الخطوة 3: إنشاء طلب من الزبون -->
             <div id="clientView" class="view-panel">
-                <h3 style="font-size: 15px; margin-bottom: 10px; color: var(--primary);">📦 الخطوة 3: إنشاء طلب توصيل جديد</h3>
+                <h3 style="font-size: 15px; margin-bottom: 10px; color: var(--primary);" id="title-step3">📦 الخطوة 3: إنشاء طلب توصيل جديد</h3>
                 
                 <div id="map"></div>
 
                 <div class="field-group">
-                    <label>🟢 نقطة البداية / الاستلام (إلزامية):</label>
+                    <label id="lbl-pickup">🟢 نقطة البداية / الاستلام (إلزامية):</label>
                     <input type="text" id="pickupAddr" placeholder="مثال: المعاريف - شارع المسيرة">
                 </div>
 
                 <div class="field-group">
-                    <label>🔴 نقطة الوصول / التسليم (إلزامية):</label>
+                    <label id="lbl-delivery">🔴 نقطة الوصول / التسليم (إلزامية):</label>
                     <input type="text" id="deliveryAddr" placeholder="مثال: سيدي معروف - المجمع الشمسي">
                 </div>
 
                 <div class="field-group">
-                    <label>📷 صورة الطرد (إلزامية قبل الإرسال):</label>
+                    <label id="lbl-package-photo">📷 صورة الطرد (إلزامية قبل الإرسال):</label>
                     <input type="file" id="packagePhotoFile" accept="image/*">
                 </div>
 
                 <div class="field-group">
-                    <label>الأجرة المقترحة (درهم):</label>
+                    <label id="lbl-price">الأجرة المقترحة (درهم):</label>
                     <input type="number" id="offeredPrice" value="25">
                 </div>
 
                 <!-- التنبيه الأمني والموافقة -->
                 <div class="security-warning-box">
-                    <p>⚠️ <strong>تنبيه أمني صريح:</strong> يمنع منعاً باتاً توصيل أي مواد مخدرة، كحولية، أسلحة، أو أسباب غير قانونية. أي مخالفة تتسبب في التبليغ الفوري للجهات الأمنية.</p>
+                    <p id="txt-security-warn">⚠️ <strong>تنبيه أمني صريح:</strong> يمنع منعاً باتاً توصيل أي مواد مخدرة، كحولية، أسلحة، أو أسباب غير قانونية. أي مخالفة تتسبب في التبليغ الفوري للجهات الأمنية.</p>
                 </div>
 
                 <label class="checkbox-label">
                     <input type="checkbox" id="legalTerms">
-                    <span>أتعهد صراحة بأن الطرد لا يحتوي على أي مواد مخالفة للقانون.</span>
+                    <span id="txt-legal-terms">أتعهد صراحة بأن الطرد لا يحتوي على أي مواد مخالفة للقانون.</span>
                 </label>
 
-                <button class="btn-submit" onclick="createOrderStep()">إرسال الطلب الآن 🚀</button>
+                <button class="btn-submit" id="btn-create-order" onclick="createOrderStep()">إرسال الطلب الآن 🚀</button>
             </div>
 
             <!-- الرادار وعرض الطلبات -->
             <div id="ordersView" class="view-panel">
-                <h3 style="font-size: 14px; margin-bottom: 12px; color: var(--primary);">📡 طلبات التوصيل المتاحة بالرادار</h3>
+                <h3 style="font-size: 14px; margin-bottom: 12px; color: var(--primary);" id="title-radar">📡 طلبات التوصيل المتاحة بالرادار</h3>
                 <div id="ordersListContainer">
-                    <p style="font-size: 12px; color: var(--text-muted);">جاري تحميل الطلبات...</p>
+                    <p style="font-size: 12px; color: var(--text-muted);" id="txt-loading-orders">جاري تحميل الطلبات...</p>
                 </div>
             </div>
 
@@ -223,12 +274,167 @@
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
 
-        // متغيرات الجلسة والمحاكاة
+        // متغيرات الجلسة والمحاكاة واللغة
         let currentUserId = null;
         let currentUserName = '';
         let currentRole = '';
         let mockOrdersArr = [];
         let map = null;
+        let currentLang = 'ar';
+
+        // ترجمات النصوص للغة الفرنسية والعربية
+        const translations = {
+            ar: {
+                appTitle: "تطبيق التوصيل - كازا",
+                appDesc: "منصة التوصيل السريع للمحليات والطرود والطلبيات",
+                navAuth: "🔑 التسجيل (OTP)",
+                navClient: "🙋‍♂️ الزبون",
+                navOrders: "📡 الرادار",
+                navCourier: "🛵 الموصل",
+                regAccount: "حساب مسجل:",
+                step1Title: "📲 الخطوة 1: التسجيل عبر رقم الهاتف (SMS OTP)",
+                fullName: "الاسم الكامل:",
+                fullNamePh: "مثال: محمد العمراوي",
+                phone: "رقم الهاتف:",
+                role: "نوع الحساب:",
+                optClient: "زبون (Client)",
+                optCourier: "موصل / سائق (Courier)",
+                btnSendOtp: "إرسال رمز التحقق OTP 📩",
+                enterOtp: "أدخل رمز التحقق (OTP) المرسل:",
+                btnVerifyOtp: "تأكيد الرمز والتسجيل ✅",
+                step2Title: "🛵 الخطوة 2: استكمال حساب الموصل",
+                vehicle: "نوع المركبة المعتمد:",
+                vehicleVal: "دراجة نارية (Moto)",
+                photo: "📸 الصورة الشخصية الشمسية للوجه (إلزامية للتأكد من الهوية):",
+                btnRegisterCourier: "إكمال التسجيل وتفعيل الحساب 📝",
+                badgeStatus: "حالة الحساب",
+                statusPendingText: "في انتظار استكمال البيانات كـ (Pending)...",
+                step3Title: "📦 الخطوة 3: إنشاء طلب توصيل جديد",
+                pickup: "🟢 نقطة البداية / الاستلام (إلزامية):",
+                pickupPh: "مثال: المعاريف - شارع المسيرة",
+                delivery: "🔴 نقطة الوصول / التسليم (إلزامية):",
+                deliveryPh: "مثال: سيدي معروف - المجمع الشمسي",
+                packagePhoto: "📷 صورة الطرد (إلزامية قبل الإرسال):",
+                price: "الأجرة المقترحة (درهم):",
+                securityWarn: "⚠️ <strong>تنبيه أمني صريح:</strong> يمنع منعاً باتاً توصيل أي مواد مخدرة، كحولية، أسلحة، أو أسباب غير قانونية. أي مخالفة تتسبب في التبليغ الفوري للجهات الأمنية.",
+                legalTerms: "أتعهد صراحة بأن الطرد لا يحتوي على أي مواد مخالفة للقانون.",
+                btnCreateOrder: "إرسال الطلب الآن 🚀",
+                radarTitle: "📡 طلبات التوصيل المتاحة بالرادار",
+                loadingOrders: "جاري تحميل الطلبات...",
+                noOrders: "لا توجد طلبات معروضة حالياً بالرادار...",
+                roleCourier: "موصل",
+                roleClient: "زبون",
+                from: "من:",
+                to: "إلى:"
+            },
+            fr: {
+                appTitle: "Livraison Casa",
+                appDesc: "Plateforme de livraison rapide de colis & commandes",
+                navAuth: "🔑 Inscription (OTP)",
+                navClient: "🙋‍♂️ Client",
+                navOrders: "📡 Radar",
+                navCourier: "🛵 Coursier",
+                regAccount: "Compte enregistré:",
+                step1Title: "📲 Étape 1: Inscription via Téléphone (SMS OTP)",
+                fullName: "Nom complet:",
+                fullNamePh: "Ex: Mohamed Amraoui",
+                phone: "Numéro de téléphone:",
+                role: "Type de compte:",
+                optClient: "Client",
+                optCourier: "Coursier / Chauffeur",
+                btnSendOtp: "Envoyer le code OTP 📩",
+                enterOtp: "Entrez le code OTP reçu:",
+                btnVerifyOtp: "Vérifier & S'inscrire ✅",
+                step2Title: "🛵 Étape 2: Compléter le profil Coursier",
+                vehicle: "Type de véhicule approuvé:",
+                vehicleVal: "Moto",
+                photo: "📸 Photo de profil (Obligatoire pour vérification):",
+                btnRegisterCourier: "Finaliser l'inscription 📝",
+                badgeStatus: "Statut du compte",
+                statusPendingText: "En attente de finalisation (Pending)...",
+                step3Title: "📦 Étape 3: Créer une nouvelle commande",
+                pickup: "🟢 Point de départ / Ramassage (Obligatoire):",
+                pickupPh: "Ex: Maarif - Rue Al Massira",
+                delivery: "🔴 Point d'arrivée / Livraison (Obligatoire):",
+                deliveryPh: "Ex: Sidi Maalouf - Near Solar Park",
+                packagePhoto: "📷 Photo du colis (Obligatoire):",
+                price: "Prix proposé (DH):",
+                securityWarn: "⚠️ <strong>Avertissement de sécurité:</strong> Il est strictement interdit de transporter des drogues, de l'alcool, des armes ou tout produit illégal. Toute infraction sera immédiatement signalée aux autorités.",
+                legalTerms: "Je certifie que le colis ne contient aucun produit illégal.",
+                btnCreateOrder: "Envoyer la commande 🚀",
+                radarTitle: "📡 Commandes disponibles sur le radar",
+                loadingOrders: "Chargement des commandes...",
+                noOrders: "Aucune commande disponible sur le radar...",
+                roleCourier: "Coursier",
+                roleClient: "Client",
+                from: "De:",
+                to: "À:"
+            }
+        };
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            const t = translations[lang];
+            const html = document.documentElement;
+
+            if (lang === 'fr') {
+                html.setAttribute('dir', 'ltr');
+                html.setAttribute('lang', 'fr');
+                document.getElementById('btn-ar').classList.remove('active');
+                document.getElementById('btn-fr').classList.add('active');
+            } else {
+                html.setAttribute('dir', 'rtl');
+                html.setAttribute('lang', 'ar');
+                document.getElementById('btn-fr').classList.remove('active');
+                document.getElementById('btn-ar').classList.add('active');
+            }
+
+            // تحديث النصوص في الواجهة
+            document.getElementById('txt-app-title').innerText = t.appTitle;
+            document.getElementById('txt-app-desc').innerText = t.appDesc;
+            document.getElementById('nav-auth').innerText = t.navAuth;
+            document.getElementById('nav-client').innerText = t.navClient;
+            document.getElementById('nav-orders').innerText = t.navOrders;
+            document.getElementById('nav-courier').innerText = t.navCourier;
+            document.getElementById('lbl-registered-account').innerText = t.regAccount;
+            
+            document.getElementById('title-step1').innerText = t.step1Title;
+            document.getElementById('lbl-fullname').innerText = t.fullName;
+            document.getElementById('authFullName').placeholder = t.fullNamePh;
+            document.getElementById('lbl-phone').innerText = t.phone;
+            document.getElementById('lbl-role').innerText = t.role;
+            document.getElementById('opt-client').innerText = t.optClient;
+            document.getElementById('opt-courier').innerText = t.optCourier;
+            document.getElementById('btn-send-otp').innerText = t.btnSendOtp;
+            document.getElementById('lbl-enter-otp').innerText = t.enterOtp;
+            document.getElementById('btn-verify-otp').innerText = t.btnVerifyOtp;
+
+            document.getElementById('title-step2').innerText = t.step2Title;
+            document.getElementById('lbl-vehicle').innerText = t.vehicle;
+            document.getElementById('val-vehicle').value = t.vehicleVal;
+            document.getElementById('lbl-photo').innerText = t.photo;
+            document.getElementById('btn-register-courier').innerText = t.btnRegisterCourier;
+            document.getElementById('badge-account-status').innerText = t.badgeStatus;
+
+            document.getElementById('title-step3').innerText = t.step3Title;
+            document.getElementById('lbl-pickup').innerText = t.pickup;
+            document.getElementById('pickupAddr').placeholder = t.pickupPh;
+            document.getElementById('lbl-delivery').innerText = t.delivery;
+            document.getElementById('deliveryAddr').placeholder = t.deliveryPh;
+            document.getElementById('lbl-package-photo').innerText = t.packagePhoto;
+            document.getElementById('lbl-price').innerText = t.price;
+            document.getElementById('txt-security-warn').innerHTML = t.securityWarn;
+            document.getElementById('txt-legal-terms').innerText = t.legalTerms;
+            document.getElementById('btn-create-order').innerText = t.btnCreateOrder;
+
+            document.getElementById('title-radar').innerText = t.radarTitle;
+
+            if (currentRole) {
+                document.getElementById('sessionUserRole').innerText = currentRole === 'courier' ? t.roleCourier : t.roleClient;
+            }
+
+            loadOrdersRadar();
+        }
 
         function initMap() {
             if (!map && document.getElementById('map')) {
@@ -256,17 +462,17 @@
             const fullName = document.getElementById('authFullName').value.trim();
 
             if (!fullName || !phone) {
-                alert('⚠️ يرجى أدخال الاسم الكامل ورقم الهاتف أولاً.');
+                alert(currentLang === 'fr' ? '⚠️ Veuillez saisir le nom et le numéro.' : '⚠️ يرجى أدخال الاسم الكامل ورقم الهاتف أولاً.');
                 return;
             }
 
             if (supabaseClient) {
                 const { error } = await supabaseClient.auth.signInWithOtp({ phone });
-                if (error) { alert('خطأ في إرسال الرمز: ' + error.message); return; }
+                if (error) { alert('Erreur: ' + error.message); return; }
             }
 
             document.getElementById('otpSection').style.display = 'block';
-            alert('📩 تم إرسال رمز OTP التخيلي (أو عبر الهاتف) إلى الرقم المخزن.');
+            alert(currentLang === 'fr' ? '📩 Code OTP envoyé avec succès.' : '📩 تم إرسال رمز OTP التخيلي (أو عبر الهاتف) إلى الرقم المخزن.');
         }
 
         async function verifyOtpStep() {
@@ -275,11 +481,14 @@
             const role = document.getElementById('authRole').value;
             const token = document.getElementById('otpCode').value.trim();
 
-            if (!token) { alert('يرجى إدخال رمز OTP المخزن.'); return; }
+            if (!token) { 
+                alert(currentLang === 'fr' ? 'Saisissez le code OTP.' : 'يرجى إدخال رمز OTP المخزن.'); 
+                return; 
+            }
 
             if (supabaseClient) {
                 const { data, error } = await supabaseClient.auth.verifyOtp({ phone, token, type: 'sms' });
-                if (error) { alert('رمز غير صحيح: ' + error.message); return; }
+                if (error) { alert('Erreur: ' + error.message); return; }
 
                 currentUserId = data.user.id;
                 await supabaseClient.from('users').upsert({ id: currentUserId, phone, full_name: fullName, role });
@@ -290,11 +499,12 @@
             currentUserName = fullName;
             currentRole = role;
 
+            const t = translations[currentLang];
             document.getElementById('sessionUserName').innerText = currentUserName;
-            document.getElementById('sessionUserRole').innerText = role === 'courier' ? 'موصل' : 'زبون';
+            document.getElementById('sessionUserRole').innerText = role === 'courier' ? t.roleCourier : t.roleClient;
             document.getElementById('userInfoBar').style.display = 'block';
 
-            alert('✅ تم التحقق والتسجيل بنجاح!');
+            alert(currentLang === 'fr' ? '✅ Inscription réussie!' : '✅ تم التحقق والتسجيل بنجاح!');
             if (role === 'courier') switchMainView('courierView');
             else switchMainView('clientView');
         }
@@ -302,14 +512,14 @@
         // --- الخطوة 2: استكمال حساب الموصل ---
         async function registerCourierStep() {
             if (!currentUserId) {
-                alert('⚠️ يرجى إكمال الخطوة الأولى والتسجيل أولاً!');
+                alert(currentLang === 'fr' ? '⚠️ Veuillez d abord vous inscrire!' : '⚠️ يرجى إكمال الخطوة الأولى والتسجيل أولاً!');
                 switchMainView('authView');
                 return;
             }
 
             const photoInput = document.getElementById('courierPhotoFile');
             if (!photoInput.files || photoInput.files.length === 0) {
-                alert('❌ الصورة الشخصية الشمسية للوجه إلزامية لتأكيد الهوية للزبائن!');
+                alert(currentLang === 'fr' ? '❌ La photo est obligatoire!' : '❌ الصورة الشخصية الشمسية للوجه إلزامية لتأكيد الهوية للزبائن!');
                 return;
             }
 
@@ -319,7 +529,7 @@
             if (supabaseClient) {
                 const path = `couriers/${currentUserId}.jpg`;
                 const { error: uploadErr } = await supabaseClient.storage.from('courier-avatars').upload(path, file, { upsert: true });
-                if (uploadErr) { alert('فشل رفع الصورة: ' + uploadErr.message); return; }
+                if (uploadErr) { alert('Erreur: ' + uploadErr.message); return; }
 
                 photoUrl = supabaseClient.storage.from('courier-avatars').getPublicUrl(path).data.publicUrl;
 
@@ -330,17 +540,19 @@
                     status: 'pending'
                 });
 
-                if (error) { alert('خطأ في حفظ بيانات الموصل: ' + error.message); return; }
+                if (error) { alert('Erreur: ' + error.message); return; }
             }
 
-            document.getElementById('courierStatusText').innerHTML = '✅ تم رفع الصورة الشمسية وتحديث الطلب إلى <strong>Pending</strong> (قيد التفعيل).';
-            alert('تم استكمال الملف وحفظ الحساب بنجاح.');
+            document.getElementById('courierStatusText').innerHTML = currentLang === 'fr' 
+                ? '✅ Photo envoyée. Statut: <strong>Pending</strong>.' 
+                : '✅ تم رفع الصورة الشمسية وتحديث الطلب إلى <strong>Pending</strong> (قيد التفعيل).';
+            alert(currentLang === 'fr' ? 'Profil mis à jour.' : 'تم استكمال الملف وحفظ الحساب بنجاح.');
         }
 
         // --- الخطوة 3: إنشاء طلب توصيل من الزبون ---
         async function createOrderStep() {
             if (!currentUserId) {
-                alert('⚠️ يجب التسجيل كزبون أولاً قبل إنشاء طلب!');
+                alert(currentLang === 'fr' ? '⚠️ Veuillez vous inscrire d abord!' : '⚠️ يجب التسجيل كزبون أولاً قبل إنشاء طلب!');
                 switchMainView('authView');
                 return;
             }
@@ -351,14 +563,14 @@
             const legalAccepted = document.getElementById('legalTerms').checked;
             const price = document.getElementById('offeredPrice').value;
 
-            if (!pickup) { alert('⚠️ نقطة البداية إلزامية.'); return; }
-            if (!delivery) { alert('⚠️ نقطة الوصول إلزامية.'); return; }
+            if (!pickup) { alert(currentLang === 'fr' ? '⚠️ Point de départ obligatoire.' : '⚠️ نقطة البداية إلزامية.'); return; }
+            if (!delivery) { alert(currentLang === 'fr' ? '⚠️ Point d arrivée obligatoire.' : '⚠️ نقطة الوصول إلزامية.'); return; }
             if (!photoInput.files || photoInput.files.length === 0) {
-                alert('📷 صورة الطرد إلزامية قبل إرسال الطلب.');
+                alert(currentLang === 'fr' ? '📷 Photo du colis obligatoire.' : '📷 صورة الطرد إلزامية قبل إرسال الطلب.');
                 return;
             }
             if (!legalAccepted) {
-                alert('⛔ يلزم الموافقة والتأشير على التعهد الأمني بعدم نقل المحظورات.');
+                alert(currentLang === 'fr' ? '⛔ Vous devez accepter les termes de sécurité.' : '⛔ يلزم الموافقة والتأشير على التعهد الأمني بعدم نقل المحظورات.');
                 return;
             }
 
@@ -367,7 +579,7 @@
             if (supabaseClient) {
                 const path = `packages/${Date.now()}_${currentUserId}.jpg`;
                 const { error: uploadErr } = await supabaseClient.storage.from('package-photos').upload(path, photoInput.files[0]);
-                if (uploadErr) { alert('فشل رفع صورة الطرد: ' + uploadErr.message); return; }
+                if (uploadErr) { alert('Erreur: ' + uploadErr.message); return; }
 
                 packagePhotoUrl = supabaseClient.storage.from('package-photos').getPublicUrl(path).data.publicUrl;
 
@@ -381,7 +593,7 @@
                     status: 'pending'
                 }]);
 
-                if (error) { alert('حدث خطأ في إنشاء الطلب: ' + error.message); return; }
+                if (error) { alert('Erreur: ' + error.message); return; }
             } else {
                 mockOrdersArr.push({
                     id: '#' + Math.floor(1000 + Math.random() * 9000),
@@ -392,13 +604,14 @@
                 });
             }
 
-            alert('🚀 تم إرسال طلب التوصيل بنجاح بعد تأكيد التعهد الأمني!');
+            alert(currentLang === 'fr' ? '🚀 Commande envoyée avec succès!' : '🚀 تم إرسال طلب التوصيل بنجاح بعد تأكيد التعهد الأمني!');
             switchMainView('ordersView');
         }
 
         // --- عرض الرادار للطلبات ---
         async function loadOrdersRadar() {
             const container = document.getElementById('ordersListContainer');
+            const t = translations[currentLang];
             let orders = [];
 
             if (supabaseClient) {
@@ -409,18 +622,18 @@
             }
 
             if (orders.length === 0) {
-                container.innerHTML = '<p style="font-size: 12px; color: var(--text-muted);">لا توجد طلبات معروضة حالياً بالرادار...</p>';
+                container.innerHTML = `<p style="font-size: 12px; color: var(--text-muted);">${t.noOrders}</p>`;
                 return;
             }
 
             container.innerHTML = orders.map(ord => `
                 <div class="card">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                        <span class="badge">${ord.offered_price || 25} درهم</span>
+                        <span class="badge">${ord.offered_price || 25} DH</span>
                         <span style="font-size: 10px; color: var(--text-muted);">${ord.status || 'pending'}</span>
                     </div>
-                    <p style="font-size: 11px;">🟢 <strong>من:</strong> ${ord.pickup_address}</p>
-                    <p style="font-size: 11px; margin-top: 2px;">🔴 <strong>إلى:</strong> ${ord.delivery_address}</p>
+                    <p style="font-size: 11px;">🟢 <strong>${t.from}</strong> ${ord.pickup_address}</p>
+                    <p style="font-size: 11px; margin-top: 2px;">🔴 <strong>${t.to}</strong> ${ord.delivery_address}</p>
                 </div>
             `).join('');
         }
