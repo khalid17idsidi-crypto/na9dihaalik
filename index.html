@@ -1,30 +1,429 @@
--- 1. جدول المستخدمين
-create table public.users (
-  id uuid default gen_random_uuid() primary key,
-  phone text unique not null,
-  full_name text not null,
-  role text check (role in ('client', 'courier')) not null,
-  created_at timestamp with time zone default timezone('utc'::text, now())
-);
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق التوصيل - كازا</title>
+    
+    <!-- خط Tajawal و مكتبات Supabase و Leaflet للمباني والخرائط -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
--- 2. جدول بيانات الموصلين
-create table public.courier_profiles (
-  id uuid default gen_random_uuid() primary key,
-  user_id uuid references public.users(id) on delete cascade,
-  vehicle_type text default 'moto',
-  profile_photo text not null, -- الصورة الشمسية إلزامية
-  status text default 'pending' check (status in ('pending', 'approved'))
-);
+    <style>
+        :root {
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --primary-glow: rgba(16, 185, 129, 0.4);
+            --bg-dark: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
 
--- 3. جدول الطلبات
-create table public.delivery_orders (
-  id uuid default gen_random_uuid() primary key,
-  client_id uuid references public.users(id) on delete cascade,
-  pickup_address text not null,
-  delivery_address text not null,
-  package_photo text not null, -- صورة الطرد إلزامية
-  offered_price numeric default 25,
-  legal_terms_accepted boolean not null check (legal_terms_accepted = true),
-  status text default 'pending' check (status in ('pending', 'accepted', 'delivered')),
-  created_at timestamp with time zone default timezone('utc'::text, now())
-);
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
+        body { background: #020617; color: var(--text-main); display: flex; justify-content: center; min-height: 100vh; }
+
+        .app-container {
+            width: 100%; max-width: 480px; height: 100vh; background: var(--bg-dark);
+            position: relative; overflow: hidden; display: flex; flex-direction: column;
+        }
+
+        #map { width: 100%; height: 160px; border-radius: 16px; margin-bottom: 12px; border: 1px solid var(--border); }
+
+        .main-nav {
+            position: absolute; top: 10px; left: 10px; right: 10px; z-index: 1000;
+            background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px);
+            padding: 6px; border-radius: 20px; display: flex; border: 1px solid var(--border);
+            overflow-x: auto; gap: 4px; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        }
+        .nav-btn {
+            flex: 1; min-width: 60px; padding: 8px 4px; border: none; border-radius: 14px; color: var(--text-muted);
+            background: transparent; font-weight: 700; cursor: pointer; transition: all 0.3s ease; font-size: 11px; text-align: center;
+        }
+        .nav-btn.active { background: var(--primary); color: white; box-shadow: 0 2px 10px var(--primary-glow); }
+
+        .bottom-sheet {
+            position: absolute; top: 60px; bottom: 0; left: 0; right: 0; z-index: 50;
+            background: var(--card-bg); border-top-left-radius: 28px; border-top-right-radius: 28px;
+            padding: 20px; box-shadow: 0 -10px 40px rgba(0,0,0,0.8); border-top: 1px solid var(--border);
+            overflow-y: auto;
+        }
+
+        .sheet-handle { width: 40px; height: 4px; background: var(--text-muted); border-radius: 10px; margin: 0 auto 15px auto; opacity: 0.4; }
+        
+        .view-panel { display: none; }
+        .view-panel.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .field-group { margin-bottom: 12px; }
+        .field-group label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; }
+        .field-group input, .field-group select {
+            width: 100%; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--border);
+            background: rgba(15, 23, 42, 0.6); color: white; font-size: 12px; outline: none;
+        }
+
+        .security-warning-box {
+            background: rgba(239, 68, 68, 0.1); border: 1px solid var(--danger);
+            border-radius: 12px; padding: 10px; margin-bottom: 12px;
+        }
+        .security-warning-box p { font-size: 10px; color: #fca5a5; line-height: 1.4; font-weight: 600; }
+
+        .checkbox-label { display: flex; align-items: flex-start; gap: 8px; font-size: 11px; color: var(--warning); margin-bottom: 12px; cursor: pointer; }
+        .checkbox-label input { width: auto; margin-top: 2px; }
+
+        .btn-submit { width: 100%; padding: 12px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border: none; border-radius: 14px; font-size: 13px; font-weight: 800; cursor: pointer; transition: opacity 0.2s; }
+        .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .card { background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 12px; border-radius: 14px; margin-bottom: 10px; }
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: bold; background: var(--primary); color: white; }
+        .user-status { background: rgba(16, 185, 129, 0.15); border: 1px solid var(--primary); padding: 8px; border-radius: 10px; margin-bottom: 12px; font-size: 11px; color: #a7f3d0; }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+
+        <!-- شريط التنقل الرئيسي -->
+        <nav class="main-nav">
+            <button class="nav-btn active" onclick="switchMainView('authView', this)">🔑 التسجيل (OTP)</button>
+            <button class="nav-btn" onclick="switchMainView('clientView', this)">🙋‍♂️ الزبون</button>
+            <button class="nav-btn" onclick="switchMainView('ordersView', this)">📡 الرادار</button>
+            <button class="nav-btn" onclick="switchMainView('courierView', this)">🛵 الموصل</button>
+        </nav>
+
+        <div class="bottom-sheet">
+            <div class="sheet-handle"></div>
+
+            <!-- شريط معلومات الجلسة الحالية -->
+            <div id="userInfoBar" class="user-status" style="display: none;">
+                حساب مسجل: <strong id="sessionUserName">-</strong> (<span id="sessionUserRole">-</span>)
+            </div>
+
+            <!-- الخطوة 1: التسجيل ورمز الهاتف OTP -->
+            <div id="authView" class="view-panel active">
+                <h3 style="font-size: 15px; margin-bottom: 12px; color: var(--primary);">📲 الخطوة 1: التسجيل عبر رقم الهاتف (SMS OTP)</h3>
+                
+                <div class="field-group">
+                    <label>الاسم الكامل:</label>
+                    <input type="text" id="authFullName" placeholder="مثال: محمد العمراوي">
+                </div>
+
+                <div class="field-group">
+                    <label>رقم الهاتف:</label>
+                    <input type="tel" id="authPhone" placeholder="+212600000000">
+                </div>
+
+                <div class="field-group">
+                    <label>نوع الحساب:</label>
+                    <select id="authRole">
+                        <option value="client">زبون (Client)</option>
+                        <option value="courier">موصل / سائق (Courier)</option>
+                    </select>
+                </div>
+
+                <button class="btn-submit" onclick="sendOtpStep()">إرسال رمز التحقق OTP 📩</button>
+
+                <div id="otpSection" style="display: none; margin-top: 15px; border-top: 1px solid var(--border); padding-top: 12px;">
+                    <div class="field-group">
+                        <label>أدخل رمز التحقق (OTP) المرسل:</label>
+                        <input type="text" id="otpCode" placeholder="123456">
+                    </div>
+                    <button class="btn-submit" style="background: var(--primary-dark);" onclick="verifyOtpStep()">تأكيد الرمز والتسجيل ✅</button>
+                </div>
+            </div>
+
+            <!-- الخطوة 2: حساب الموصل (Couriers) -->
+            <div id="courierView" class="view-panel">
+                <h3 style="font-size: 15px; margin-bottom: 12px; color: var(--primary);">🛵 الخطوة 2: استكمال حساب الموصل</h3>
+                
+                <div class="field-group">
+                    <label>نوع المركبة المعتمد:</label>
+                    <input type="text" value="دراجة نارية (Moto)" disabled style="opacity: 0.7;">
+                </div>
+
+                <div class="field-group">
+                    <label>📸 الصورة الشخصية الشمسية للوجه (إلزامية للتأكد من الهوية):</label>
+                    <input type="file" id="courierPhotoFile" accept="image/*">
+                </div>
+
+                <button class="btn-submit" onclick="registerCourierStep()">إكمال التسجيل وتفعيل الحساب 📝</button>
+
+                <div class="card" style="margin-top: 15px;">
+                    <span class="badge" style="background: var(--warning);">حالة الحساب</span>
+                    <p id="courierStatusText" style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">في انتظار استكمال البيانات كـ (Pending)...</p>
+                </div>
+            </div>
+
+            <!-- الخطوة 3: إنشاء طلب من الزبون -->
+            <div id="clientView" class="view-panel">
+                <h3 style="font-size: 15px; margin-bottom: 10px; color: var(--primary);">📦 الخطوة 3: إنشاء طلب توصيل جديد</h3>
+                
+                <div id="map"></div>
+
+                <div class="field-group">
+                    <label>🟢 نقطة البداية / الاستلام (إلزامية):</label>
+                    <input type="text" id="pickupAddr" placeholder="مثال: المعاريف - شارع المسيرة">
+                </div>
+
+                <div class="field-group">
+                    <label>🔴 نقطة الوصول / التسليم (إلزامية):</label>
+                    <input type="text" id="deliveryAddr" placeholder="مثال: سيدي معروف - المجمع الشمسي">
+                </div>
+
+                <div class="field-group">
+                    <label>📷 صورة الطرد (إلزامية قبل الإرسال):</label>
+                    <input type="file" id="packagePhotoFile" accept="image/*">
+                </div>
+
+                <div class="field-group">
+                    <label>الأجرة المقترحة (درهم):</label>
+                    <input type="number" id="offeredPrice" value="25">
+                </div>
+
+                <!-- التنبيه الأمني والموافقة -->
+                <div class="security-warning-box">
+                    <p>⚠️ <strong>تنبيه أمني صريح:</strong> يمنع منعاً باتاً توصيل أي مواد مخدرة، كحولية، أسلحة، أو أسباب غير قانونية. أي مخالفة تتسبب في التبليغ الفوري للجهات الأمنية.</p>
+                </div>
+
+                <label class="checkbox-label">
+                    <input type="checkbox" id="legalTerms">
+                    <span>أتعهد صراحة بأن الطرد لا يحتوي على أي مواد مخالفة للقانون.</span>
+                </label>
+
+                <button class="btn-submit" onclick="createOrderStep()">إرسال الطلب الآن 🚀</button>
+            </div>
+
+            <!-- الرادار وعرض الطلبات -->
+            <div id="ordersView" class="view-panel">
+                <h3 style="font-size: 14px; margin-bottom: 12px; color: var(--primary);">📡 طلبات التوصيل المتاحة بالرادار</h3>
+                <div id="ordersListContainer">
+                    <p style="font-size: 12px; color: var(--text-muted);">جاري تحميل الطلبات...</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- 1. إعداد Supabase مع Fallback لوضع التجربة ---
+        const SUPABASE_URL = 'https://YOUR_SUPABASE_URL.supabase.co'; 
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+        
+        let supabaseClient = null;
+        if (SUPABASE_URL !== 'https://YOUR_SUPABASE_URL.supabase.co') {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+
+        // متغيرات الجلسة والمحاكاة
+        let currentUserId = null;
+        let currentUserName = '';
+        let currentRole = '';
+        let mockOrdersArr = [];
+        let map = null;
+
+        function initMap() {
+            if (!map && document.getElementById('map')) {
+                map = L.map('map').setView([33.5731, -7.5898], 12);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            }
+        }
+
+        function switchMainView(viewId, btn) {
+            document.querySelectorAll('.view-panel').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            if (btn) btn.classList.add('active');
+
+            if (viewId === 'clientView') {
+                setTimeout(() => { initMap(); if(map) map.invalidateSize(); }, 200);
+            } else if (viewId === 'ordersView') {
+                loadOrdersRadar();
+            }
+        }
+
+        // --- الخطوة 1: التسجيل ورمز OTP ---
+        async function sendOtpStep() {
+            const phone = document.getElementById('authPhone').value.trim();
+            const fullName = document.getElementById('authFullName').value.trim();
+
+            if (!fullName || !phone) {
+                alert('⚠️ يرجى أدخال الاسم الكامل ورقم الهاتف أولاً.');
+                return;
+            }
+
+            if (supabaseClient) {
+                const { error } = await supabaseClient.auth.signInWithOtp({ phone });
+                if (error) { alert('خطأ في إرسال الرمز: ' + error.message); return; }
+            }
+
+            document.getElementById('otpSection').style.display = 'block';
+            alert('📩 تم إرسال رمز OTP التخيلي (أو عبر الهاتف) إلى الرقم المخزن.');
+        }
+
+        async function verifyOtpStep() {
+            const phone = document.getElementById('authPhone').value.trim();
+            const fullName = document.getElementById('authFullName').value.trim();
+            const role = document.getElementById('authRole').value;
+            const token = document.getElementById('otpCode').value.trim();
+
+            if (!token) { alert('يرجى إدخال رمز OTP المخزن.'); return; }
+
+            if (supabaseClient) {
+                const { data, error } = await supabaseClient.auth.verifyOtp({ phone, token, type: 'sms' });
+                if (error) { alert('رمز غير صحيح: ' + error.message); return; }
+
+                currentUserId = data.user.id;
+                await supabaseClient.from('users').upsert({ id: currentUserId, phone, full_name: fullName, role });
+            } else {
+                currentUserId = 'user_' + Math.random().toString(36).substr(2, 9);
+            }
+
+            currentUserName = fullName;
+            currentRole = role;
+
+            document.getElementById('sessionUserName').innerText = currentUserName;
+            document.getElementById('sessionUserRole').innerText = role === 'courier' ? 'موصل' : 'زبون';
+            document.getElementById('userInfoBar').style.display = 'block';
+
+            alert('✅ تم التحقق والتسجيل بنجاح!');
+            if (role === 'courier') switchMainView('courierView');
+            else switchMainView('clientView');
+        }
+
+        // --- الخطوة 2: استكمال حساب الموصل ---
+        async function registerCourierStep() {
+            if (!currentUserId) {
+                alert('⚠️ يرجى إكمال الخطوة الأولى والتسجيل أولاً!');
+                switchMainView('authView');
+                return;
+            }
+
+            const photoInput = document.getElementById('courierPhotoFile');
+            if (!photoInput.files || photoInput.files.length === 0) {
+                alert('❌ الصورة الشخصية الشمسية للوجه إلزامية لتأكيد الهوية للزبائن!');
+                return;
+            }
+
+            const file = photoInput.files[0];
+            let photoUrl = "https://via.placeholder.com/150";
+
+            if (supabaseClient) {
+                const path = `couriers/${currentUserId}.jpg`;
+                const { error: uploadErr } = await supabaseClient.storage.from('courier-avatars').upload(path, file, { upsert: true });
+                if (uploadErr) { alert('فشل رفع الصورة: ' + uploadErr.message); return; }
+
+                photoUrl = supabaseClient.storage.from('courier-avatars').getPublicUrl(path).data.publicUrl;
+
+                const { error } = await supabaseClient.from('courier_profiles').upsert({
+                    user_id: currentUserId,
+                    vehicle_type: 'moto',
+                    profile_photo: photoUrl,
+                    status: 'pending'
+                });
+
+                if (error) { alert('خطأ في حفظ بيانات الموصل: ' + error.message); return; }
+            }
+
+            document.getElementById('courierStatusText').innerHTML = '✅ تم رفع الصورة الشمسية وتحديث الطلب إلى <strong>Pending</strong> (قيد التفعيل).';
+            alert('تم استكمال الملف وحفظ الحساب بنجاح.');
+        }
+
+        // --- الخطوة 3: إنشاء طلب توصيل من الزبون ---
+        async function createOrderStep() {
+            if (!currentUserId) {
+                alert('⚠️ يجب التسجيل كزبون أولاً قبل إنشاء طلب!');
+                switchMainView('authView');
+                return;
+            }
+
+            const pickup = document.getElementById('pickupAddr').value.trim();
+            const delivery = document.getElementById('deliveryAddr').value.trim();
+            const photoInput = document.getElementById('packagePhotoFile');
+            const legalAccepted = document.getElementById('legalTerms').checked;
+            const price = document.getElementById('offeredPrice').value;
+
+            if (!pickup) { alert('⚠️ نقطة البداية إلزامية.'); return; }
+            if (!delivery) { alert('⚠️ نقطة الوصول إلزامية.'); return; }
+            if (!photoInput.files || photoInput.files.length === 0) {
+                alert('📷 صورة الطرد إلزامية قبل إرسال الطلب.');
+                return;
+            }
+            if (!legalAccepted) {
+                alert('⛔ يلزم الموافقة والتأشير على التعهد الأمني بعدم نقل المحظورات.');
+                return;
+            }
+
+            let packagePhotoUrl = 'https://via.placeholder.com/150/10b981/ffffff?text=Package';
+
+            if (supabaseClient) {
+                const path = `packages/${Date.now()}_${currentUserId}.jpg`;
+                const { error: uploadErr } = await supabaseClient.storage.from('package-photos').upload(path, photoInput.files[0]);
+                if (uploadErr) { alert('فشل رفع صورة الطرد: ' + uploadErr.message); return; }
+
+                packagePhotoUrl = supabaseClient.storage.from('package-photos').getPublicUrl(path).data.publicUrl;
+
+                const { error } = await supabaseClient.from('delivery_orders').insert([{
+                    client_id: currentUserId,
+                    pickup_address: pickup,
+                    delivery_address: delivery,
+                    package_photo: packagePhotoUrl,
+                    offered_price: price,
+                    legal_terms_accepted: true,
+                    status: 'pending'
+                }]);
+
+                if (error) { alert('حدث خطأ في إنشاء الطلب: ' + error.message); return; }
+            } else {
+                mockOrdersArr.push({
+                    id: '#' + Math.floor(1000 + Math.random() * 9000),
+                    pickup_address: pickup,
+                    delivery_address: delivery,
+                    offered_price: price,
+                    status: 'pending'
+                });
+            }
+
+            alert('🚀 تم إرسال طلب التوصيل بنجاح بعد تأكيد التعهد الأمني!');
+            switchMainView('ordersView');
+        }
+
+        // --- عرض الرادار للطلبات ---
+        async function loadOrdersRadar() {
+            const container = document.getElementById('ordersListContainer');
+            let orders = [];
+
+            if (supabaseClient) {
+                const { data, error } = await supabaseClient.from('delivery_orders').select('*').order('created_at', { ascending: false });
+                if (!error && data) orders = data;
+            } else {
+                orders = mockOrdersArr;
+            }
+
+            if (orders.length === 0) {
+                container.innerHTML = '<p style="font-size: 12px; color: var(--text-muted);">لا توجد طلبات معروضة حالياً بالرادار...</p>';
+                return;
+            }
+
+            container.innerHTML = orders.map(ord => `
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span class="badge">${ord.offered_price || 25} درهم</span>
+                        <span style="font-size: 10px; color: var(--text-muted);">${ord.status || 'pending'}</span>
+                    </div>
+                    <p style="font-size: 11px;">🟢 <strong>من:</strong> ${ord.pickup_address}</p>
+                    <p style="font-size: 11px; margin-top: 2px;">🔴 <strong>إلى:</strong> ${ord.delivery_address}</p>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
