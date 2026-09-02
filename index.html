@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق التوصيل - كازا</title>
+    <title>نقضيه عليك - كازا</title>
     
     <!-- خط Tajawal و مكتبات Supabase و Leaflet للمباني والخرائط -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -134,7 +134,7 @@
         <!-- الخانة الرئيسية: اسم التطبيق وعمله وزر اختيار اللغة -->
         <header class="app-header">
             <div class="app-info">
-                <div class="app-title">🚀 <span id="txt-app-title">تطبيق التوصيل - كازا</span></div>
+                <div class="app-title">🚀 <span id="txt-app-title">نقضيه عليك - كازا</span></div>
                 <div class="app-subtitle" id="txt-app-desc">منصة التوصيل السريع للمحليات والطرود والطلبيات</div>
             </div>
             <div class="lang-switch">
@@ -285,7 +285,7 @@
         // ترجمات النصوص للغة الفرنسية والعربية
         const translations = {
             ar: {
-                appTitle: "تطبيق التوصيل - كازا",
+                appTitle: "نقضيه عليك - كازا",
                 appDesc: "منصة التوصيل السريع للمحليات والطرود والطلبيات",
                 navAuth: "🔑 التسجيل (OTP)",
                 navClient: "🙋‍♂️ الزبون",
@@ -328,7 +328,7 @@
                 to: "إلى:"
             },
             fr: {
-                appTitle: "Livraison Casa",
+                appTitle: "Naqdih Alik - Casa",
                 appDesc: "Plateforme de livraison rapide de colis & commandes",
                 navAuth: "🔑 Inscription (OTP)",
                 navClient: "🙋‍♂️ Client",
@@ -356,7 +356,7 @@
                 pickup: "🟢 Point de départ / Ramassage (Obligatoire):",
                 pickupPh: "Ex: Maarif - Rue Al Massira",
                 delivery: "🔴 Point d'arrivée / Livraison (Obligatoire):",
-                deliveryPh: "Ex: Sidi Maalouf - Near Solar Park",
+                deliveryPh: "Ex: Sidi Maarouf - Near Solar Park",
                 packagePhoto: "📷 Photo du colis (Obligatoire):",
                 price: "Prix proposé (DH):",
                 securityWarn: "⚠️ <strong>Avertissement de sécurité:</strong> Il est strictement interdit de transporter des drogues, de l'alcool, des armes ou tout produit illégal. Toute infraction sera immédiatement signalée aux autorités.",
@@ -626,16 +626,23 @@
                 return;
             }
 
-            container.innerHTML = orders.map(ord => `
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                        <span class="badge">${ord.offered_price || 25} DH</span>
-                        <span style="font-size: 10px; color: var(--text-muted);">${ord.status || 'pending'}</span>
+            let html = '';
+            orders.forEach(o => {
+                html += `
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <span class="badge">${o.offered_price || 25} DH</span>
+                            <span style="font-size: 10px; color: var(--text-muted);">${o.id || '#ORDER'}</span>
+                        </div>
+                        <p style="font-size: 11px; margin-bottom: 2px;"><strong>${t.from}</strong> ${o.pickup_address}</p>
+                        <p style="font-size: 11px; margin-bottom: 6px;"><strong>${t.to}</strong> ${o.delivery_address}</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                            <span style="font-size: 10px; color: var(--primary);">● ${o.status || 'pending'}</span>
+                        </div>
                     </div>
-                    <p style="font-size: 11px;">🟢 <strong>${t.from}</strong> ${ord.pickup_address}</p>
-                    <p style="font-size: 11px; margin-top: 2px;">🔴 <strong>${t.to}</strong> ${ord.delivery_address}</p>
-                </div>
-            `).join('');
+                `;
+            });
+            container.innerHTML = html;
         }
     </script>
 </body>
