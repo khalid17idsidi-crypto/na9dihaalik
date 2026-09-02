@@ -125,6 +125,26 @@
         .card { background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 12px; border-radius: 14px; margin-bottom: 10px; }
         .badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: bold; background: var(--primary); color: white; }
         .user-status { background: rgba(16, 185, 129, 0.15); border: 1px solid var(--primary); padding: 8px; border-radius: 10px; margin-bottom: 12px; font-size: 11px; color: #a7f3d0; }
+
+        /* تنسيقات كارت نظام تقييم Glovo الجديد */
+        .glovo-rating-card {
+            background: linear-gradient(145deg, rgba(16, 185, 129, 0.1), rgba(15, 23, 42, 0.8));
+            border: 1px solid var(--primary);
+            border-radius: 16px;
+            padding: 14px;
+            margin-top: 15px;
+        }
+        .glovo-score-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+        }
+        .score-big { font-size: 22px; font-weight: 900; color: #34d399; }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11px; }
+        .stat-item { background: rgba(0,0,0,0.2); padding: 6px 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); }
     </style>
 </head>
 <body>
@@ -192,7 +212,7 @@
                 </div>
             </div>
 
-            <!-- الخطوة 2: حساب الموصل (Couriers) -->
+            <!-- الخطوة 2: حساب الموصل (Couriers) + نظام تقييم Glovo التفاعلي -->
             <div id="courierView" class="view-panel">
                 <h3 style="font-size: 15px; margin-bottom: 12px; color: var(--primary);" id="title-step2">🛵 الخطوة 2: استكمال حساب الموصل</h3>
                 
@@ -218,9 +238,31 @@
 
                 <button class="btn-submit" id="btn-register-courier" onclick="registerCourierStep()">إكمال التسجيل وتفعيل الحساب 📝</button>
 
-                <div class="card" style="margin-top: 15px;">
-                    <span class="badge" style="background: var(--warning);" id="badge-account-status">حالة الحساب</span>
-                    <p id="courierStatusText" style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">في انتظار استكمال البيانات كـ (Pending)...</p>
+                <!-- بطاقة عرض تقييم Glovo المرئية والتفاعلية -->
+                <div class="glovo-rating-card" id="glovoRatingContainer">
+                    <div class="glovo-score-header">
+                        <div>
+                            <span class="badge" style="background: var(--warning);" id="badge-account-status">تقييم الموصل Glovo</span>
+                            <div style="font-size: 11px; margin-top: 4px; color: var(--text-muted);" id="lbl-courier-id-display">المعرف: ---</div>
+                        </div>
+                        <div class="score-big" id="glovoScoreDisplay">0.0 / 5.0</div>
+                    </div>
+
+                    <div class="stat-grid">
+                        <div class="stat-item">
+                            <span style="color: var(--text-muted);">المستوى:</span><br>
+                            <strong id="glovoTierDisplay" style="color: #6ee7b7;">-</strong>
+                        </div>
+                        <div class="stat-item">
+                            <span style="color: var(--text-muted);">الأداء العام:</span><br>
+                            <strong id="glovoPercentDisplay" style="color: #6ee7b7;">0%</strong>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 10px; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; font-size: 10px; border-left: 3px solid var(--primary);">
+                        <strong>⏰ أولوية حجز الساعات:</strong><br>
+                        <span id="glovoPriorityDisplay" style="color: #fde047;">قم بتفعيل الحساب لحساب الأولوية...</span>
+                    </div>
                 </div>
             </div>
 
@@ -341,6 +383,22 @@
             }
         }
 
+        // دالة تحديث واجهة التقييم فورياً
+        function updateGlovoRatingUI(customRatings = null) {
+            const courierId = currentUserId || "RIDER_EXEMPLAR";
+            const glovo = new GlovoRatingSystem(courierId);
+            
+            // بيانات افتراضية لحساب التقييم في الواجهة
+            const ratings = customRatings || [1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1];
+            const result = glovo.calculateExcellenceScore(ratings, 96.0, 92.0, 9, 18);
+
+            document.getElementById('lbl-courier-id-display').innerText = 'المعرف: ' + result.courier_id;
+            document.getElementById('glovoScoreDisplay').innerText = result.overall_score_5 + ' / 5.0';
+            document.getElementById('glovoTierDisplay').innerText = result.tier;
+            document.getElementById('glovoPercentDisplay').innerText = result.score_percentage + '%';
+            document.getElementById('glovoPriorityDisplay').innerText = result.booking_priority;
+        }
+
         // ترجمات النصوص للغة الفرنسية والعربية
         const translations = {
             ar: {
@@ -368,8 +426,7 @@
                 courierSecurityWarn: "⚠️ <strong>تعهد أمني وإقرار قانوني:</strong> أتعهد بالالتزام التام بالقوانين الجاري بها العمل. وفي حالة حدوث أي سرقة، ضياع، أو تقديم شكاية ضد أي طلبية، أوافق وأقر بإلزامية تقديم جميع بياناتي الشخصية وموقعي للجهات الأمنية والمختصة فوراً.",
                 courierLegalTerms: "أوافق على التعهد الأمني وإلزامية تقديم بياناتي للجهات المختصة عند الشكاية أو السرقة.",
                 btnRegisterCourier: "إكمال التسجيل وتفعيل الحساب 📝",
-                badgeStatus: "حالة الحساب",
-                statusPendingText: "في انتظار استكمال البيانات كـ (Pending)...",
+                badgeStatus: "تقييم الموصل Glovo",
                 step3Title: "📦 الخطوة 3: إنشاء طلب توصيل جديد",
                 pickup: "🟢 نقطة البداية / الاستلام (إلزامية):",
                 pickupPh: "مثال: المعاريف - شارع المسيرة",
@@ -413,8 +470,7 @@
                 courierSecurityWarn: "⚠️ <strong>Engagement de sécurité:</strong> Je m'engage à respecter les lois en vigueur. En cas de vol, perte ou plainte concernant une commande, j'accepte la communication obligatoire de mes données personnelles aux autorités compétentes.",
                 courierLegalTerms: "J'accepte l'engagement de sécurité et la transmission de mes données aux autorités en cas de plainte ou de vol.",
                 btnRegisterCourier: "Finaliser l'inscription 📝",
-                badgeStatus: "Statut du compte",
-                statusPendingText: "En attente de finalisation (Pending)...",
+                badgeStatus: "Score Glovo Coursier",
                 step3Title: "📦 Étape 3: Créer une nouvelle commande",
                 pickup: "🟢 Point de départ / Ramassage (Obligatoire):",
                 pickupPh: "Ex: Maarif - Rue Al Massira",
@@ -516,6 +572,8 @@
 
             if (viewId === 'clientView') {
                 setTimeout(() => { initMap(); if(map) map.invalidateSize(); }, 200);
+            } else if (viewId === 'courierView') {
+                updateGlovoRatingUI(); // تحديث وحساب التقييم فور فتح صفحة الموصل
             } else if (viewId === 'ordersView') {
                 loadOrdersRadar();
             }
@@ -591,21 +649,10 @@
                 return;
             }
 
-            // تطبيق حساب تقييم كلوفو الأولي
-            const courierRatings = [1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1];
-            const glovo = new GlovoRatingSystem(currentUserId || "RIDER_10293");
-            const result = glovo.calculateExcellenceScore(courierRatings, 95.0, 90.0, 8, 15);
+            // تحديث التقييم بأعلى أداء عند اكتمال التجهيز
+            updateGlovoRatingUI([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
 
-            const statusBox = document.getElementById('courierStatusText');
-            statusBox.innerHTML = `
-                ✅ <strong>تم تفعيل الحساب ونظام التقييم (Glovo Rating):</strong><br>
-                • معرف الموصل: ${result.courier_id}<br>
-                • التقييم النهائي: ${result.overall_score_5} / 5.0<br>
-                • النسبة المئوية: ${result.score_percentage}%<br>
-                • المستوى الحالي: ${result.tier}<br>
-                • أولوية الحجز: ${result.booking_priority}
-            `;
-            alert(currentLang === 'fr' ? '✅ Profil coursier vérifié et activé!' : '✅ تم استكمال واستلام ملف الموصل وتفعيله بنجاح مع تطبيق تقييم كلوفو!');
+            alert(currentLang === 'fr' ? '✅ Profil coursier vérifié et activé!' : '✅ تم استكمال واســتلام ملف الموصل وتفعيله بنجاح مع تحديث تقييم Glovo!');
         }
 
         // --- الخطوة 3: إنشاء طلب توصيل من الزبون ---
