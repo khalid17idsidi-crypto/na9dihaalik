@@ -5,7 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نقضيها عليك ... في كازا | Naqdiha Aalik Casa</title>
     
+    <!-- الخطوط ومكتبة Supabase -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Leaflet CSS & JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -34,11 +38,10 @@
             position: relative; overflow: hidden; display: flex; flex-direction: column;
         }
 
-        #map { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; transition: opacity 0.3s; }
-        #map.hide-map { opacity: 0; pointer-events: none; display: none !important; }
+        #map { width: 100%; height: 180px; border-radius: 16px; margin-bottom: 15px; border: 1px solid var(--border); }
 
         .main-nav {
-            position: absolute; top: 10px; left: 10px; right: 10px; z-index: 100;
+            position: absolute; top: 10px; left: 10px; right: 10px; z-index: 1000;
             background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px);
             padding: 6px; border-radius: 20px; display: flex; border: 1px solid var(--border);
             overflow-x: auto; gap: 4px; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
@@ -48,20 +51,18 @@
             background: transparent; font-weight: 700; cursor: pointer; transition: all 0.3s ease; font-size: 11px; text-align: center;
         }
         .nav-btn.active { background: var(--primary); color: white; box-shadow: 0 2px 10px var(--primary-glow); }
-        .nav-btn.auth-btn { background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid var(--info); }
-        .nav-btn.admin-btn { background: rgba(239, 68, 68, 0.15); color: #fca5a5; }
 
         .bottom-sheet {
-            position: absolute; bottom: 0; left: 0; right: 0; z-index: 50;
+            position: absolute; top: 60px; bottom: 0; left: 0; right: 0; z-index: 50;
             background: var(--card-bg); border-top-left-radius: 28px; border-top-right-radius: 28px;
             padding: 20px; box-shadow: 0 -10px 40px rgba(0,0,0,0.8); border-top: 1px solid var(--border);
-            max-height: 85vh; overflow-y: auto; transition: all 0.4s ease;
+            overflow-y: auto; transition: all 0.4s ease;
         }
 
         .sheet-handle { width: 40px; height: 4px; background: var(--text-muted); border-radius: 10px; margin: 0 auto 15px auto; opacity: 0.4; }
         
-        .view-panel { display: none !important; }
-        .view-panel.active { display: block !important; animation: fadeIn 0.3s ease-in-out; }
+        .view-panel { display: none; }
+        .view-panel.active { display: block; animation: fadeIn 0.3s ease-in-out; }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(8px); }
@@ -74,22 +75,11 @@
             border-radius: 20px; border: 1px solid rgba(16, 185, 129, 0.3);
         }
 
-        .top-language-bar {
-            display: flex; justify-content: center; align-items: center; gap: 8px;
-            margin-bottom: 12px; background: rgba(0, 0, 0, 0.3); padding: 6px 12px;
-            border-radius: 12px; border: 1px solid var(--border);
-        }
-        .lang-btn {
-            background: transparent; border: 1px solid transparent; color: var(--text-muted);
-            padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;
-        }
-        .lang-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
-
         .app-brand { font-size: 20px; font-weight: 900; color: #ffffff; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .app-brand span.highlight { color: var(--primary); }
         .app-slogan { font-size: 11px; color: var(--text-muted); margin-top: 6px; font-weight: 600; }
 
-        .home-content-center { display: flex; flex-direction: column; justify-content: center; min-height: 40vh; }
+        .home-content-center { display: flex; flex-direction: column; justify-content: center; min-height: 35vh; }
         .services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 15px; }
         .service-card {
             background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border);
@@ -106,60 +96,35 @@
             width: 100%; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--border);
             background: rgba(15, 23, 42, 0.6); color: white; font-size: 12px; outline: none;
         }
-        .field-group textarea { resize: none; height: 55px; }
 
         .selected-service-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(16, 185, 129, 0.15); border: 1px solid var(--primary); color: var(--primary); padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; margin-bottom: 15px; }
-        .security-box { background: rgba(239, 68, 68, 0.1); border: 1px dashed var(--danger); padding: 12px; border-radius: 12px; font-size: 11px; color: #fca5a5; margin-bottom: 12px; }
-        .legal-checkbox { display: flex; align-items: flex-start; gap: 8px; margin-top: 8px; cursor: pointer; color: white; font-size: 10px; }
-        .file-upload-btn { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; background: rgba(255,255,255,0.03); border: 1px dashed var(--primary); border-radius: 12px; font-size: 11px; color: var(--primary); cursor: pointer; width: 100%; }
-        .preview-img { width: 100%; height: 90px; object-fit: cover; border-radius: 10px; margin-top: 6px; display: none; border: 1px solid var(--primary); }
         .fare-box { background: rgba(16, 185, 129, 0.08); border: 1px solid var(--primary); padding: 12px; border-radius: 14px; margin-bottom: 12px; }
         .fare-input-wrapper { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
         .fare-input-wrapper input { font-size: 16px; font-weight: 800; text-align: center; color: var(--primary); }
         .quick-btn { background: rgba(255,255,255,0.1); border: none; color: white; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 700; }
         .btn-submit { width: 100%; padding: 12px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border: none; border-radius: 14px; font-size: 14px; font-weight: 800; cursor: pointer; margin-top: 5px; }
-        .btn-submit:disabled { background: #475569; cursor: not-allowed; }
         .card { background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 12px; border-radius: 14px; margin-bottom: 10px; }
-        .wallet-card { background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid var(--border); border-radius: 16px; padding: 14px; margin-bottom: 12px; }
-        .wallet-balance { font-size: 22px; font-weight: 800; color: var(--primary); margin: 4px 0; }
-        .link-action { color: var(--primary); font-size: 11px; text-decoration: underline; cursor: pointer; text-align: center; display: block; margin-top: 10px; }
-
-        .role-selector-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
-        .role-card { background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 15px; border-radius: 14px; text-align: center; cursor: pointer; }
-        .role-card:hover { border-color: var(--primary); background: rgba(16, 185, 129, 0.1); }
-
-        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 10px; }
-        .stat-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 8px 10px; border-radius: 10px; text-align: center; }
-        .stat-title { font-size: 10px; color: var(--text-muted); margin-bottom: 2px; }
-        .stat-value { font-size: 13px; font-weight: 800; color: white; }
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; background: var(--primary); color: white; margin-bottom: 6px; }
     </style>
 </head>
 <body>
 
     <div class="app-container">
-        <div id="map" class="hide-map"></div>
 
+        <!-- شريط التنقل الرئيسي -->
         <nav class="main-nav">
             <button class="nav-btn active" id="navHome" onclick="switchMainView('homeView', this)">🏠 الرئيسية</button>
-            <button class="nav-btn auth-btn" id="navAuth" onclick="switchMainView('authChoiceView', this)">🔐 الدخول</button>
-            <button class="nav-btn" id="navClient" onclick="switchMainView('clientView', this)">🙋‍♂️ الطلبات</button>
+            <button class="nav-btn" id="navClient" onclick="switchMainView('clientView', this)">🙋‍♂️ الطلب</button>
             <button class="nav-btn" id="navOrders" onclick="switchMainView('ordersView', this)">📡 الرادار</button>
-            <button class="nav-btn" id="navRegister" onclick="switchMainView('registerView', this)">📝 الانضمام</button>
-            <button class="nav-btn admin-btn" id="navAdmin" onclick="openAdminPanel(this)">⚙️ الأدمن</button>
+            <button class="nav-btn" id="navDriver" onclick="switchMainView('driverView', this)">🛵 الموصل</button>
         </nav>
 
         <div class="bottom-sheet" id="bottomSheet">
             <div class="sheet-handle"></div>
 
-            <!-- 1. الشاشة الرئيسية للزوار -->
+            <!-- 1. الرئيسية -->
             <div id="homeView" class="view-panel active">
                 <div class="app-header">
-                    <div class="top-language-bar">
-                        <span style="font-size: 12px; color: var(--text-muted);">🌐 اختر اللغة / Langue:</span>
-                        <button class="lang-btn active" onclick="setLanguage('ar', this)">العربية</button>
-                        <button class="lang-btn" onclick="setLanguage('fr', this)">Français</button>
-                    </div>
-
                     <div class="app-brand">
                         <span>🛵</span> <span class="highlight">نقضيها عليك</span> ... في كازا
                     </div>
@@ -187,331 +152,107 @@
                 </div>
             </div>
 
-            <!-- 2. خيار اختيار نوع الدخول -->
-            <div id="authChoiceView" class="view-panel">
-                <h4 style="font-size: 14px; text-align: center; margin-bottom: 15px;">اختر طريقة الدخول للتطبيق:</h4>
-                <div class="role-selector-grid">
-                    <div class="role-card" onclick="switchMainView('clientView', document.getElementById('navClient'))">
-                        <div style="font-size: 30px;">🙋‍♂️</div>
-                        <div style="font-size: 12px; font-weight: 800; margin-top: 5px;">دخول كزبون</div>
-                        <div style="font-size: 10px; color: var(--text-muted);">لوضع الطلبيات والتسخيرات</div>
-                    </div>
-                    <div class="role-card" onclick="switchMainView('signupAuthView', document.getElementById('navRegister'))">
-                        <div style="font-size: 30px;">🛵</div>
-                        <div style="font-size: 12px; font-weight: 800; margin-top: 5px;">دخول كمندوب</div>
-                        <div style="font-size: 10px; color: var(--text-muted);">التسجيل وتنفيذ المهمات</div>
-                    </div>
-                </div>
-                <span class="link-action" onclick="showAuthSubView('loginAuthView')">لديك حساب مسجل بالفعل؟ تسجيل الدخول</span>
-            </div>
-
-            <!-- 3. الزبون - صفحة إتمام الطلب -->
+            <!-- 2. واجهة الزبون (إرسال الطلب) -->
             <div id="clientView" class="view-panel">
                 <div id="serviceBadgeContainer" class="selected-service-badge">
                     <span>📌 الخدمة المحددة:</span> <span id="selectedServiceName">🛒 مستلزمات وقضاء أغراض</span>
                 </div>
 
+                <!-- الخريطة لتحديد المكان -->
+                <div id="map"></div>
+
                 <div class="field-group">
-                    <label for="clientName">👤 الاسم الكامل للزبون</label>
-                    <input type="text" id="clientName" placeholder="أدخل اسمك الكامل..." oninput="validateClientForm()">
+                    <label for="custName">👤 الاسم الكامل</label>
+                    <input type="text" id="custName" value="أحمد">
                 </div>
 
                 <div class="field-group">
-                    <label for="clientPhone">📞 رقم الهاتف الشخصي</label>
-                    <input type="tel" id="clientPhone" placeholder="06XXXXXXXX" oninput="validateClientForm()">
+                    <label for="pickupAddr">🟢 عنوان الاستلام / نقطة الانطلاق</label>
+                    <input type="text" id="pickupAddr" placeholder="مثال: متجر البركة / شارع الحسن الثاني">
                 </div>
 
                 <div class="field-group">
-                    <label for="pickupLocation">🟢 نقطة الاستلام / المتجر</label>
-                    <input type="text" id="pickupLocation" value="شارع الجيش الملكي - مرجان">
-                </div>
-
-                <div class="field-group">
-                    <label for="dropoffLocation">🔴 عنوان التسليم الخاص بك</label>
-                    <input type="text" id="dropoffLocation" placeholder="حدد مكان التسليم بالضبط...">
-                </div>
-
-                <div class="field-group">
-                    <label for="orderDetails">📝 تفاصيل التسخيرة والطلبات</label>
-                    <textarea id="orderDetails" placeholder="أدخل تفاصيل الطلب..."></textarea>
-                </div>
-
-                <div class="field-group">
-                    <label>📸 صورة الطرد / المشتريات (<span style="color: var(--danger);">إجبارية</span>)</label>
-                    <label class="file-upload-btn">
-                        <span>📷 رفع صورة الطرد (إجباري)</span>
-                        <input type="file" accept="image/*" style="display: none;" onchange="handleClientImage(this)">
-                    </label>
-                    <img id="clientImgPreview" class="preview-img" alt="معاينة الصورة">
+                    <label for="deliveryAddr">🔴 عنوان التسليم</label>
+                    <input type="text" id="deliveryAddr" placeholder="مثال: الحي المحمدي عمارة 4">
                 </div>
 
                 <div class="fare-box">
-                    <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px;">
-                        <span>📏 المسافة: <b style="color: white;">3.5 كم</b></span>
-                        <span>💰 التكلفة: <b style="color: var(--primary);">30.00 د.م</b></span>
-                    </div>
-                    <label for="offeredFare" style="font-size: 11px; color: var(--text-muted);">الأجرة المقترحة للمندوب:</label>
+                    <label for="offeredPrice" style="font-size: 11px; color: var(--text-muted);">الأجرة المقترحة للمندوب (درهم):</label>
                     <div class="fare-input-wrapper">
-                        <input type="number" id="offeredFare" value="30" min="30">
+                        <input type="number" id="offeredPrice" value="25">
                         <button class="quick-btn" onclick="addFare(5)">+5</button>
                         <button class="quick-btn" onclick="addFare(10)">+10</button>
                     </div>
                 </div>
 
-                <div class="security-box">
-                    ⚠️ <b>تعهد أمني وقانوني:</b> يتحمل الزبون المسؤولية القانونية الكاملة عن المحتويات.
-                    <label class="legal-checkbox">
-                        <input type="checkbox" id="clientLegalAgree" onchange="validateClientForm()"> أوافق على كافة الشروط والمسؤولية القانونية
-                    </label>
-                </div>
+                <button class="btn-submit" onclick="createOrder()">إرسال الطلب الآن 🚀</button>
 
-                <button class="btn-submit" id="submitClientBtn" disabled onclick="alert('تم إرسال الطلب بنجاح للرادار!')">إرسال الطلب الآن 🚀</button>
+                <hr style="margin: 20px 0; border: 0; border-top: 1px solid var(--border);">
+                <h4 style="font-size: 13px; color: var(--primary); margin-bottom: 10px;">العروض المقدمة على طلبك:</h4>
+                <div id="customerBidsContainer" style="font-size: 12px; color: var(--text-muted);">لا توجد عروض حالياً...</div>
             </div>
 
-            <!-- 4. المندوب - إدارة الطلبيات -->
-            <div id="driverView" class="view-panel">
-                <div class="wallet-card">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 11px; color: var(--text-muted);">رصيد المحفظة (العمولة 10%)</span>
-                        <button class="quick-btn" onclick="alert('اتصل بالإدارة لشحن الرصيد عبر التحويل البنكي')">💳 شحن</button>
-                    </div>
-                    <div class="wallet-balance">45.00 د.م</div>
-                </div>
-
-                <div class="card" style="border-color: var(--primary);">
-                    <h4 style="font-size: 12px; margin-bottom: 6px;">🛵 إدارة الطلبية الحالية (#4829)</h4>
-                    <p style="font-size: 10px; color: var(--text-muted); margin-bottom: 8px;">عند تسليم الطرد للزبون بالكامل اضغط على زر التكفل والوصول:</p>
-                    <button class="btn-submit" style="background: var(--primary);" onclick="alert('تم إنهاء الطلبية بنجاح!')">✅ الوصول التام وإنهاء الطلبية</button>
-                </div>
-            </div>
-
-            <!-- 5. الرادار - متابعة واختيار المهمات -->
+            <!-- 3. واجهة الرادار (استقبال طلبات التوصيل القريبة) -->
             <div id="ordersView" class="view-panel">
-                <p style="text-align: center; font-size: 11px; color: var(--text-muted); margin-bottom: 15px;">جاري البث والتنقيب عن طلبيات قريبة منك عبر الرادار...</p>
-
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <b>طلب رقم: #4829 (نقل طرد)</b>
-                        <span style="color: var(--warning); font-size: 11px;">قيد التوصيل 🛵</span>
-                    </div>
-                    <p style="font-size: 11px; color: var(--text-muted); margin-top: 5px;">الزبون: محمد أمين</p>
-                    <p style="font-size: 11px; color: var(--text-muted);">الأجرة: 35.00 درهم</p>
-                    <button class="btn-submit" style="margin-top: 8px; font-size: 12px; padding: 8px;" onclick="switchMainView('driverView', document.getElementById('navDriver'))">تأكيد وتنفيذ المهمة 🚀</button>
-                </div>
+                <h3 style="font-size: 14px; margin-bottom: 12px; color: var(--primary);">📡 الطلبات المتاحة بالرادار</h3>
+                <div id="driverOrdersContainer" style="font-size: 12px; color: var(--text-muted);">في انتظار طلبات جديدة...</div>
             </div>
 
-            <!-- 6. تسجيل الدخول -->
-            <div id="loginAuthView" class="view-panel">
-                <h4 style="font-size: 14px; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">🔐 تسجيل الدخول</h4>
+            <!-- 4. واجهة الموصل -->
+            <div id="driverView" class="view-panel">
+                <h3 style="font-size: 14px; margin-bottom: 12px;">🛵 معلومات السائق / الموصل</h3>
                 
                 <div class="field-group">
-                    <label for="loginPhone">📞 رقم الهاتف</label>
-                    <input type="tel" id="loginPhone" placeholder="06XXXXXXXX">
+                    <label for="driverName">اسم السائق/الموصل:</label>
+                    <input type="text" id="driverName" value="ياسين">
                 </div>
 
-                <div class="field-group">
-                    <label for="loginPass">🔑 الرقم السري (Password)</label>
-                    <input type="password" id="loginPass" placeholder="أدخل الرقم السري">
-                </div>
-
-                <button class="btn-submit" onclick="submitLogin()">تسجيل الدخول 🔓</button>
-                
-                <span class="link-action" onclick="showAuthSubView('forgotPassView')">نسيت الرقم السري؟ استرجاع الكود</span>
-                <span class="link-action" style="color: white; margin-top: 15px;" onclick="showAuthSubView('signupAuthView')">ليس لديك حساب؟ إنشاء حساب جديد</span>
-            </div>
-
-            <!-- 7. إنشاء حساب جديد مع صورة شخصية -->
-            <div id="signupAuthView" class="view-panel">
-                <h4 style="font-size: 14px; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">✨ إنشاء حساب جديد (مندوب/زبون)</h4>
-
-                <div class="field-group">
-                    <label for="signPhone">📞 رقم الهاتف</label>
-                    <input type="tel" id="signPhone" placeholder="06XXXXXXXX">
-                </div>
-
-                <div class="field-group">
-                    <label for="signEmail">📧 البريد الإلكتروني (Gmail)</label>
-                    <input type="email" id="signEmail" placeholder="example@gmail.com">
-                </div>
-
-                <div class="field-group">
-                    <label for="signPass">🔑 إنشاء الرقم السري</label>
-                    <input type="password" id="signPass" placeholder="أدخل كلمة سر قوية">
-                </div>
-
-                <div class="field-group">
-                    <label>📸 صورة شمسية شخصية للبروفايل (<span style="color: var(--danger);">إجبارية</span>)</label>
-                    <label class="file-upload-btn">
-                        <span>📷 رفع الصورة الشخصية الشمسية (إجباري)</span>
-                        <input type="file" accept="image/*" style="display: none;" onchange="handleUserPhoto(this)">
-                    </label>
-                    <img id="userPhotoPreview" class="preview-img" alt="الصورة الشخصية">
-                </div>
-
-                <button class="btn-submit" onclick="submitSignup()">إنشاء الحساب والتسجيل 📝</button>
-                <span class="link-action" onclick="showAuthSubView('loginAuthView')">لديك حساب بالفعل؟ تسجيل الدخول</span>
-            </div>
-
-            <!-- 8. استرجاع كلمة السر -->
-            <div id="forgotPassView" class="view-panel">
-                <h4 style="font-size: 14px; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">🔑 استرجاع الرقم السري</h4>
-                
-                <div class="field-group">
-                    <label for="resetPhone">📞 رقم الهاتف المسجل</label>
-                    <input type="tel" id="resetPhone" placeholder="06XXXXXXXX">
-                </div>
-
-                <div class="field-group">
-                    <label for="resetEmail">📧 البريد الإلكتروني (Gmail)</label>
-                    <input type="email" id="resetEmail" placeholder="example@gmail.com">
-                </div>
-
-                <button class="btn-submit" style="background: var(--info);" onclick="submitResetPassword()">إرسال رمز الاسترجاع 📩</button>
-                <span class="link-action" onclick="showAuthSubView('loginAuthView')">الرجوع لصفحة الدخول</span>
-            </div>
-
-            <!-- 9. طلب الانضمام كمندوب -->
-            <div id="registerView" class="view-panel">
-                <h4 style="font-size: 14px; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">📝 طلب الانضمام كـ مندوب توصيل جديد</h4>
-                
-                <div class="wallet-card">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 11px; color: var(--text-muted);">💰 محفظة أرباح المنفذ (الصافي)</span>
-                        <span style="background: rgba(16, 185, 129, 0.2); color: var(--primary); padding: 2px 6px; border-radius: 4px; font-size: 10px;">حساب نشط</span>
-                    </div>
-                    <div class="wallet-balance" id="driverNetEarnings">0.00 د.م</div>
-                    
-                    <div class="stats-grid">
-                        <div class="stat-item">
-                            <div class="stat-title">خصومات التطبيق (10%)</div>
-                            <div class="stat-value" style="color: var(--danger);" id="driverAppDeductions">0.00 د.م</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-title">عدد المهمات</div>
-                            <div class="stat-value" style="color: var(--info);" id="driverTasksCount">0</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-title">التقييم العام</div>
-                            <div class="stat-value" style="color: var(--warning);" id="driverRating">⭐ 5.0</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-title">عدد الإلغاءات</div>
-                            <div class="stat-value" style="color: var(--danger);" id="driverCancellations">0</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="field-group">
-                    <label for="regName">👤 الاسم الكامل</label>
-                    <input type="text" id="regName" placeholder="الاسم الشخصي والعائلي الكامل" oninput="validateDriverReg()">
-                </div>
-
-                <div class="field-group">
-                    <label for="regPhone">📞 رقم الهاتف</label>
-                    <input type="tel" id="regPhone" placeholder="06XXXXXXXX" oninput="validateDriverReg()">
-                </div>
-
-                <div class="field-group">
-                    <label>🪪 صورة البطاقة الوطنية - الوجه الأمامي (<span style="color: var(--danger);">إجبارية</span>)</label>
-                    <label class="file-upload-btn">
-                        <span>📷 رفع الوجه الأمامي للبطاقة</span>
-                        <input type="file" accept="image/*" style="display: none;" onchange="handleDriverDoc(this, 'cinFrontPreview', 'cinFront')">
-                    </label>
-                    <img id="cinFrontPreview" class="preview-img" alt="البطاقة الوطنية الأمامية">
-                </div>
-
-                <div class="field-group">
-                    <label>🪪 صورة البطاقة الوطنية - الوجه الخلفي (<span style="color: var(--danger);">إجبارية</span>)</label>
-                    <label class="file-upload-btn">
-                        <span>📷 رفع الوجه الخلفي للبطاقة</span>
-                        <input type="file" accept="image/*" style="display: none;" onchange="handleDriverDoc(this, 'cinBackPreview', 'cinBack')">
-                    </label>
-                    <img id="cinBackPreview" class="preview-img" alt="البطاقة الوطنية الخلفية">
-                </div>
-
-                <div class="field-group">
-                    <label>📜 صورة شهادة الملكية / الورقة الرمادية (<span style="color: var(--danger);">إجبارية</span>)</label>
-                    <label class="file-upload-btn">
-                        <span>📷 رفع صورة شهادة الملكية</span>
-                        <input type="file" accept="image/*" style="display: none;" onchange="handleDriverDoc(this, 'ownershipPreview', 'ownership')">
-                    </label>
-                    <img id="ownershipPreview" class="preview-img" alt="شهادة الملكية">
-                </div>
-
-                <div class="security-box">
-                    🚨 <b>تنبيه أمني وإقرار قانوني صارم:</b><br>
-                    يتعهد المندوب بعدم ارتكاب أي مخالفة تتضمن <b>السرقة، أو الإتلاف، أو النصب</b>. في حال تسجيل أي شكاية، <b>تتم إحالة الملف تلقائياً ومباشرة للشرطة والسلطات المختصة</b>.
-                    
-                    <label class="legal-checkbox">
-                        <input type="checkbox" id="regLegalAgree" onchange="validateDriverReg()"> 
-                        <b>أوافق على المنح الفوري لصلاحية إحالة معطياتي للشرطة عند تسجيل أي شكاية.</b>
-                    </label>
-                </div>
-
-                <button class="btn-submit" id="submitDriverBtn" disabled onclick="alert('تم إرسال طلب الانضمام بنجاح!')">تقديم طلب الانضمام 📩</button>
-            </div>
-
-            <!-- 10. لوحة الأدمن -->
-            <div id="adminView" class="view-panel">
-                <h3 style="font-size: 14px; color: var(--danger); margin-bottom: 12px;">⚙️ لوحة تحكم المدير (الأدمن)</h3>
-                <div class="card">
-                    <p style="font-size: 11px; color: var(--text-muted);">مرحباً بك يا مدير التطبيق. لديك الصلاحية الكاملة لتجاوز الحسابات ومراجعة الوثائق المرفوعة.</p>
+                <div class="card" style="border-color: var(--primary); margin-top: 15px;">
+                    <h4 style="font-size: 12px; margin-bottom: 6px;">حالة الاتصال بالرادار</h4>
+                    <p style="font-size: 11px; color: var(--text-muted);">أنت الآن متصل وتستقبل الطلبات بشكل مباشر وحي عبر Supabase Realtime.</p>
                 </div>
             </div>
+
         </div>
     </div>
 
     <script>
-        let isLoggedIn = false;
-        let isAdminLoggedIn = false;
-        let uploadedUserPhoto = false;
-        let uploadedClientImg = false;
+        // --- 1. إعدادات Supabase ---
+        const SUPABASE_URL = "YOUR_SUPABASE_URL";
+        const SUPABASE_KEY = "YOUR_SUPABASE_ANON_KEY";
+        
+        let _supabase = null;
+        if (SUPABASE_URL !== "YOUR_SUPABASE_URL") {
+            _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        }
 
-        const ADMIN_SECRET = "115460ja";
+        let activeOrderId = null;
+        let map = null;
 
-        let driverDocs = {
-            cinFront: false,
-            cinBack: false,
-            ownership: false
-        };
-
-        // إعداد الخريطة
-        const map = L.map('map').setView([33.5731, -7.5898], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap'
-        }).addTo(map);
-
-        function switchMainView(viewId, btn) {
-            const allPanels = document.querySelectorAll('.view-panel');
-            allPanels.forEach(panel => {
-                panel.classList.remove('active');
-            });
-
-            const allBtns = document.querySelectorAll('.nav-btn');
-            allBtns.forEach(b => b.classList.remove('active'));
-
-            const targetView = document.getElementById(viewId);
-            if(targetView) {
-                targetView.classList.add('active');
-            }
-
-            if(btn) {
-                btn.classList.add('active');
-            }
-
-            const mapEl = document.getElementById('map');
-            if(viewId === 'homeView' || viewId === 'adminView' || viewId === 'loginAuthView' || viewId === 'signupAuthView' || viewId === 'forgotPassView' || viewId === 'authChoiceView') {
-                mapEl.classList.add('hide-map');
-            } else {
-                mapEl.classList.remove('hide-map');
-                setTimeout(() => map.invalidateSize(), 200);
+        // --- 2. إعداد الخريطة ---
+        function initMap() {
+            if (!map) {
+                map = L.map('map').setView([33.5731, -7.5898], 12); // الدار البيضاء
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap'
+                }).addTo(map);
             }
         }
 
-        function showAuthSubView(subViewId) {
+        // --- 3. التبديل بين الواجهات ---
+        function switchMainView(viewId, btn) {
             document.querySelectorAll('.view-panel').forEach(el => el.classList.remove('active'));
-            const target = document.getElementById(subViewId);
-            if(target) target.classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(viewId).classList.add('active');
+            if (btn) btn.classList.add('active');
+
+            if (viewId === 'clientView') {
+                setTimeout(() => {
+                    initMap();
+                    map.invalidateSize();
+                }, 200);
+            }
         }
 
         function selectService(serviceName) {
@@ -519,130 +260,126 @@
             switchMainView('clientView', document.getElementById('navClient'));
         }
 
-        function setLanguage(lang, btn) {
-            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-            if(btn) btn.classList.add('active');
-        }
-
-        function handleUserPhoto(input) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = document.getElementById('userPhotoPreview');
-                    img.src = e.target.result;
-                    img.style.display = 'block';
-                    uploadedUserPhoto = true;
-                }
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        function handleClientImage(input) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = document.getElementById('clientImgPreview');
-                    img.src = e.target.result;
-                    img.style.display = 'block';
-                    uploadedClientImg = true;
-                    validateClientForm();
-                }
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        function handleDriverDoc(input, previewId, docKey) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = document.getElementById(previewId);
-                    img.src = e.target.result;
-                    img.style.display = 'block';
-                    driverDocs[docKey] = true;
-                    validateDriverReg();
-                }
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
         function addFare(amount) {
-            const input = document.getElementById('offeredFare');
-            let current = parseInt(input.value) || 30;
-            input.value = current + amount;
+            const input = document.getElementById('offeredPrice');
+            input.value = parseInt(input.value || 0) + amount;
         }
 
-        function validateClientForm() {
-            const name = document.getElementById('clientName').value.trim();
-            const phone = document.getElementById('clientPhone').value.trim();
-            const agree = document.getElementById('clientLegalAgree').checked;
-            const submitBtn = document.getElementById('submitClientBtn');
-
-            if (name !== '' && phone !== '' && uploadedClientImg && agree) {
-                submitBtn.disabled = false;
-            } else {
-                submitBtn.disabled = true;
-            }
-        }
-
-        function validateDriverReg() {
-            const name = document.getElementById('regName').value.trim();
-            const phone = document.getElementById('regPhone').value.trim();
-            const agree = document.getElementById('regLegalAgree').checked;
-            const submitBtn = document.getElementById('submitDriverBtn');
-
-            const allDocsUploaded = driverDocs.cinFront && driverDocs.cinBack && driverDocs.ownership;
-
-            if (name !== '' && phone !== '' && allDocsUploaded && agree) {
-                submitBtn.disabled = false;
-            } else {
-                submitBtn.disabled = true;
-            }
-        }
-
-        function submitLogin() {
-            const pass = document.getElementById('loginPass').value;
-            if (pass === ADMIN_SECRET) {
-                isAdminLoggedIn = true;
-                alert('تم تسجيل الدخول كـ أدمن بنجاح!');
-                switchMainView('adminView', document.getElementById('navAdmin'));
-            } else {
-                isLoggedIn = true;
-                alert('تم تسجيل الدخول بنجاح!');
-                switchMainView('homeView', document.getElementById('navHome'));
-            }
-        }
-
-        function submitSignup() {
-            if (!uploadedUserPhoto) {
-                alert('يرجى رفع الصورة الشخصية الشمسية للبروفايل أولاً!');
+        // --- 4. إنشاء طلب جديد (الزبون) ---
+        async function createOrder() {
+            if (!_supabase) {
+                alert("يرجى ربط المفاتيح الخاصة بـ Supabase أولاً.");
                 return;
             }
-            alert('تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول.');
-            showAuthSubView('loginAuthView');
-        }
 
-        function submitResetPassword() {
-            const phone = document.getElementById('resetPhone').value;
-            if (phone.trim() === '') {
-                alert('يرجى إدخال رقم الهاتف المسجل!');
+            const rider_name = document.getElementById('custName').value;
+            const pickup_address = document.getElementById('pickupAddr').value;
+            const destination_address = document.getElementById('deliveryAddr').value;
+            const offered_price = document.getElementById('offeredPrice').value;
+
+            if(!pickup_address || !destination_address) {
+                alert("يرجى إدخال عناوين الاستلام والتسليم");
                 return;
             }
-            alert('تم إرسال رمز استرجاع كلمة السر إلى البريد/الهاتف بنجاح.');
-            showAuthSubView('loginAuthView');
+
+            const { data, error } = await _supabase
+                .from('ride_requests')
+                .insert([{ rider_name, pickup_address, destination_address, offered_price }])
+                .select();
+
+            if (error) {
+                alert('حدث خطأ أثناء إنشاء الطلب');
+                console.error(error);
+            } else {
+                activeOrderId = data[0].id;
+                alert('تم نشر طلبك بنجاح على الرادار!');
+                listenToBids(activeOrderId);
+            }
         }
 
-        function openAdminPanel(btn) {
-            if (isAdminLoggedIn) {
-                switchMainView('adminView', btn);
+        // --- 5. تقديم عرض (الموصل) ---
+        async function sendBid(orderId) {
+            if (!_supabase) return;
+
+            const driver_name = document.getElementById('driverName').value;
+            const counter_price = document.getElementById(`bid-input-${orderId}`).value;
+
+            const { error } = await _supabase
+                .from('bids')
+                .insert([{ ride_id: orderId, driver_name, counter_price }]);
+
+            if (error) {
+                console.error(error);
+                alert('حدث خطأ أثناء إرسال العرض');
             } else {
-                const pass = prompt("أدخل كلمة سر الأدمن الخاصة:");
-                if (pass === ADMIN_SECRET) {
-                    isAdminLoggedIn = true;
-                    switchMainView('adminView', btn);
-                } else if (pass !== null) {
-                    alert("كلمة السر غير صحيحة!");
-                }
+                alert('تم إرسال عرضك بنجاح إلى الزبون!');
             }
+        }
+
+        // --- 6. الاستماع الفوري للطلبات الجديدة (Realtime) ---
+        if (_supabase) {
+            _supabase
+                .channel('realtime_orders')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ride_requests' }, payload => {
+                    const order = payload.new;
+                    const container = document.getElementById('driverOrdersContainer');
+
+                    if (container.innerText.includes('في انتظار')) container.innerHTML = '';
+
+                    const item = document.createElement('div');
+                    item.className = 'card';
+                    item.id = `order-${order.id}`;
+                    item.innerHTML = `
+                        <div><span class="badge">طلب جديد 🔥</span></div>
+                        <p style="font-size:12px;"><strong>الزبون:</strong> ${order.rider_name}</p>
+                        <p style="font-size:11px; color:var(--text-muted);"><strong>من:</strong> ${order.pickup_address}</p>
+                        <p style="font-size:11px; color:var(--text-muted);"><strong>إلى:</strong> ${order.destination_address}</p>
+                        <p style="font-size:12px; margin-top:5px;"><strong>السعر المقترح:</strong> ${order.offered_price} درهم</p>
+                        <div style="margin-top:10px; display:flex; gap:8px;">
+                            <input type="number" id="bid-input-${order.id}" value="${order.offered_price}" style="width:50%; padding:6px; border-radius:8px; border:1px solid var(--border); background:#0f172a; color:white;">
+                            <button class="btn-submit" style="margin:0; width:50%; font-size:12px; padding:6px;" onclick="sendBid('${order.id}')">تقديم عرض</button>
+                        </div>
+                    `;
+                    container.prepend(item);
+                })
+                .subscribe();
+        }
+
+        // --- 7. الاستماع الفوري لعروض الموصلين (Realtime) ---
+        function listenToBids(orderId) {
+            if (!_supabase) return;
+
+            _supabase
+                .channel(`realtime_bids_${orderId}`)
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'bids', filter: `ride_id=eq.${orderId}` }, payload => {
+                    const bid = payload.new;
+                    const bidsContainer = document.getElementById('customerBidsContainer');
+
+                    if (bidsContainer.innerText.includes('لا توجد عروض')) bidsContainer.innerHTML = '';
+
+                    const item = document.createElement('div');
+                    item.className = 'card';
+                    item.style.borderColor = 'var(--primary)';
+                    item.innerHTML = `
+                        <p style="font-size:12px;"><strong>الموصل:</strong> ${bid.driver_name}</p>
+                        <p style="font-size:12px; color:var(--primary);"><strong>السعر المقترح:</strong> ${bid.counter_price} درهم</p>
+                        <button class="btn-submit" style="margin-top:8px; padding:6px; font-size:12px;" onclick="acceptBid('${bid.id}')">قبول هذا العرض ✅</button>
+                    `;
+                    bidsContainer.appendChild(item);
+                })
+                .subscribe();
+        }
+
+        // --- 8. قبول العرض ---
+        async function acceptBid(bidId) {
+            if (!_supabase) return;
+
+            const { error } = await _supabase
+                .from('bids')
+                .update({ status: 'accepted' })
+                .eq('id', bidId);
+
+            if (!error) alert('تم قبول العرض بنجاح! الموصل في طريقه إليك.');
         }
     </script>
 </body>
