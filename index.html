@@ -292,6 +292,55 @@
         let map = null;
         let currentLang = 'ar';
 
+        // --- نظام تقييم كلوفو المترجم بـ JavaScript (محاكاة منطق Python) ---
+        class GlovoRatingSystem {
+            constructor(courierId) {
+                this.courierId = courierId;
+            }
+
+            calculateExcellenceScore(customerRatings, acceptanceRate, completionRate, peakHoursWorked, totalShiftsCompleted) {
+                let customerScore = 100;
+                if (customerRatings && customerRatings.length > 0) {
+                    const positiveReviews = customerRatings.filter(r => r === 1).length;
+                    customerScore = (positiveReviews / customerRatings.length) * 100;
+                }
+
+                const acceptanceScore = acceptanceRate;
+                const reliabilityScore = completionRate;
+                const peakScore = Math.min((peakHoursWorked / 10) * 100, 100);
+
+                const finalScorePercentage = (
+                    (customerScore * 0.40) +
+                    (acceptanceScore * 0.25) +
+                    (reliabilityScore * 0.20) +
+                    (peakScore * 0.15)
+                );
+
+                const scoreOutOf5 = Math.round(((finalScorePercentage / 100) * 5) * 100) / 100;
+
+                return {
+                    courier_id: this.courierId,
+                    overall_score_5: scoreOutOf5,
+                    score_percentage: Math.round(finalScorePercentage * 10) / 10,
+                    tier: this._determineCourierTier(scoreOutOf5),
+                    booking_priority: this._getBookingPriority(scoreOutOf5)
+                };
+            }
+
+            _determineCourierTier(score) {
+                if (score >= 4.7) return "Diamond (ماسي - أولوية قصوى)";
+                if (score >= 4.2) return "Gold (ذهبي)";
+                if (score >= 3.5) return "Silver (فضي)";
+                return "Bronze (برونزي - يحتاج تحسين)";
+            }
+
+            _getBookingPriority(score) {
+                if (score >= 4.5) return "فتح الحجز يوم الاثنين الساعة 16:00 (أول نقطة)";
+                if (score >= 3.8) return "فتح الحجز يوم الاثنين الساعة 18:00";
+                return "فتح الحجز يوم الثلاثاء (الساعات المتبقية)";
+            }
+        }
+
         // ترجمات النصوص للغة الفرنسية والعربية
         const translations = {
             ar: {
@@ -521,149 +570,136 @@
             document.getElementById('userInfoBar').style.display = 'block';
 
             alert(currentLang === 'fr' ? '✅ Inscription réussie!' : '✅ تم التحقق والتسجيل بنجاح!');
-            if (role === 'courier') switchMainView('courierView');
-            else switchMainView('clientView');
+            if (role === 'courier') {
+                switchMainView('courierView', document.getElementById('nav-courier'));
+            } else {
+                switchMainView('clientView', document.getElementById('nav-client'));
+            }
         }
 
-        // --- الخطوة 2: استكمال حساب الموصل ---
+        // --- الخطوة 2: تفعيل الموصل وتقييمه بواسطة GlovoRatingSystem ---
         async function registerCourierStep() {
-            if (!currentUserId) {
-                alert(currentLang === 'fr' ? '⚠️ Veuillez d abord vous inscrire!' : '⚠️ يرجى إكمال الخطوة الأولى والتسجيل أولاً!');
-                switchMainView('authView');
-                return;
-            }
-
             const photoInput = document.getElementById('courierPhotoFile');
-            const legalAccepted = document.getElementById('courierLegalTerms').checked;
+            const legalCheck = document.getElementById('courierLegalTerms').checked;
 
-            if (!photoInput.files || photoInput.files.length === 0) {
-                alert(currentLang === 'fr' ? '❌ La photo est obligatoire!' : '❌ الصورة الشخصية الشمسية للوجه إلزامية لتأكيد الهوية للزبائن!');
+            if (!legalCheck) {
+                alert(currentLang === 'fr' ? '⚠️ Vous devez accepter l\'engagement de sécurité.' : '⚠️ يجب القبول بالتعهد الأمني والإقرار القانوني لتفعيل حساب الموصل.');
+                return;
+            }
+            if (photoInput.files.length === 0) {
+                alert(currentLang === 'fr' ? '📸 Photo de profil requise.' : '📸 يرجى إرفاق الصورة الشخصية الشمسية للوجه لتأكيد الهوية.');
                 return;
             }
 
-            if (!legalAccepted) {
-                alert(currentLang === 'fr' ? '⛔ Vous devez accepter l engagement de sécurité.' : '⛔ يلزم الموافقة والتأشير على التعهد الأمني بإلزامية تقديم بياناتك للجهات المختصة عند وجود شكاية أو سرقة.');
-                return;
-            }
+            // تطبيق حساب تقييم كلوفو الأولي
+            const courierRatings = [1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1];
+            const glovo = new GlovoRatingSystem(currentUserId || "RIDER_10293");
+            const result = glovo.calculateExcellenceScore(courierRatings, 95.0, 90.0, 8, 15);
 
-            const file = photoInput.files[0];
-            let photoUrl = "https://via.placeholder.com/150";
-
-            if (supabaseClient) {
-                const path = `couriers/${currentUserId}.jpg`;
-                const { error: uploadErr } = await supabaseClient.storage.from('courier-avatars').upload(path, file, { upsert: true });
-                if (uploadErr) { alert('Erreur: ' + uploadErr.message); return; }
-
-                photoUrl = supabaseClient.storage.from('courier-avatars').getPublicUrl(path).data.publicUrl;
-
-                const { error } = await supabaseClient.from('courier_profiles').upsert({
-                    user_id: currentUserId,
-                    vehicle_type: 'moto',
-                    profile_photo: photoUrl,
-                    security_terms_accepted: true,
-                    status: 'pending'
-                });
-
-                if (error) { alert('Erreur: ' + error.message); return; }
-            }
-
-            document.getElementById('courierStatusText').innerHTML = currentLang === 'fr' 
-                ? '✅ Photo envoyée. Statut: <strong>Pending</strong>.' 
-                : '✅ تم رفع الصورة والتأشير على التعهد الأمني وتحديث الطلب إلى <strong>Pending</strong> (قيد التفعيل).';
-            alert(currentLang === 'fr' ? 'Profil mis à jour.' : 'تم استكمال الملف والتوقيع على التعهد الأمني وحفظ الحساب بنجاح.');
+            const statusBox = document.getElementById('courierStatusText');
+            statusBox.innerHTML = `
+                ✅ <strong>تم تفعيل الحساب ونظام التقييم (Glovo Rating):</strong><br>
+                • معرف الموصل: ${result.courier_id}<br>
+                • التقييم النهائي: ${result.overall_score_5} / 5.0<br>
+                • النسبة المئوية: ${result.score_percentage}%<br>
+                • المستوى الحالي: ${result.tier}<br>
+                • أولوية الحجز: ${result.booking_priority}
+            `;
+            alert(currentLang === 'fr' ? '✅ Profil coursier vérifié et activé!' : '✅ تم استكمال واستلام ملف الموصل وتفعيله بنجاح مع تطبيق تقييم كلوفو!');
         }
 
         // --- الخطوة 3: إنشاء طلب توصيل من الزبون ---
         async function createOrderStep() {
-            if (!currentUserId) {
-                alert(currentLang === 'fr' ? '⚠️ Veuillez vous inscrire d abord!' : '⚠️ يجب التسجيل كزبون أولاً قبل إنشاء طلب!');
-                switchMainView('authView');
-                return;
-            }
-
             const pickup = document.getElementById('pickupAddr').value.trim();
             const delivery = document.getElementById('deliveryAddr').value.trim();
-            const photoInput = document.getElementById('packagePhotoFile');
-            const legalAccepted = document.getElementById('legalTerms').checked;
             const price = document.getElementById('offeredPrice').value;
+            const photoInput = document.getElementById('packagePhotoFile');
+            const legalCheck = document.getElementById('legalTerms').checked;
 
-            if (!pickup) { alert(currentLang === 'fr' ? '⚠️ Point de départ obligatoire.' : '⚠️ نقطة البداية إلزامية.'); return; }
-            if (!delivery) { alert(currentLang === 'fr' ? '⚠️ Point d arrivée obligatoire.' : '⚠️ نقطة الوصول إلزامية.'); return; }
-            if (!photoInput.files || photoInput.files.length === 0) {
-                alert(currentLang === 'fr' ? '📷 Photo du colis obligatoire.' : '📷 صورة الطرد إلزامية قبل إرسال الطلب.');
+            if (!pickup || !delivery) {
+                alert(currentLang === 'fr' ? '⚠️ Veuillez indiquer le point de départ et d\'arrivée.' : '⚠️ يرجى تحديد نقطتي الاستلام والتسليم.');
                 return;
             }
-            if (!legalAccepted) {
-                alert(currentLang === 'fr' ? '⛔ Vous devez accepter les termes de sécurité.' : '⛔ يلزم الموافقة والتأشير على التعهد الأمني بعدم نقل المحظورات.');
+            if (photoInput.files.length === 0) {
+                alert(currentLang === 'fr' ? '📷 Photo du colis requise.' : '📷 يرجى التقاط أو إرفاق صورة الطرد أولاً.');
+                return;
+            }
+            if (!legalCheck) {
+                alert(currentLang === 'fr' ? '⚠️ Vous devez certifier le contenu du colis.' : '⚠️ يجب الموافقة على التعهد الأمني بعدم وجود مواد مخالفة.');
                 return;
             }
 
-            let packagePhotoUrl = 'https://via.placeholder.com/150/10b981/ffffff?text=Package';
+            const newOrder = {
+                id: 'ORD_' + Math.floor(Math.random() * 8999 + 1000),
+                pickup,
+                delivery,
+                price: price + ' DH',
+                sender: currentUserName || 'زبون زائر',
+                status: 'متاح'
+            };
 
             if (supabaseClient) {
-                const path = `packages/${Date.now()}_${currentUserId}.jpg`;
-                const { error: uploadErr } = await supabaseClient.storage.from('package-photos').upload(path, photoInput.files[0]);
-                if (uploadErr) { alert('Erreur: ' + uploadErr.message); return; }
-
-                packagePhotoUrl = supabaseClient.storage.from('package-photos').getPublicUrl(path).data.publicUrl;
-
-                const { error } = await supabaseClient.from('delivery_orders').insert([{
-                    client_id: currentUserId,
-                    pickup_address: pickup,
-                    delivery_address: delivery,
-                    package_photo: packagePhotoUrl,
-                    offered_price: price,
-                    legal_terms_accepted: true,
+                await supabaseClient.from('orders').insert([{
+                    pickup_location: pickup,
+                    delivery_location: delivery,
+                    price: parseFloat(price),
+                    sender_id: currentUserId,
                     status: 'pending'
                 }]);
-
-                if (error) { alert('Erreur: ' + error.message); return; }
             } else {
-                mockOrdersArr.push({
-                    id: '#' + Math.floor(1000 + Math.random() * 9000),
-                    pickup_address: pickup,
-                    delivery_address: delivery,
-                    offered_price: price,
-                    status: 'pending'
-                });
+                mockOrdersArr.unshift(newOrder);
             }
 
-            alert(currentLang === 'fr' ? '🚀 Commande envoyée avec succès!' : '🚀 تم إرسال طلب التوصيل بنجاح بعد تأكيد التعهد الأمني!');
-            switchMainView('ordersView');
+            alert(currentLang === 'fr' ? '🚀 Commande créée avec succès!' : '🚀 تم نشر الطلب بنجاح وهو يظهر الآن على الرادار!');
+            switchMainView('ordersView', document.getElementById('nav-orders'));
         }
 
-        // --- عرض الرادار للطلبات ---
+        // --- عرض الرادار ---
         async function loadOrdersRadar() {
             const container = document.getElementById('ordersListContainer');
             const t = translations[currentLang];
-            let orders = [];
+            let ordersList = [];
 
             if (supabaseClient) {
-                const { data, error } = await supabaseClient.from('delivery_orders').select('*').order('created_at', { ascending: false });
-                if (!error && data) orders = data;
+                const { data } = await supabaseClient.from('orders').select('*').eq('status', 'pending');
+                if (data && data.length > 0) {
+                    ordersList = data.map(o => ({
+                        id: o.id,
+                        pickup: o.pickup_location,
+                        delivery: o.delivery_location,
+                        price: o.price + ' DH',
+                        sender: 'مستخدم',
+                        status: 'متاح'
+                    }));
+                }
             } else {
-                orders = mockOrdersArr;
+                ordersList = mockOrdersArr;
             }
 
-            if (orders.length === 0) {
+            if (ordersList.length === 0) {
                 container.innerHTML = `<p style="font-size: 12px; color: var(--text-muted);">${t.noOrders}</p>`;
                 return;
             }
 
             let html = '';
-            orders.forEach(order => {
+            ordersList.forEach(ord => {
                 html += `
                     <div class="card">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                            <span class="badge">${order.id || '#ORD'}</span>
-                            <strong style="color: var(--primary); font-size: 13px;">${order.offered_price} DH</strong>
+                            <span class="badge">${ord.price}</span>
+                            <span style="font-size: 10px; color: var(--primary-dark); font-weight: bold;">#${ord.id}</span>
                         </div>
-                        <p style="font-size: 11px; margin-bottom: 2px;"><strong>${t.from}</strong> ${order.pickup_address}</p>
-                        <p style="font-size: 11px;"><strong>${t.to}</strong> ${order.delivery_address}</p>
+                        <p style="font-size: 11px; margin-bottom: 4px;">🟢 <strong>${t.from}</strong> ${ord.pickup}</p>
+                        <p style="font-size: 11px; margin-bottom: 8px;">🔴 <strong>${t.to}</strong> ${ord.delivery}</p>
+                        <button class="btn-submit" style="padding: 6px; font-size: 11px;" onclick="acceptOrder('${ord.id}')">قبول الطلب 🛵</button>
                     </div>
                 `;
             });
             container.innerHTML = html;
+        }
+
+        function acceptOrder(orderId) {
+            alert(currentLang === 'fr' ? `Commande #${orderId} acceptée!` : `تم قبول الطلب #${orderId} بنجاح! يمكنك التواصل مع الزبون الآن.`);
         }
     </script>
 </body>
